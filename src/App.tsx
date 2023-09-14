@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import {
   ChangeEvent,
   FormEvent,
@@ -6,52 +5,58 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useAccount, useConnect } from "wagmi";
 import "./App.css";
 import { ContractType } from "./contracts/config";
-import { TypedListener } from "./contracts/types/common";
-import { useConnectors } from "./hooks/useConnectors";
 import { useContract } from "./hooks/useContract";
 
 function App() {
-  const {
-    connectors: { provider, signer },
-  } = useConnectors();
 
-  const { read: readSbtc, write: writeSbtc } = useContract(ContractType.SBTC);
+  const {connect} = useConnect()
+
+  const { address, isConnected } = useAccount()
+
+  const { read: readZbtc, write: writeZbtc } = useContract(ContractType.ZBTC);
 
   const [balance, setBalance] = useState<string | null>(null);
 
+  /** PROMPT WALLET CONNECTION */
+  useEffect(() => {
+    connect()
+  }, [connect])
+
+
   /* READING STORAGE */
 
-  const fetchSbtcBalance = useCallback(async () => {
-    if (!readSbtc || !signer?.address) {
+  const fetchzbtcBalance = useCallback(async () => {
+    if (!readZbtc || !address) {
       return;
     }
-    const sbtcBalance = await readSbtc.balanceOf(signer.address);
-    const sbtcDecimals = readSbtc.decimals;
+    const zbtcBalance = await readZbtc.balanceOf([address]);
+    const zbtcDecimals = readZbtc.decimals;
 
     const parsedBalance = ethers.formatUnits(
-      sbtcBalance,
-      sbtcDecimals.toString()
+      zbtcBalance,
+      zbtcDecimals.toString()
     );
     setBalance(parsedBalance);
-  }, [signer?.address, readSbtc]);
+  }, [address, readZbtc]);
 
   useEffect(() => {
-    fetchSbtcBalance();
-  }, [fetchSbtcBalance]);
+    fetchzbtcBalance();
+  }, [fetchzbtcBalance]);
 
   /* TRANSACTION SUBMISSION */
 
-  const transferOneSbtc = async () => {
-    if (!writeSbtc) {
+  const transferOnezbtc = async () => {
+    if (!writeZbtc) {
       throw new Error("Writer not set!");
     }
     const args = getTxArgs();
 
     /* TRANSACTION LIFECYCLE  */
 
-    const tx = await writeSbtc.transfer(...args);
+    const tx = await writeZbtc.transfer(args);
     // Transaction is now submitted to mempool, now we wait until tx is mined.
     console.log(
       `Transaction ${tx.hash} has been submitted to mempool with has limit of ${tx.gasLimit}.`
@@ -62,8 +67,8 @@ function App() {
       `Transaction ${tx.hash} has been included. It used ${txReceipt?.gasUsed} gas.`
     );
 
-    // Refetch sBTC balance after the transfer is done.
-    fetchSbtcBalance();
+    // Refetch zBTC balance after the transfer is done.
+    fetchzbtcBalance();
   };
 
   const [transferRecipient, setTransferRecipient] = useState<string | null>(
@@ -74,14 +79,14 @@ function App() {
     if (!transferRecipient) {
       throw new Error("Transfer recipient address not set!");
     }
-    if (!readSbtc) {
+    if (!readZbtc) {
       throw new Error("Provider not set!");
     }
 
-    const sbtcDecimals = readSbtc.decimals;
-    const oneSbtc = ethers.parseUnits("1", sbtcDecimals.toString());
-    return [transferRecipient, oneSbtc];
-  }, [readSbtc, transferRecipient]);
+    const zbtcDecimals = readZbtc.decimals;
+    const onezbtc = ethers.parseUnits("1", zbtcDecimals.toString());
+    return [transferRecipient, onezbtc];
+  }, [readZbtc, transferRecipient]);
 
   /** FEE ESTIMATE */
 
@@ -92,14 +97,14 @@ function App() {
       if (!provider) {
         throw new Error("Provider not connected!");
       }
-      if (!writeSbtc) {
+      if (!writeZbtc) {
         throw new Error("Writer not set!");
       }
       const args = getTxArgs();
 
       const [feeData, gas] = await Promise.all([
         provider.getFeeData(),
-        writeSbtc.transfer.estimateGas(...args),
+        writeZbtc.transfer.estimateGas(...args),
       ]);
 
       // TODO: is our rollup using EIP1559 model?
@@ -122,7 +127,7 @@ function App() {
       setTxFeeEstimate(formattedFeeEstimate);
     };
     estimateFee();
-  }, [getTxArgs, provider, writeSbtc]);
+  }, [getTxArgs, provider, writeZbtc]);
 
   const [latestTransfers, setLatestTransfers] = useState<
     { from: string; to: string; amount: string; id: string }[]
@@ -138,10 +143,10 @@ function App() {
   /** EVENT LISTENING */
 
   useEffect(() => {
-    if (!readSbtc) {
+    if (!readZbtc) {
       return;
     }
-    const transferEvent = readSbtc.getEvent("Transfer");
+    const transferEvent = readZbtc.getEvent("Transfer");
 
     const transferEventListener: TypedListener<typeof transferEvent> = (
       from,
@@ -161,16 +166,16 @@ function App() {
       ]);
     };
 
-    readSbtc.on(transferEvent, transferEventListener);
+    readZbtc.on(transferEvent, transferEventListener);
 
     return () => {
-      readSbtc.removeListener(transferEvent, transferEventListener);
+      readZbtc.removeListener(transferEvent, transferEventListener);
     };
-  }, [readSbtc]);
+  }, [readZbtc]);
 
   const handleFormSubmission = (form: FormEvent<HTMLFormElement>) => {
     form.preventDefault();
-    transferOneSbtc();
+    transferOnezbtc();
   };
 
   const handleTransferRecipientChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -184,11 +189,11 @@ function App() {
           ? `Connected with account ${signer.address}`
           : "Please connect your Metamask."}
       </div>
-      <div>Your sBTC balance: {balance || 0} sBTC</div>
+      <div>Your zBTC balance: {balance || 0} zBTC</div>
       <br />
 
       <form onSubmit={handleFormSubmission}>
-        <h2>sBTC Transfer Form</h2>
+        <h2>zBTC Transfer Form</h2>
         <label>
           Recipient address
           <input
@@ -198,10 +203,10 @@ function App() {
           />
         </label>
         <label>Estimated tx fee: {txFeeEstimate || 0} BOB</label>
-        <button type="submit">Send 1 sBTC</button>
+        <button type="submit">Send 1 zBTC</button>
       </form>
       <br />
-      <h2>10 Latest sBTC transfers</h2>
+      <h2>10 Latest zBTC transfers</h2>
       <table>
         <tr>
           <th>From</th>

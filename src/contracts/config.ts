@@ -1,16 +1,16 @@
-import { ERC20Abi__factory } from "./types";
+import ERC20Abi from "./abi/ERC20.abi.json";
 
 enum ContractType {
-  SBTC = "SBTC",
+  ZBTC = "ZBTC",
 }
 
 // Contracts config with contract address and typechain typings
 // that are used in useContract hook to automatically infer smart contract types.
 const contracts = {
-  [ContractType.SBTC]: {
-    address: "0x000 TODO",
-    connect: ERC20Abi__factory.connect,
+  [ContractType.ZBTC]: {
+    address: "0xd6cd079ee8bc26b5000a5e1ea8d434c840e3434b",
+    abi: ERC20Abi,
   },
-};
+} as const;
 
 export { contracts, ContractType };

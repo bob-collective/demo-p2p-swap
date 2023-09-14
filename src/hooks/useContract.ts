@@ -1,41 +1,25 @@
-import { useEffect, useState } from "react";
+import { getContract } from "viem";
+import { usePublicClient, useWalletClient } from "wagmi";
 import { contracts, ContractType } from "../contracts/config";
-import { useConnectors } from "./useConnectors";
+import { useMemo } from "react";
 
 // Wrapper around ethers Contract to automatically get contract types
 // with read and write objects automatically constructed from provider and signer.
 const useContract = (contractType: ContractType) => {
-  const { address, connect } = contracts[contractType];
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
 
-  const {
-    connectors: { provider, signer },
-    isLoading: isLoadingConnectors,
-  } = useConnectors();
+  const contract = useMemo(() => {
+    const { address, abi } = contracts[contractType];
+    return getContract({
+      address,
+      abi,
+      publicClient,
+      walletClient: walletClient ?? undefined,
+    });
+  }, [walletClient, publicClient, contractType]);
 
-  const [read, setRead] = useState<ReturnType<typeof connect> | null>(null);
-  const [write, setWrite] = useState<ReturnType<typeof connect> | null>(null);
-
-  useEffect(() => {
-    if (isLoadingConnectors) {
-      return;
-    }
-
-    if (provider) {
-      const reader = connect(address, provider);
-      setRead(reader);
-    } else {
-      setRead(null);
-    }
-
-    if (signer) {
-      const writer = connect(address, signer);
-      setWrite(writer);
-    } else {
-      setWrite(null);
-    }
-  }, [address, connect, isLoadingConnectors, provider, signer]);
-
-  return { read, write };
+  return { read: contract.read, write: contract.write };
 };
 
 export { useContract };
