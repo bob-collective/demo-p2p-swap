@@ -112,9 +112,23 @@ Simple way to handle transaction submission, at first the transaction is sent to
     await signer.sendTransaction(signedTx);
 ```
 
+## Dry-running
+```typescript
+    const rawTx= await writeSbtc.transfer.populateTransaction(...args);
+    // Dry-run tx by calling `provider.call`
+    try {
+      await provider.call(rawTx);
+    } catch (error) {
+      // If the contract call execution reverts, errow is thrown.
+      console.error("Dry-running tx failed: ", error.message);
+    }
+```
+
 
 ## Docs & DX
 - documentation does not contain many examples, mainly API reference
 - industry standard package -> more content on SO/GitHub, but 6 different versions cause outdated answers
 - some issues on GitHub seem to be open without any plan to get resolved 
 
+## Integrations
+- integrated into hardhat
