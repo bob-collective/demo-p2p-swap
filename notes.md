@@ -141,6 +141,7 @@ Simple way to handle transaction submission, at first the transaction is sent to
     await signer.sendTransaction(signedTx);
 ```
 
+## Dry-running
 
 ## Docs & DX
 - documentation does not contain many examples, mainly API reference

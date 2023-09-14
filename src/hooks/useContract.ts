@@ -9,7 +9,7 @@ const useContract = (contractType: ContractType) => {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
-  const contract = useMemo(() => {
+  return useMemo(() => {
     const { address, abi } = contracts[contractType];
     return getContract({
       address,
@@ -18,8 +18,6 @@ const useContract = (contractType: ContractType) => {
       walletClient: walletClient ?? undefined,
     });
   }, [walletClient, publicClient, contractType]);
-
-  return { read: contract.read, write: contract.write };
 };
 
 export { useContract };

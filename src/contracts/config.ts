@@ -1,4 +1,4 @@
-import ERC20Abi from "./abi/ERC20.abi.json";
+import { ERC20Abi } from "./abi/ERC20.abi";
 
 enum ContractType {
   ZBTC = "ZBTC",

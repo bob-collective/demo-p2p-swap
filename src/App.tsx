@@ -5,26 +5,37 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useConnect, usePublicClient } from "wagmi";
+import { formatUnits, parseUnits, formatEther, decodeEventLog } from "viem";
+
 import "./App.css";
 import { ContractType } from "./contracts/config";
 import { useContract } from "./hooks/useContract";
+import { config } from "./connectors/wagmi-connectors";
+
+type HexString = `0x${string}`;
 
 function App() {
+  const { connect } = useConnect({ connector: config.connectors[0] });
 
-  const {connect} = useConnect()
+  const { address } = useAccount();
 
-  const { address, isConnected } = useAccount()
+  const publicClient = usePublicClient();
 
-  const { read: readZbtc, write: writeZbtc } = useContract(ContractType.ZBTC);
+  const {
+    read: readZbtc,
+    write: writeZbtc,
+    estimateGas: estimateGasZbtc,
+    watchEvent: watchEventZbtc,
+    abi: abiZbtc,
+  } = useContract(ContractType.ZBTC);
 
   const [balance, setBalance] = useState<string | null>(null);
 
   /** PROMPT WALLET CONNECTION */
   useEffect(() => {
-    connect()
-  }, [connect])
-
+    connect();
+  }, [connect]);
 
   /* READING STORAGE */
 
@@ -33,12 +44,9 @@ function App() {
       return;
     }
     const zbtcBalance = await readZbtc.balanceOf([address]);
-    const zbtcDecimals = readZbtc.decimals;
+    const zbtcDecimals = await readZbtc.decimals();
 
-    const parsedBalance = ethers.formatUnits(
-      zbtcBalance,
-      zbtcDecimals.toString()
-    );
+    const parsedBalance = formatUnits(zbtcBalance, zbtcDecimals);
     setBalance(parsedBalance);
   }, [address, readZbtc]);
 
@@ -53,40 +61,38 @@ function App() {
       throw new Error("Writer not set!");
     }
     const args = getTxArgs();
-
+    if (!args) return;
     /* TRANSACTION LIFECYCLE  */
 
-    const tx = await writeZbtc.transfer(args);
+    // Tx is created, signed and sent to network, its hash is returned.
+    const txHash = await writeZbtc.transfer(args);
     // Transaction is now submitted to mempool, now we wait until tx is mined.
-    console.log(
-      `Transaction ${tx.hash} has been submitted to mempool with has limit of ${tx.gasLimit}.`
-    );
-    const txReceipt = await tx.wait();
+    console.log(`Transaction ${txHash} has been submitted to mempool.`);
+    const txReceipt = await publicClient.waitForTransactionReceipt({
+      hash: txHash,
+    });
     // Transaction has been mined and included in latest block.
     console.log(
-      `Transaction ${tx.hash} has been included. It used ${txReceipt?.gasUsed} gas.`
+      `Transaction ${txHash} has been included. It used ${txReceipt.gasUsed} gas.`
     );
 
     // Refetch zBTC balance after the transfer is done.
     fetchzbtcBalance();
   };
 
-  const [transferRecipient, setTransferRecipient] = useState<string | null>(
+  const [transferRecipient, setTransferRecipient] = useState<HexString | null>(
     null
   );
 
-  const getTxArgs = useCallback((): [string, bigint] => {
+  const getTxArgs = useCallback((): [HexString, bigint] | null => {
     if (!transferRecipient) {
-      throw new Error("Transfer recipient address not set!");
-    }
-    if (!readZbtc) {
-      throw new Error("Provider not set!");
+      return null;
     }
 
-    const zbtcDecimals = readZbtc.decimals;
-    const onezbtc = ethers.parseUnits("1", zbtcDecimals.toString());
+    const zbtcDecimals = 18; // NOTE: hardcoded for POC, decimals should be handled separately readZbtc.decimals();
+    const onezbtc = parseUnits("1", zbtcDecimals);
     return [transferRecipient, onezbtc];
-  }, [readZbtc, transferRecipient]);
+  }, [transferRecipient]);
 
   /** FEE ESTIMATE */
 
@@ -94,84 +100,56 @@ function App() {
 
   useEffect(() => {
     const estimateFee = async () => {
-      if (!provider) {
-        throw new Error("Provider not connected!");
-      }
-      if (!writeZbtc) {
-        throw new Error("Writer not set!");
-      }
       const args = getTxArgs();
+      if (!args) return;
 
-      const [feeData, gas] = await Promise.all([
-        provider.getFeeData(),
-        writeZbtc.transfer.estimateGas(...args),
+      const [gasPrice, gasNeeded] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateGasZbtc.transfer(args),
       ]);
 
-      // TODO: is our rollup using EIP1559 model?
-      // when clear on this discard following lines and use maxFeePerGas or gasPrice accordingly.
-      const usingEIP1559 = true;
-      let gasPrice: bigint | null;
-      if (usingEIP1559) {
-        gasPrice = feeData.maxFeePerGas;
-      } else {
-        gasPrice = feeData.gasPrice;
-      }
+      const finalFee = gasNeeded * gasPrice;
 
-      if (!gasPrice) {
-        throw new Error("Gas price fetching failed.");
-      }
-
-      const finalFee = gas * gasPrice;
-
-      const formattedFeeEstimate = ethers.formatEther(finalFee);
+      const formattedFeeEstimate = formatEther(finalFee);
       setTxFeeEstimate(formattedFeeEstimate);
     };
     estimateFee();
-  }, [getTxArgs, provider, writeZbtc]);
+  }, [estimateGasZbtc, getTxArgs, publicClient]);
 
   const [latestTransfers, setLatestTransfers] = useState<
     { from: string; to: string; amount: string; id: string }[]
-  >([
-    {
-      from: ethers.ZeroAddress,
-      to: ethers.ZeroAddress,
-      amount: "1.2",
-      id: "0x823284732849iojdskjfhkdsjaf809",
-    },
-  ]);
+  >([]);
 
   /** EVENT LISTENING */
 
   useEffect(() => {
-    if (!readZbtc) {
+    if (!watchEventZbtc) {
       return;
     }
-    const transferEvent = readZbtc.getEvent("Transfer");
-
-    const transferEventListener: TypedListener<typeof transferEvent> = (
-      from,
-      to,
-      rawAmount,
-      event
-    ) => {
-      const transferEvent = {
-        from,
-        to,
-        amount: ethers.formatEther(rawAmount),
-        id: event.transactionHash,
-      };
-      setLatestTransfers((previous) => [
-        transferEvent,
-        ...previous.slice(0, 9),
-      ]);
-    };
-
-    readZbtc.on(transferEvent, transferEventListener);
+    const unsubscribeFromEvent = watchEventZbtc.Transfer(
+      {},
+      {
+        onLogs: (logs) => {
+          const transferEvents = logs.map((log) => {
+            const {
+              args: { from, to, value },
+            } = decodeEventLog({ abi: abiZbtc, ...log });
+            return {
+              from,
+              to,
+              amount: formatEther(value),
+              id: log.transactionHash,
+            };
+          });
+          setLatestTransfers((previous) => [...transferEvents, ...previous]);
+        },
+      }
+    );
 
     return () => {
-      readZbtc.removeListener(transferEvent, transferEventListener);
+      unsubscribeFromEvent();
     };
-  }, [readZbtc]);
+  }, [abiZbtc, watchEventZbtc]);
 
   const handleFormSubmission = (form: FormEvent<HTMLFormElement>) => {
     form.preventDefault();
@@ -179,14 +157,14 @@ function App() {
   };
 
   const handleTransferRecipientChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setTransferRecipient(e.target.value);
+    setTransferRecipient(e.target.value as HexString);
   };
 
   return (
     <>
       <div>
-        {signer
-          ? `Connected with account ${signer.address}`
+        {address
+          ? `Connected with account ${address}`
           : "Please connect your Metamask."}
       </div>
       <div>Your zBTC balance: {balance || 0} zBTC</div>
@@ -208,19 +186,22 @@ function App() {
       <br />
       <h2>10 Latest zBTC transfers</h2>
       <table>
-        <tr>
-          <th>From</th>
-          <th>To</th>
-          <th>Amount</th>
-        </tr>
-
-        {latestTransfers.map((transfer) => (
-          <tr key={transfer.id}>
-            <td>{transfer.from}</td>
-            <td>{transfer.to}</td>
-            <td>{transfer.amount}</td>
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Amount</th>
           </tr>
-        ))}
+        </thead>
+        <tbody>
+          {latestTransfers.map((transfer) => (
+            <tr key={transfer.id}>
+              <td>{transfer.from}</td>
+              <td>{transfer.to}</td>
+              <td>{transfer.amount}</td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </>
   );
