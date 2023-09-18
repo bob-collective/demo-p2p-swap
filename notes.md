@@ -97,13 +97,13 @@ Simple way to handle transaction submission, at first the transaction is sent to
 - allows easy transaction chaining 
 
 ## Data handling
-- since v6 uses JS native `bignum`
-- getter return types automatically decoded
+- v6 uses JS native `bignum`
+- automatically decodes types from SC methods and ABI
 - useful `parseEther`|`parseUnits` and `formatEther`|`formatUnits` utils to help with decimal conversions
-- utils to help with hashing (keccak256)
+- utils to help with hashing (keccak256) and message signing
 
 ## Constructing unsigned transaction
-- non-trivial, but possible:
+- possible with little workaround
 ```typescript
     const rawTx= await writeSbtc.transfer.populateTransaction(...args);
     const txObject = ethers.Transaction.from(rawTx);
@@ -128,7 +128,8 @@ Simple way to handle transaction submission, at first the transaction is sent to
 ## Docs & DX
 - documentation does not contain many examples, mainly API reference
 - industry standard package -> more content on SO/GitHub, but 6 different versions cause outdated answers
-- some issues on GitHub seem to be open without any plan to get resolved 
+- some issues on GitHub seem to be open for a long time already, without clear plan to resolve them
 
 ## Integrations
 - integrated into hardhat
+- possibility to use with `web3-react` package maintained by Uniswap

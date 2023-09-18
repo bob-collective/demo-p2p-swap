@@ -27,13 +27,15 @@ function App() {
     if (!readSbtc || !signer?.address) {
       return;
     }
+    console.log('fetching')
     const sbtcBalance = await readSbtc.balanceOf(signer.address);
-    const sbtcDecimals = readSbtc.decimals;
+    const sbtcDecimals = await readSbtc.decimals();
 
     const parsedBalance = ethers.formatUnits(
       sbtcBalance,
-      sbtcDecimals.toString()
+      sbtcDecimals
     );
+    console.log(parsedBalance, sbtcDecimals.toString())
     setBalance(parsedBalance);
   }, [signer?.address, readSbtc]);
 
@@ -48,7 +50,7 @@ function App() {
       throw new Error("Writer not set!");
     }
     const args = getTxArgs();
-
+    if (!args) return;
     /* TRANSACTION LIFECYCLE  */
 
     const tx = await writeSbtc.transfer(...args);
@@ -70,16 +72,16 @@ function App() {
     null
   );
 
-  const getTxArgs = useCallback((): [string, bigint] => {
+  const getTxArgs = useCallback((): [string, bigint] | undefined => {
     if (!transferRecipient) {
-      throw new Error("Transfer recipient address not set!");
+      return;
     }
     if (!readSbtc) {
-      throw new Error("Provider not set!");
+      return;
     }
 
-    const sbtcDecimals = readSbtc.decimals;
-    const oneSbtc = ethers.parseUnits("1", sbtcDecimals.toString());
+    const sbtcDecimals = 18; // MEMO: made constatnt for simplicity of POC
+    const oneSbtc = ethers.parseUnits("1", sbtcDecimals);
     return [transferRecipient, oneSbtc];
   }, [readSbtc, transferRecipient]);
 
@@ -90,12 +92,13 @@ function App() {
   useEffect(() => {
     const estimateFee = async () => {
       if (!provider) {
-        throw new Error("Provider not connected!");
+        return;
       }
       if (!writeSbtc) {
-        throw new Error("Writer not set!");
+        return;
       }
       const args = getTxArgs();
+      if (!args) return;
 
       const [feeData, gas] = await Promise.all([
         provider.getFeeData(),

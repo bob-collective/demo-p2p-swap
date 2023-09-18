@@ -8,7 +8,7 @@ enum ContractType {
 // that are used in useContract hook to automatically infer smart contract types.
 const contracts = {
   [ContractType.SBTC]: {
-    address: "0x000 TODO",
+    address: "0xd6cd079ee8bc26b5000a5e1ea8d434c840e3434b",
     connect: ERC20Abi__factory.connect,
   },
 };
