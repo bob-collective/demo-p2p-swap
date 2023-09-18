@@ -1,28 +1,58 @@
-# ethers.js (v6) POC
-JS industry-standard library to help with blockchain interaction. 
-- 7k stars on GitHub
-- full TS support
-- used by biggest projects: Uniswap, Compound, Optimism, ...
+# viem + wagmi
+viem = new lightweight 'TypeScript Interface for Ethereum '
+- 1.4k viem, 4.9k wagmi stars on GitHub
+- smaller bundle size and more performant than ethers v6
+- used by MetaMask, SushiSwap, QuickNode, PancakeSwap, ...
+- `wagmi` package is becoming React standard for EVM dapps 
 
 ## Wallet connection
-Straightforward way to connect to injected provider and obtain signer object.
+Wallet connection is abstracted away utilizing `Wagmi.Config`. All needed to be done is specification of custom chain and connectors to use. After that app is wrapped in wagmi provider and wallet and account interactoin hooks can be used to connect, disconnect, get account,...
+
 ```typescript
-  if (window.ethereum == null) {
-    console.log("MetaMask not installed; using read-only default provider.");
-    provider = ethers.getDefaultProvider(L2_WSS_URL);
-  } else {
-    provider = new ethers.BrowserProvider(window.ethereum);
+// connectors.ts
+const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [L2_CHAIN_CONFIG],
+  [publicProvider()]
+);
 
-    signer = await provider.getSigner();
-  }
+const config = createConfig({
+  autoConnect: true,
+  publicClient,
+  webSocketPublicClient,
+  connectors: [new MetaMaskConnector({ chains })],
+});
+
+// main.tsx
+// Wraps app in WagmiConfig provider
+    <WagmiConfig config={config}>
+      <App />
+    </WagmiConfig>
+
+// App.tsx
+  const { connect } = useConnect({ connector: config.connectors[0] });
+
+  const { address } = useAccount();
+
+  const publicClient = usePublicClient();
 ```
-
 ### Other wallet integrations
 
-- does not support WalletConnect out of the box
+- Easy configuration - only need to pass another connector to be used, support for: injected wallets, MetaMask, Ledger, WalletConnect, Coinbase wallet, SafeWallet, wallet mocking.
+
+```typescript
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
+ 
+const connector = new WalletConnectConnector({
+  options: {
+    projectId: '...',
+  },
+})
+```
 
 ## Smart contract interaction
-Default reading and writing way is suboptimal - it does not provide any type safety:
+Reading and writing is handled by separate objects called `PublicClient` and `WalletClient`. These clients provide methods called `actions` that utilize Ethereum RPC methods 1 to 1.
+
+Default way of reading and writing is suboptimal - it requires specification of contract address and ABI all over again:
 ```typescript
 //source: https://viem.sh/docs/contract/getContract.html
 import { wagmiAbi } from './abi'
@@ -40,113 +70,140 @@ const hash = await walletClient.writeContract({
   functionName: 'mint',
   args: [69420]
 })
-const unwatch = publicClient.watchContractEvent({
-  address: '0xfba3912ca04dd458c843e2ee08967fc04f3579c2',
-  abi: wagmiAbi,
-  eventName: 'Transfer',
-  args: {  
-    from: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
-    to: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac'
+
+```
+However, with little modification, contract address and ABI can be read from config file in custom hook and all contract member types will be inferred.
+```typescript
+// contracts/config.ts
+const contracts = {
+  [ContractType.ZBTC]: {
+    address: "0xd6cd079ee8bc26b5000a5e1ea8d434c840e3434b",
+    abi: ERC20Abi,
   },
-  onLogs: logs => console.log(logs)
-})
-```
-Reading and writing are handled by separate connectors. `provider` handles reading, `signer` handles writing.
-```typescript
-interface Connectors {
-  provider: ethers.BrowserProvider | ethers.AbstractProvider | null;
-  signer: ethers.JsonRpcSigner | null;
-}
-```
-### Smart contract types
-Integration of `typechain` package allows very useful type generation of smart contract typings from ABI. Later, these types can be bound to `Contract` instance which adds type-safety to contract method calls.
+} as const;
 
-#### Custom typegen from ABI flow
-1. Place smart contract ABI into `src/contracts/abi/` folder
-2. `$ pnpm typechain`
-3. All smart contracts types have been (re)generated.
-4. Declare smart contract address in `src/contracts/config.ts` with its type factory.
-5. Now the smart contract types will be automatically infered and can be used with `useContract` hook.
-```typescript
-  const { read: readZbtc, write: writeZbtc } = useContract(ContractType.ZBTC);
+// App.tsx
+  const {
+    read: readZbtc,
+    write: writeZbtc,
+    estimateGas: estimateGasZbtc,
+  } = useContract(ContractType.ZBTC);
   
-  ...
-
-  // Now we can type-safely call contract methods
-  const balance = await readZbtc.balanceOf(account);
-
-  // And submit transaction with type-checked calldata 
-  await writeZbtc.transfer(otherAccount, "1");
+  // ...
+  const zbtcBalance = await readZbtc.balanceOf([address]);
 ```
 
+
+
+### Smart contract types
+With the example above and TS version 5.x+, smart contract types are inferred from ABI specification without need to run any typegen commands.
 ### Multicall, batch requests
-- NO direct out of the box support for multicall
+- Built-in support for multicall3
+```typescript
+const results = await publicClient.multicall({
+  contracts: [
+    {
+      ...wagmiContract,
+      functionName: 'totalSupply',
+    },
+    {
+      ...wagmiContract,
+      functionName: 'ownerOf',
+      args: [69420n]
+    },
+    {
+      ...wagmiContract,
+      functionName: 'mint'
+    }
+  ]
+})
+/**
+ * [
+ *  { result: 424122n, status: 'success' },
+ *  { result: '0xc961145a54C96E3aE9bAA048c4F4D6b04C13916b', status: 'success' },
+ *  { error: [ContractFunctionExecutionError: ...], status: 'failure' }
+ * ]
+ */
+```
 - JsonRpcBatchProvider is available for multiple rpc request batching
 
 ### Listening to events
-Straightforward event subscripttions and event data decoding.
+Straightforward event subscription available on contract instance under `Contract.watchEvent`.
 ```typescript
-    const transferEvent = readZbtc.getEvent("Transfer");
-
-    const transferEventListener: TypedListener<typeof transferEvent> = (
-      from,
-      to,
-      rawAmount,
-      event
-    ) => {
-      const transferEvent = {
-        from,
-        to,
-        amount: ethers.formatEther(rawAmount),
-        id: event.transactionHash,
-      };
-      setLatestTransfer(transferEvent);
-    };
-
-    readZbtc.on(transferEvent, transferEventListener);
-
-    return () => {
-      readZbtc.removeListener(transferEvent, transferEventListener);
-    }
+ const unsubscribeFromEvent = watchEventZbtc.Transfer(
+      {},
+      {
+        onLogs: (logs) => {
+          const transferEvents = logs.map((log) => {
+            const {
+              args: { from, to, value },
+            } = decodeEventLog({ abi: abiZbtc, ...log });
+            return {
+              from,
+              to,
+              amount: formatEther(value),
+              id: log.transactionHash,
+            };
+          });
+          setLatestTransfers((previous) => [...transferEvents, ...previous]);
+        },
+      }
+    );
   ```
-  - need to manually implement polling/data refetch on each block
 
 ### Transaction lifecycle handling
-Simple way to handle transaction submission, at first the transaction is sent to mempool. After, `TransactionResponse.wait` method can be called to await block inclusion.
+Simple way to handle transaction submission, at first the transaction is sent to mempool. After `PublicClient.waitForTransactionReceipt` method can be called to await tx block inclusion.
 ```typescript
-    const tx = await writeZbtc.transfer(...args);
-    // Transaction is now submitted to mempool, now we wait until tx is mined.
+    // Tx is created, signed and sent to network, its hash is returned.
+    const txHash = await writeZbtc.transfer(args);
 
-...
-
-    const txReceipt = await tx.wait();
+    const txReceipt = await publicClient.waitForTransactionReceipt({
+      hash: txHash,
+    });
     // Transaction has been mined and included in latest block.
+    console.log(
+      `Transaction ${txHash} has been included. It used ${txReceipt.gasUsed} gas.`
+    );
 
-```
-- allows easy transaction chaining 
+``` 
 
 ## Data handling
-- since v6 uses JS native `bignum`
-- getter return types automatically decoded
-- useful `parseEther`|`parseUnits` and `formatEther`|`formatUnits` utils to help with decimal conversions
-- utils to help with hashing (keccak256)
+- use of JS native `bignum`
+- `parseEther`, `parseGwei`,`parseUnits` and `formatEther`, `formatGwei`,`formatUnits` utils to help with decimal conversions
+- utils to help with hashing (keccak256), data type checking and deoding
 
 ## Constructing unsigned transaction
-- non-trivial, but possible:
+- straightforward construction of unsigned tranaction with `WalletClient.prepareTransactionRequest` method
 ```typescript
-    const rawTx= await writeZbtc.transfer.populateTransaction(...args);
-    const txObject = ethers.Transaction.from(rawTx);
-    const signedTx = await signer.signTransaction(txObject);
+const request = await walletClient.prepareTransactionRequest({ 
+  account,
+  to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  value: 1000000000000000000n
+})
 
-    await signer.sendTransaction(signedTx);
+
+const signature = await walletClient.signTransaction(request)
+const hash = await walletClient.sendRawTransaction(signature)
 ```
 
 ## Dry-running
+```typescript
+import { account, publicClient } from './config'
+import { wagmiAbi } from './abi'
 
+const { result } = await publicClient.simulateContract({
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: wagmiAbi,
+  functionName: 'mint',
+  account,
+})
+```
 ## Docs & DX
-- documentation does not contain many examples, mainly API reference
-- industry standard package -> more content on SO/GitHub, but 6 different versions cause outdated answers
-- some issues on GitHub seem to be open without any plan to get resolved 
+- very comprehensive documentation with examples for each method / module
+- fast resolution of GitHub issues, same reliable team building both viem and wagmi
+- smart contract type inheritance significantly simplifies DX 
+- `wagmi` abstracts away most of EVM interaction complexity for React 
+- migration guide between ethers -> viem provided in viem docs
 
 
 
