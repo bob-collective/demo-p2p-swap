@@ -1,44 +1,240 @@
 export const MarketplaceAbi = [
   {
-    type: "function",
-    stateMutability: "nonpayable",
-    outputs: [],
-    name: "acceptErcErcOrder",
+    anonymous: false,
     inputs: [
-      { type: "uint256", name: "id", internalType: "uint256" },
-      { type: "uint256", name: "saleAmount", internalType: "uint256" },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'orderId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'who',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'buyAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'saleAmount',
+        type: 'uint256'
+      }
     ],
+    name: 'acceptOrder',
+    type: 'event'
   },
   {
-    type: "function",
-    stateMutability: "view",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'orderId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'requesterAddress',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'offeringAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'offeringToken',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'askingAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'askingToken',
+        type: 'address'
+      }
+    ],
+    name: 'placeOrder',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'orderId',
+        type: 'uint256'
+      }
+    ],
+    name: 'withdrawOrder',
+    type: 'event'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'saleAmount',
+        type: 'uint256'
+      }
+    ],
+    name: 'acceptErcErcOrder',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sellingToken',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'saleAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'buyingToken',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'buyAmount',
+        type: 'uint256'
+      }
+    ],
+    name: 'placeErcErcOrder',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256'
+      }
+    ],
+    name: 'withdrawErcErcOrder',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    name: 'ercErcOrders',
     outputs: [
-      { type: "uint256", name: "offeringAmount", internalType: "uint256" },
-      { type: "address", name: "offeringToken", internalType: "address" },
-      { type: "uint256", name: "askingAmount", internalType: "uint256" },
-      { type: "address", name: "askingToken", internalType: "address" },
-      { type: "address", name: "requesterAddress", internalType: "address" },
+      {
+        internalType: 'uint256',
+        name: 'offeringAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'offeringToken',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'askingAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'askingToken',
+        type: 'address'
+      },
+      {
+        internalType: 'address',
+        name: 'requesterAddress',
+        type: 'address'
+      }
     ],
-    name: "ercErcOrders",
-    inputs: [{ type: "uint256", name: "", internalType: "uint256" }],
+    stateMutability: 'view',
+    type: 'function'
   },
   {
-    type: "function",
-    stateMutability: "nonpayable",
-    outputs: [],
-    name: "placeErcErcOrder",
-    inputs: [
-      { type: "address", name: "sellingToken", internalType: "address" },
-      { type: "uint256", name: "saleAmount", internalType: "uint256" },
-      { type: "address", name: "buyingToken", internalType: "address" },
-      { type: "uint256", name: "buyAmount", internalType: "uint256" },
+    inputs: [],
+    name: 'getOpenOrders',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'offeringAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address',
+            name: 'offeringToken',
+            type: 'address'
+          },
+          {
+            internalType: 'uint256',
+            name: 'askingAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address',
+            name: 'askingToken',
+            type: 'address'
+          },
+          {
+            internalType: 'address',
+            name: 'requesterAddress',
+            type: 'address'
+          }
+        ],
+        internalType: 'struct MarketPlace.Order[]',
+        name: '',
+        type: 'tuple[]'
+      }
     ],
+    stateMutability: 'view',
+    type: 'function'
   },
   {
-    type: "function",
-    stateMutability: "nonpayable",
-    outputs: [],
-    name: "withdrawErcErcOrder",
-    inputs: [{ type: "uint256", name: "id", internalType: "uint256" }],
-  },
+    inputs: [],
+    name: 'nextOrderId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  }
 ] as const;
