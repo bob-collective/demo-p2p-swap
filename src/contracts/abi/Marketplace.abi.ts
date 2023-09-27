@@ -1,4 +1,4 @@
-export const MarketplaceAbi = [
+export const Erc20MarketplaceAbi = [
   {
     anonymous: false,
     inputs: [

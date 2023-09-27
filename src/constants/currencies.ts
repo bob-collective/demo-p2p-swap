@@ -1,30 +1,33 @@
 import { HexString } from '../types';
 
-enum ERC20Currency {
+enum Erc20CurrencyTicker {
   ZBTC = 'ZBTC',
   USDT = 'USDT'
 }
 
-const ERC20Currencies: {
-  [ticker in ERC20Currency]: {
-    ticker: string;
-    name: string;
-    decimals: number;
-    address: HexString;
-  };
+interface Erc20Currency {
+  ticker: Erc20CurrencyTicker;
+  name: string;
+  decimals: number;
+  address: HexString;
+}
+
+const Erc20Currencies: {
+  [ticker in Erc20CurrencyTicker]: Erc20Currency;
 } = {
-  [ERC20Currency.ZBTC]: {
-    ticker: 'ZBTC',
+  [Erc20CurrencyTicker.ZBTC]: {
+    ticker: Erc20CurrencyTicker.ZBTC,
     name: 'zBTC',
     decimals: 18,
     address: '0xd6cd079ee8bc26b5000a5e1ea8d434c840e3434b'
   },
-  [ERC20Currency.USDT]: {
-    ticker: 'USDT',
+  [Erc20CurrencyTicker.USDT]: {
+    ticker: Erc20CurrencyTicker.USDT,
     name: 'Tether USD',
     decimals: 6,
     address: '0x3c252953224948E441aAfdE7b391685201ccd3bC'
   }
 };
 
-export { ERC20Currencies, ERC20Currency };
+export { Erc20Currencies, Erc20CurrencyTicker };
+export type { Erc20Currency };

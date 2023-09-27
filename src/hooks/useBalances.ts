@@ -1,13 +1,13 @@
 import { useAccount, usePublicClient } from 'wagmi';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { useCallback, useEffect, useState } from 'react';
-import { ERC20Currency, ERC20Currencies } from '../constants';
+import { Erc20CurrencyTicker, Erc20Currencies } from '../constants';
 
 type Balances = {
-  [ticker in ERC20Currency]: bigint;
+  [ticker in Erc20CurrencyTicker]: bigint;
 };
 
-const initialBalances = Object.keys(ERC20Currencies).reduce(
+const initialBalances = Object.keys(Erc20Currencies).reduce(
   (result, ticker) => ({ ...result, [ticker]: undefined }),
   {}
 ) as Balances;
@@ -24,15 +24,15 @@ const useBalances = () => {
       }
 
       const balancesMulticallResult = await publicClient.multicall({
-        contracts: Object.values(ERC20Currencies).map(({ address }) => ({
+        contracts: Object.values(Erc20Currencies).map(({ address: erc20Address }) => ({
           abi: ERC20Abi,
-          address,
+          address: erc20Address,
           functionName: 'balanceOf',
           args: [address]
         }))
       });
 
-      const balancesResult = Object.keys(ERC20Currencies).reduce<Balances>(
+      const balancesResult = Object.keys(Erc20Currencies).reduce<Balances>(
         (result, ticker, index) => ({ ...result, [ticker]: balancesMulticallResult[index].result }),
         {} as Balances
       );
@@ -47,12 +47,12 @@ const useBalances = () => {
   });
 
   const getBalanceInBaseDecimals = useCallback(
-    (ticker: ERC20Currency) => {
+    (ticker: Erc20CurrencyTicker) => {
       if (balances[ticker] === undefined) {
         return 0;
       }
 
-      return balances[ticker] / BigInt(10 ** ERC20Currencies[ticker].decimals);
+      return parseFloat((balances[ticker] / BigInt(10 ** Erc20Currencies[ticker].decimals)).toString());
     },
     [balances]
   );
