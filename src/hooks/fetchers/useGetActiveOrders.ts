@@ -5,6 +5,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 
 interface Erc20Order {
+  id: number;
   offeringCurrency: Erc20Currency;
   askingCurrency: Erc20Currency;
   price: number; // Price per unit of asking token.
@@ -26,19 +27,22 @@ interface Erc20Order {
 // };
 
 const parseErc20Order = (rawOrder: {
+  id: number;
   offeringAmount: bigint;
   offeringToken: HexString;
   askingAmount: bigint;
   askingToken: HexString;
   requesterAddress: HexString;
 }): Erc20Order => {
-  const { offeringAmount, offeringToken, askingAmount, askingToken, requesterAddress } = rawOrder;
+  const { id, offeringAmount, offeringToken, askingAmount, askingToken, requesterAddress } = rawOrder;
 
   const offeringCurrency = getErc20CurrencyFromContractAddress(offeringToken);
   const askingCurrency = getErc20CurrencyFromContractAddress(askingToken);
-  const price = parseInt((askingAmount / offeringAmount).toString()) / offeringCurrency.decimals;
+  // TODO: make common util to handle decimal conversions or handle all monetary amounts in standalone class
+  const price =
+    Number(askingAmount) / 10 ** askingCurrency.decimals / (Number(offeringAmount) / 10 ** offeringCurrency.decimals);
 
-  return { offeringCurrency, askingCurrency, requesterAddress, availableLiquidity: askingAmount, price };
+  return { id, offeringCurrency, askingCurrency, requesterAddress, availableLiquidity: offeringAmount, price };
 };
 
 const useGetActiveErc20Orders = () => {
@@ -48,15 +52,18 @@ const useGetActiveErc20Orders = () => {
   const fetchErc20Orders = useCallback(async () => {
     if (!readErc20Marketplace) return;
     const rawOrders = await readErc20Marketplace.getOpenOrders();
-    const orders = rawOrders.map(parseErc20Order);
+    // !TODO: modify marketplace contract to return ID, this will start breaking when orders
+    // get cancelled / totally filled, +2 is quick hack for this reason, needs change
+    const orders = rawOrders.map((order, id) => parseErc20Order({ ...order, id: id + 2 }));
     setActiveOrders(orders);
   }, [setActiveOrders, readErc20Marketplace]);
 
   useEffect(() => {
-    fetchErc20Orders;
+    fetchErc20Orders();
   }, [fetchErc20Orders]);
 
   return { data: activeOrders, refetch: fetchErc20Orders };
 };
 
 export { useGetActiveErc20Orders };
+export type { Erc20Order };
