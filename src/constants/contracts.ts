@@ -20,7 +20,7 @@ const contracts = {
     {} as { [ticker in Erc20CurrencyTicker]: { abi: typeof ERC20Abi; address: HexString } }
   ),
   [ContractType.ERC20_MARKETPLACE]: {
-    address: '0x8AFE17149acA25bD009dB723D8D56672E2230bCc',
+    address: '0xd887C0d5b3982B5D6f2ca67cD8e217E430Add285',
     abi: Erc20MarketplaceAbi
   }
 } as const;

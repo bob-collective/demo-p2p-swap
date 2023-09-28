@@ -5,7 +5,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 
 interface Erc20Order {
-  id: number;
+  id: bigint;
   offeringCurrency: Erc20Currency;
   askingCurrency: Erc20Currency;
   price: number; // Price per unit of asking token.
@@ -27,7 +27,7 @@ interface Erc20Order {
 // };
 
 const parseErc20Order = (rawOrder: {
-  id: number;
+  id: bigint;
   offeringAmount: bigint;
   offeringToken: HexString;
   askingAmount: bigint;
@@ -51,10 +51,10 @@ const useGetActiveErc20Orders = () => {
 
   const fetchErc20Orders = useCallback(async () => {
     if (!readErc20Marketplace) return;
-    const rawOrders = await readErc20Marketplace.getOpenOrders();
-    // !TODO: modify marketplace contract to return ID, this will start breaking when orders
-    // get cancelled / totally filled, +2 is quick hack for this reason, needs change
-    const orders = rawOrders.map((order, id) => parseErc20Order({ ...order, id: id + 2 }));
+    const [rawOrders, identifiers] = await readErc20Marketplace.getOpenOrders();
+    // !MEMO: Should use modified marketplace contract to return ID, this will start breaking when orders
+    // get cancelled / totally filled.
+    const orders = rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }));
     setActiveOrders(orders);
   }, [setActiveOrders, readErc20Marketplace]);
 

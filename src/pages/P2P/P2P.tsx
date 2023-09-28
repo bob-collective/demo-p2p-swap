@@ -1,10 +1,13 @@
 import { CTA, Flex, H1 } from '@interlay/ui';
 import { useState } from 'react';
 import { AddOrderModal, OrdersTable } from './components';
+import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 
 const P2P = () => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState(false);
   const titleId = 'titleId';
+
+  const { data: orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal(false);
 
@@ -19,9 +22,9 @@ const P2P = () => {
             Add an order
           </CTA>
         </Flex>
-        <OrdersTable aria-labelledby={titleId} />
+        <OrdersTable aria-labelledby={titleId} orders={orders} refetchOrders={refetchActiveErc20Orders} />
       </Flex>
-      <AddOrderModal isOpen={isAddNewOrderModal} onClose={handleCloseNewOrderModal} />
+      <AddOrderModal isOpen={isAddNewOrderModal} onClose={handleCloseNewOrderModal} refetchOrders={refetchActiveErc20Orders} />
     </>
   );
 };

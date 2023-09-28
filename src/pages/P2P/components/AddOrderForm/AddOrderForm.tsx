@@ -1,10 +1,9 @@
 import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
-import { ChangeEvent, FormEvent, RefObject, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, RefObject, useState } from 'react';
 import { formatUSD } from '../../../../utils/format';
 import { useBalances } from '../../../../hooks/useBalances';
-import { ContractType,  Erc20CurrencyTicker, UINT_256_MAX, contracts } from '../../../../constants';
-import { useContract } from '../../../../hooks/useContract';
-import { useAccount, usePublicClient } from 'wagmi';
+import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
+import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 
 type AddOrderFormData = {
   inputValue?: string;
@@ -24,49 +23,19 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
     inputTicker: Erc20CurrencyTicker.ZBTC,
     outputTicker: Erc20CurrencyTicker.USDT
   });
-  const [inputErc20TransferApproved, setInputErc20TransferApproved] = useState(false);
 
-  const { address } = useAccount();
+  const { isAllowed: inputErc20TransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
+    ContractType.ERC20_MARKETPLACE,
+    state.inputTicker
+  );
 
-  const { read: readInputContract, write: writeInputContract } = useContract(ContractType[state.inputTicker]);
-  const publicClient = usePublicClient();
   const { getBalanceInBaseDecimals } = useBalances();
 
   const isComplete = state.inputTicker && state.outputTicker && state.inputValue && state.outputValue;
 
-  const checkAllowance = useCallback(async () => {
-    if (readInputContract && address) {
-      const allowance = await readInputContract.allowance([address, contracts[ContractType.ERC20_MARKETPLACE].address]);
-      // If allowance is lower than maximum, then it is considered unallowed and approval tx is required. (to keep poc simple)
-      if (allowance < UINT_256_MAX) {
-        setInputErc20TransferApproved(false);
-      } else {
-        setInputErc20TransferApproved(true);
-      }
-    }
-  }, [readInputContract, setInputErc20TransferApproved, address]);
-
-  useEffect(() => {
-    checkAllowance();
-  }, [checkAllowance]);
-
-  const allowErc20Transfer = async() => {
-     if (!writeInputContract) {
-      return;
-     }
-     
-    const txHash = await writeInputContract.approve([contracts[ContractType.ERC20_MARKETPLACE].address, UINT_256_MAX, ])
-    await publicClient.waitForTransactionReceipt({hash: txHash});
-    checkAllowance();
-  }
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!inputErc20TransferApproved) {
-      allowErc20Transfer();
-      return;
-    }
-    onSubmit?.(state as Required<AddOrderFormData>);
+    wrapInErc20ApprovalTx(() => onSubmit?.(state as Required<AddOrderFormData>));
   };
 
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) =>
@@ -149,7 +118,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         </Flex>
       </Flex>
       <CTA disabled={!isComplete} size='large' type='submit'>
-        {inputErc20TransferApproved ? "Place Order" : "Approve"}
+        {inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
       </CTA>
     </form>
   );

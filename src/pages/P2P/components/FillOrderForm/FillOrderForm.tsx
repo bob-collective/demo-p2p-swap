@@ -3,31 +3,33 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { formatUSD } from '../../../../utils/format';
 import { Erc20Order } from '../../../../hooks/fetchers/useGetActiveOrders';
 import { useBalances } from '../../../../hooks/useBalances';
-import { Erc20CurrencyTicker } from '../../../../constants';
+import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { toBaseAmountErc20 } from '../../../../utils/currencies';
+import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 
 type FillOrderFormData = {
   input?: string;
 };
 
 type FillOrderFormProps = {
-  order: Erc20Order | undefined;
+  order: Erc20Order;
   onSubmit: (data: Required<FillOrderFormData>) => void;
 };
 
 const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => {
   const [state, setState] = useState<FillOrderFormData>({});
+
   const { getBalanceInBaseDecimals } = useBalances();
 
-  if (!order) {
-    // TODO: handle better
-    return <></>;
-  }
+  const { isAllowed: isAskingCurrencyTransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
+    ContractType.ERC20_MARKETPLACE,
+    order.askingCurrency.ticker
+  );
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    onSubmit?.(state as Required<FillOrderFormData>);
+    wrapInErc20ApprovalTx(() => onSubmit?.(state as Required<FillOrderFormData>));
   };
 
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => setState((s) => ({ ...s, input: e.target.value }));
@@ -36,13 +38,16 @@ const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => 
 
   const isComplete = state.input;
 
-  const outputAmount = state.input ? parseFloat(state.input) / order.price : 0
+  const outputAmount = state.input ? parseFloat(state.input) / order.price : 0;
 
   return (
     <form onSubmit={handleSubmit}>
       <Flex direction='column' gap='spacing4'>
         <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
-          <P size='xs'>Remaining available: {toBaseAmountErc20(order.availableLiquidity, order.offeringCurrency.ticker)} {order.offeringCurrency.ticker}</P>
+          <P size='xs'>
+            Remaining available: {toBaseAmountErc20(order.availableLiquidity, order.offeringCurrency.ticker)}{' '}
+            {order.offeringCurrency.ticker}
+          </P>
         </Card>
         <TokenInput
           label='Pay with'
@@ -64,7 +69,10 @@ const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => 
         <Flex direction='column' gap='spacing2'>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
             <P size='xs'>
-              Price 1 {order.offeringCurrency.ticker} = <Strong>{order.price} {order.askingCurrency.ticker} </Strong>
+              Price 1 {order.offeringCurrency.ticker} ={' '}
+              <Strong>
+                {order.price} {order.askingCurrency.ticker}{' '}
+              </Strong>
             </P>
           </Card>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
@@ -73,7 +81,7 @@ const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => 
         </Flex>
       </Flex>
       <CTA disabled={!isComplete} size='large' type='submit'>
-        Fill Order
+        {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
       </CTA>
     </form>
   );

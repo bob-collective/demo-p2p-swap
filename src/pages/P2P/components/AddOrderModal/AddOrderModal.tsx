@@ -7,9 +7,9 @@ import { ContractType, Erc20Currencies } from '../../../../constants';
 import { useAccount, usePublicClient } from 'wagmi';
 import { toAtomicAmountErc20 } from '../../../../utils/currencies';
 
-type AddOrderModalProps = Omit<ModalProps, 'children'>;
+type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
-const AddOrderModal = ({ onClose, ...props }: AddOrderModalProps): JSX.Element => {
+const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps): JSX.Element => {
   const offerModalRef = useRef<HTMLDivElement>(null);
   const receiveModalRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +34,10 @@ const AddOrderModal = ({ onClose, ...props }: AddOrderModalProps): JSX.Element =
         outputAtomicAmount
       ]);
       await publicClient.waitForTransactionReceipt({ hash: tx });
+      refetchOrders();
       onClose();
     },
-    [address, writeErc20Marketplace, onClose, publicClient]
+    [address, writeErc20Marketplace, onClose, publicClient, refetchOrders]
   );
 
   return (
