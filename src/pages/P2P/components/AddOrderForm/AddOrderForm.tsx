@@ -69,33 +69,35 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
       <Flex direction='column' gap='spacing4'>
         <P size='s'>Input the details and values of your order's assets</P>
         <TokenInput
+          type='selectable'
           label='Offer'
           balance={state.inputTicker ? getBalanceInBaseDecimals(Erc20CurrencyTicker[state.inputTicker]) : 0}
           onChange={handleChangeInput}
           value={state.inputValue}
           valueUSD={0}
           selectProps={{
-            modalRef: offerModalRef,
+            modalProps: { ref: offerModalRef },
             value: state.inputTicker,
             items: [
-              { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: formatUSD(0) },
-              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: formatUSD(0) }
+              { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
+              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleInputTickerChange(key as Erc20CurrencyTicker)
           }}
         />
         <TokenInput
+          type='selectable'
           label='You will Receive'
           balance={state.outputTicker ? getBalanceInBaseDecimals(Erc20CurrencyTicker[state.outputTicker]) : 0}
           onChange={handleChangeOutput}
           value={state.outputValue}
           valueUSD={0}
           selectProps={{
-            modalRef: receiveModalRef,
+            modalProps: { ref: receiveModalRef },
             value: state.outputTicker,
             items: [
-              { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: formatUSD(0) },
-              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: formatUSD(0) }
+              { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
+              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleOutputTickerChange(key as Erc20CurrencyTicker)
           }}

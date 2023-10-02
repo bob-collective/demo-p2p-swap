@@ -24,7 +24,11 @@ const P2P = () => {
         </Flex>
         <OrdersTable aria-labelledby={titleId} orders={orders} refetchOrders={refetchActiveErc20Orders} />
       </Flex>
-      <AddOrderModal isOpen={isAddNewOrderModal} onClose={handleCloseNewOrderModal} refetchOrders={refetchActiveErc20Orders} />
+      <AddOrderModal
+        isOpen={isAddNewOrderModal}
+        onClose={handleCloseNewOrderModal}
+        refetchOrders={refetchActiveErc20Orders}
+      />
     </>
   );
 };

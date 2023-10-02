@@ -84,10 +84,10 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
   const handleCloseOrderModal = () => setOrderModalOpen(false);
 
   const columns = [
-    { name: 'Asset', uid: OrdersTableColumns.ASSET },
-    { name: 'Price per unit', uid: OrdersTableColumns.PRICE_PER_UNIT },
-    { name: 'Available to buy', uid: OrdersTableColumns.AVAILABLE_TO_BUY },
-    { name: '', uid: OrdersTableColumns.ACTION }
+    { name: 'Asset', id: OrdersTableColumns.ASSET },
+    { name: 'Price per unit', id: OrdersTableColumns.PRICE_PER_UNIT },
+    { name: 'Available to buy', id: OrdersTableColumns.AVAILABLE_TO_BUY },
+    { name: '', id: OrdersTableColumns.ACTION }
   ];
 
   const rows: OrdersTableRow[] = useMemo(
@@ -114,6 +114,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
                 <Flex justifyContent='flex-end' gap='spacing2'>
                   {isOwnerOfOrder && (
                     <CTA
+                      variant='secondary'
                       onPress={() => {
                         setSelectedOrder(order);
                         setCancelOrderModal(true);
@@ -146,12 +147,15 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
         <Table {...props} columns={columns} rows={rows} />
       </Card>
       <Modal isOpen={isOrderModalOpen} onClose={handleCloseOrderModal}>
-        <ModalHeader>Fill Order</ModalHeader> 
-        <ModalBody>
-          {selectedOrder && <FillOrderForm onSubmit={handleFillOrder} order={selectedOrder} />}
-        </ModalBody>
+        <ModalHeader>Fill Order</ModalHeader>
+        <ModalBody>{selectedOrder && <FillOrderForm onSubmit={handleFillOrder} order={selectedOrder} />}</ModalBody>
       </Modal>
-      <CancelOrderModal isOpen={isCancelOrderModalOpen} refetchOrders={refetchOrders} order={selectedOrder} onClose={() => setCancelOrderModal(false)} />
+      <CancelOrderModal
+        isOpen={isCancelOrderModalOpen}
+        refetchOrders={refetchOrders}
+        order={selectedOrder}
+        onClose={() => setCancelOrderModal(false)}
+      />
     </>
   );
 };
