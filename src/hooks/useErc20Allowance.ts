@@ -35,16 +35,13 @@ const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) 
         return subroutine();
       }
 
-      const txHash = await writeErc20Contract.approve([
-        contracts[ContractType.ERC20_MARKETPLACE].address,
-        UINT_256_MAX
-      ]);
+      const txHash = await writeErc20Contract.approve([contracts[contract].address, UINT_256_MAX]);
       await publicClient.waitForTransactionReceipt({ hash: txHash });
 
       fetchAllowance();
       return subroutine();
     },
-    [fetchAllowance, publicClient, writeErc20Contract, isErc20TransferApproved]
+    [fetchAllowance, publicClient, writeErc20Contract, isErc20TransferApproved, contract]
   );
 
   return { isAllowed: isErc20TransferApproved, wrapInErc20ApprovalTx };

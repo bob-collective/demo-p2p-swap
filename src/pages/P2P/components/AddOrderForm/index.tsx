@@ -1,2 +1,2 @@
-export type { AddOrderFormProps } from './AddOrderForm';
+export type { AddOrderFormProps, AddOrderFormData } from './AddOrderForm';
 export { AddOrderForm } from './AddOrderForm';

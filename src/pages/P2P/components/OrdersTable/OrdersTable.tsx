@@ -3,18 +3,19 @@ import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { formatUSD } from '../../../../utils/format';
 import { FillOrderForm } from '../FillOrderForm';
 import { CancelOrderModal } from '../CancelOrderModal';
-import { Erc20Order } from '../../../../hooks/fetchers/useGetActiveOrders';
-import { toAtomicAmountErc20, toBaseAmountErc20 } from '../../../../utils/currencies';
+import { toAtomicAmount, toBaseAmount } from '../../../../utils/currencies';
 import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
-import { ContractType } from '../../../../constants';
+import { ContractType, contracts } from '../../../../constants';
 import { useAccount, usePublicClient } from 'wagmi';
-import { isAddressEqual } from 'viem';
+import { decodeEventLog, isAddressEqual } from 'viem';
+import { Order } from '../../../../types/orders';
+import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
     <Span size='s' weight='bold'>
-      {amount} {ticker}
+      {new Intl.NumberFormat("en-US", {maximumFractionDigits: 18}).format(Number(amount))} {ticker}
     </Span>
     {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
   </Flex>
@@ -46,7 +47,7 @@ type OrdersTableRow = {
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
-  orders: Array<Erc20Order> | undefined;
+  orders: Array<Order> | undefined;
   refetchOrders: () => void;
 };
 
@@ -57,13 +58,14 @@ type OrdersTableProps = Props & InheritAttrs;
 const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX.Element => {
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const [isCancelOrderModalOpen, setCancelOrderModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Erc20Order>();
+  const [selectedOrder, setSelectedOrder] = useState<Order>();
 
   const publicClient = usePublicClient();
 
   const { address } = useAccount();
 
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
+  const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
   const handleFillOrder = useCallback(
     async (data: FillOrderFormData) => {
@@ -71,14 +73,32 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
         return;
       }
       // !TODO: handle case when erc20 allowance is not set for contract
-      const atomicAmount = toAtomicAmountErc20(data.input, selectedOrder.askingCurrency.ticker);
+      const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
 
-      const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
-      await publicClient.waitForTransactionReceipt({ hash });
+      // If we are dealing with BTC, use btc marketplace contract.
+      if (isBtcOrder(selectedOrder)) {
+        if (isBtcBuyOrder(selectedOrder)) {
+          const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([selectedOrder.id, atomicAmount]);
+          const receipt = await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
+          console.log(receipt.logs.map(log => decodeEventLog({abi: contracts[ContractType.BTC_MARKETPLACE].abi, ...log})));
+          
+          // handling mocked btc relay inclusion proof - just require 2txs
+          const fakeId = BigInt(1);
+          const mockedProof = { dummy: BigInt(0) };
+          const postBuyOrderProofTxHash = await writeBtcMarketplace.proofBtcBuyOrder([fakeId, mockedProof]);
+          await publicClient.waitForTransactionReceipt({ hash: postBuyOrderProofTxHash });
+        } else {
+          // TODO: handle sell order in similar fashion
+        }
+      } else {
+        const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
+        await publicClient.waitForTransactionReceipt({ hash });
+      }
+
       handleCloseOrderModal();
       refetchOrders();
     },
-    [publicClient, selectedOrder, writeErc20Marketplace, refetchOrders]
+    [selectedOrder, refetchOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
   );
 
   const handleCloseOrderModal = () => setOrderModalOpen(false);
@@ -106,7 +126,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
               pricePerUnit: <AmountCell amount={order.price.toString()} ticker={order.askingCurrency.ticker} />,
               availableToBuy: (
                 <AmountCell
-                  amount={toBaseAmountErc20(order.availableLiquidity, order.offeringCurrency.ticker)}
+                  amount={toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker)}
                   ticker={order.offeringCurrency.ticker}
                 />
               ),

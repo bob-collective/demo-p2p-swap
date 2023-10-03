@@ -8,9 +8,9 @@ import { useEffect } from 'react';
 
 function App() {
   const { connect } = useConnect({ connector: config.connectors[0] });
-   
+
   /** PROMPT WALLET CONNECTION */
-   useEffect(() => {
+  useEffect(() => {
     connect();
   }, [connect]);
 
