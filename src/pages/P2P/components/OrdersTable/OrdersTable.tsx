@@ -8,7 +8,7 @@ import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
 import { ContractType } from '../../../../constants';
 import { useAccount, usePublicClient } from 'wagmi';
-import {  isAddressEqual } from 'viem';
+import { isAddressEqual } from 'viem';
 import { Order } from '../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 
@@ -139,19 +139,20 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
               ),
               action: (
                 <Flex justifyContent='flex-end' gap='spacing2'>
-                  {isBtcBuyOrder(order) && order.acceptTime ? new Date(parseInt(order.acceptTime.toString()) * 1000 ).toISOString()  :
-                  isOwnerOfOrder && (
-                    <CTA
-                      variant='secondary'
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCancelOrderModal(true);
-                      }}
-                      size='small'
-                    >
-                      Cancel order
-                    </CTA>
-                  )}
+                  {isBtcBuyOrder(order) && order.acceptTime
+                    ? new Date(parseInt(order.acceptTime.toString()) * 1000).toISOString()
+                    : isOwnerOfOrder && (
+                        <CTA
+                          variant='secondary'
+                          onPress={() => {
+                            setSelectedOrder(order);
+                            setCancelOrderModal(true);
+                          }}
+                          size='small'
+                        >
+                          Cancel order
+                        </CTA>
+                      )}
                   <CTA
                     onPress={() => {
                       setSelectedOrder(order);
