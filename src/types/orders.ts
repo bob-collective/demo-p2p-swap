@@ -30,4 +30,18 @@ type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
 type Order = BtcOrder | Erc20Order;
 
-export type { Order, Erc20Order, BtcBuyOrder, BtcSellOrder, BtcOrder };
+interface BaseAcceptedOrder {
+  id: bigint;
+  price: number;
+  acceptTime: Date;
+  amount: bigint; // Amount accepted token.
+  accepterAddress: HexString;
+  requesterAddress: HexString;
+}
+
+interface AcceptedBuyOrder extends BaseAcceptedOrder {
+  offeringCurrency: Erc20Currency;
+  askingCurrency: BitcoinCurrency;
+}
+
+export type { Order, Erc20Order, BtcBuyOrder, BtcSellOrder, BtcOrder, AcceptedBuyOrder };
