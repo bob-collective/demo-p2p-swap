@@ -1,4 +1,6 @@
-import { Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { useCountDown } from 'ahooks';
+import { addHours } from 'date-fns';
 import { ReactNode, useMemo } from 'react';
 import { AcceptedBuyOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -21,6 +23,33 @@ const AssetCell = ({ name, tickers }: { name: string; tickers: string[] }) => (
     </Span>
   </Flex>
 );
+
+const CancelOrderCTA = ({ acceptedTime, onPress }: { acceptedTime: Date; onPress?: () => void }) => {
+  const [number, formattedRes] = useCountDown({
+    targetDate: addHours(acceptedTime, 6)
+  });
+
+  if (number <= 0) {
+    return (
+      <CTA onPress={onPress} size='small' variant='secondary'>
+        Cancel Order
+      </CTA>
+    );
+  }
+
+  const { hours, minutes, seconds } = formattedRes;
+
+  return (
+    <Flex>
+      <Span weight='bold' color='tertiary' size='xs'>
+        Pending
+      </Span>{' '}
+      <Span weight='bold' size='xs' style={{ maxWidth: '3.3rem', width: '3.3rem' }}>
+        {hours}:{minutes}:{seconds}
+      </Span>
+    </Flex>
+  );
+};
 
 enum AcceptedOrdersTableColumns {
   ASSET = 'asset',
@@ -77,7 +106,8 @@ const AcceptedOrdersTable = ({ orders, ...props }: AcceptedOrdersTableProps): JS
               ),
               action: (
                 <Flex justifyContent='flex-end' gap='spacing2'>
-                  {order.acceptTime.toDateString()}
+                  {/* Add cancel order event */}
+                  <CancelOrderCTA acceptedTime={order.acceptTime} />
                 </Flex>
               )
             };
