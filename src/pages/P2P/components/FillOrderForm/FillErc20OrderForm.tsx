@@ -5,8 +5,7 @@ import { useBalances } from '../../../../hooks/useBalances';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
-import { BtcBuyOrder, Erc20Order, Order } from '../../../../types/orders';
-import { isBtcBuyOrder, isErc20Order } from '../../../../utils/orders';
+import { Erc20Order } from '../../../../types/orders';
 
 type FillOrderFormData = {
   input?: string;

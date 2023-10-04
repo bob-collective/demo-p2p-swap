@@ -41,7 +41,7 @@ const P2P = () => {
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
         onClose={handleCloseNewOrderModal}
-        refetchOrders={refetchActiveErc20Orders}
+        refetchOrders={refetchOrders}
       />
     </>
   );

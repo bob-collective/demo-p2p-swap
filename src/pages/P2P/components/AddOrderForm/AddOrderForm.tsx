@@ -8,7 +8,7 @@ import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 type AddOrderFormData = {
   inputValue?: string;
   outputValue?: string;
-  inputTicker: Erc20CurrencyTicker;
+  inputTicker: CurrencyTicker;
   outputTicker: CurrencyTicker;
   btcAddress?: string;
 };
@@ -86,7 +86,8 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             value: state.inputTicker,
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
-              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 }
+              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
+              { value: 'BTC', balance: 0, balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleInputTickerChange(key as Erc20CurrencyTicker)
           }}

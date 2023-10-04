@@ -5,7 +5,7 @@ import { BtcBuyOrder } from '../../types/orders';
 import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 
-const parseBtcBuyOrder = (
+const parsePendingBtcOrders = (
   rawOrder: {
     amountBtc: bigint;
     bitcoinAddress: {
@@ -48,11 +48,8 @@ const useGetActiveBtcBuyOrders = () => {
   const [buyOrders, setBuyOrders] = useState<Array<BtcBuyOrder>>();
 
   const getBtcBuyOrders = useCallback(async () => {
-    const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcBuyOrders();
-    const [rawOrderAcceptances] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
-    const parsedOrders = rawOrders.map((order, index) =>
-      parseBtcBuyOrder(order, ordersIds[index], rawOrderAcceptances)
-    );
+    const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
+    const parsedOrders = rawOrders.map((order, index) => parsePendingBtcOrders(order, ordersIds[index]));
     setBuyOrders(parsedOrders);
   }, [readBtcMarketplace]);
 
