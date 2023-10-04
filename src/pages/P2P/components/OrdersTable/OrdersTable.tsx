@@ -45,7 +45,6 @@ type OrdersTableRow = {
   [OrdersTableColumns.ACTION]: ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
   orders: Array<Order> | undefined;
   refetchOrders: () => void;

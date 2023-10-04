@@ -1,11 +1,11 @@
 import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { formatUSD } from '../../../../utils/format';
-import { useBalances } from '../../../../hooks/useBalances';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
-import { toBaseAmount } from '../../../../utils/currencies';
+import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { Erc20Order } from '../../../../types/orders';
+import { toBaseAmount } from '../../../../utils/currencies';
+import { formatUSD } from '../../../../utils/format';
 
 type FillOrderFormData = {
   input?: string;
