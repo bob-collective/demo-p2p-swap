@@ -7,7 +7,7 @@ import { isBitcoinCurrency, toAtomicAmount } from '../../../../utils/currencies'
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 
-type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
+type AddOrderModalProps = { refetchOrders: () => void; } & Omit<ModalProps, 'children'>;
 
 const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps): JSX.Element => {
   const offerModalRef = useRef<HTMLDivElement>(null);

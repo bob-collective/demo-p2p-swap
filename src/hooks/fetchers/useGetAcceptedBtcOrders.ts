@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bitcoin, ContractType } from '../../constants';
 import { HexString } from '../../types';
-import { AcceptedBuyOrder } from '../../types/orders';
+import { AcceptedBtcOrder } from '../../types/orders';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useContract } from '../useContract';
+import { BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS } from '../../constants/orders';
 
 const parseBtcBuyOrder = (
   rawOrder: {
+    orderId: bigint;
     acceptTime: bigint;
     amountBtc: bigint;
     ercToken: HexString;
@@ -15,31 +17,34 @@ const parseBtcBuyOrder = (
     requester: HexString;
   },
   id: bigint
-): AcceptedBuyOrder => {
+): AcceptedBtcOrder => {
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.ercToken);
   const price =
     Number(rawOrder.amountBtc) /
     10 ** Bitcoin.decimals /
     (Number(rawOrder.ercAmount) / 10 ** offeringCurrency.decimals);
 
-  const acceptTime = new Date(Number(rawOrder.acceptTime) * 1000);
+  const deadline = new Date((Number(rawOrder.acceptTime) + BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS) * 1000);
 
   return {
-    id,
+    type: 'buy',
+    acceptId: id,
+    orderId: rawOrder.orderId,
     price,
-    offeringCurrency,
-    askingCurrency: Bitcoin,
-    requesterAddress: rawOrder.requester,
-    amount: rawOrder.amountBtc,
-    accepterAddress: rawOrder.accepter,
-    acceptTime
+    amountBtc: rawOrder.amountBtc,
+    otherCurrency: offeringCurrency,
+    btcReceiver: rawOrder.requester,
+    btcSender: rawOrder.accepter,
+    deadline,
+    otherCurrencyAmount: rawOrder.ercAmount,
+    bitcoinAddress: 'bc1ptEstAddress99skmssjd93deaDnteray'
   };
 };
 
-const useGetAcceptedBtcBuyOrders = () => {
+const useGetAcceptedBtcOrders = () => {
   const { read: readBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
-  const [buyOrders, setBuyOrders] = useState<Array<AcceptedBuyOrder>>();
+  const [acceptedBtcOrders, setBuyOrders] = useState<Array<AcceptedBtcOrder>>();
 
   const getBtcBuyOrders = useCallback(async () => {
     const [rawOrders, ids] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
@@ -52,7 +57,7 @@ const useGetAcceptedBtcBuyOrders = () => {
     getBtcBuyOrders();
   }, [getBtcBuyOrders]);
 
-  return { data: buyOrders, refetch: getBtcBuyOrders };
+  return { data: acceptedBtcOrders, refetch: getBtcBuyOrders };
 };
 
-export { useGetAcceptedBtcBuyOrders };
+export { useGetAcceptedBtcOrders };

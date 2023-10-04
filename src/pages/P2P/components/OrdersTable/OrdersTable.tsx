@@ -48,13 +48,14 @@ type OrdersTableRow = {
 type Props = {
   orders: Array<Order> | undefined;
   refetchOrders: () => void;
+  refetchAcceptedBtcOrders: () => void;
 };
 
 type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 
 type OrdersTableProps = Props & InheritAttrs;
 
-const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX.Element => {
+const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props }: OrdersTableProps): JSX.Element => {
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const [isCancelOrderModalOpen, setCancelOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order>();
@@ -79,15 +80,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
             selectedOrder.totalAskingAmount
           ]);
           await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
-          // console.log(
-          //   receipt.logs.map((log) => decodeEventLog({ abi: contracts[ContractType.BTC_MARKETPLACE].abi, ...log }))
-          // );
-
-          // // handling mocked btc relay inclusion proof - just require 2txs
-          // const fakeId = BigInt(1);
-          // const mockedProof = { dummy: BigInt(0) };
-          // const postBuyOrderProofTxHash = await writeBtcMarketplace.proofBtcBuyOrder([fakeId, mockedProof]);
-          // await publicClient.waitForTransactionReceipt({ hash: postBuyOrderProofTxHash });
+          refetchAcceptedBtcOrders();
         } else {
           // TODO: handle sell order in similar fashion
         }
@@ -104,7 +97,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
       handleCloseOrderModal();
       refetchOrders();
     },
-    [selectedOrder, refetchOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
+    [selectedOrder, refetchOrders, refetchAcceptedBtcOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
   );
 
   const handleCloseOrderModal = () => setOrderModalOpen(false);

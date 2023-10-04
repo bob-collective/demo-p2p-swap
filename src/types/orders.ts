@@ -28,31 +28,22 @@ interface BtcSellOrder extends BaseOrder {
   askingCurrency: Erc20Currency;
 }
 
-interface PendingBtcOrder {
+interface AcceptedBtcOrder {
+  acceptId: bigint;
+  orderId: bigint;
+  deadline: Date;
   amountBtc: bigint;
+  price: number;
   otherCurrency: Currency;
   otherCurrencyAmount: bigint;
   bitcoinAddress: string;
   btcReceiver: HexString;
-  btcPayer: HexString;
+  btcSender: HexString;
+  type: 'buy' | 'sell';
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
 type Order = BtcOrder | Erc20Order;
 
-interface BaseAcceptedOrder {
-  id: bigint;
-  price: number;
-  acceptTime: Date;
-  amount: bigint; // Amount accepted token.
-  accepterAddress: HexString;
-  requesterAddress: HexString;
-}
-
-interface AcceptedBuyOrder extends BaseAcceptedOrder {
-  offeringCurrency: Erc20Currency;
-  askingCurrency: BitcoinCurrency;
-}
-
-export type { Order, Erc20Order, PendingBtcOrder, BtcBuyOrder, BtcSellOrder, BtcOrder, AcceptedBuyOrder };
+export type { Order, Erc20Order, AcceptedBtcOrder, BtcBuyOrder, BtcSellOrder, BtcOrder };

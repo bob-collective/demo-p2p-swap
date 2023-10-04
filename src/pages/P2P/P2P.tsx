@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
-import { useGetAcceptedBtcBuyOrders } from '../../hooks/fetchers/useGetAcceptedBTCBuyOrders';
+import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 
 const P2P = () => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -15,7 +15,7 @@ const P2P = () => {
   const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
   const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
   // TODO: refetch accepted buy btc orders
-  const { data: acceptedBtcBuyOrders } = useGetAcceptedBtcBuyOrders();
+  const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
 
   const orders = useMemo(
     () => [...(erc20Orders ? erc20Orders : []), ...(btcBuyOrders ? btcBuyOrders : [])],
@@ -40,14 +40,24 @@ const P2P = () => {
           </CTA>
         </Flex>
         {/* NEW TABLE */}
-        <OrdersTable aria-labelledby={titleId} orders={orders} refetchOrders={refetchOrders} />
+        <OrdersTable
+          aria-labelledby={titleId}
+          orders={orders}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+        />
         <Flex alignItems='center' justifyContent='space-between'>
           <H1 size='xl2' id={titleId2}>
-            Accepted Orders
+            Accepted BTC Orders
           </H1>
         </Flex>
         {/* NEW TABLE */}
-        <AcceptedOrdersTable aria-labelledby={titleId2} orders={acceptedBtcBuyOrders} refetchOrders={refetchOrders} />
+        <AcceptedOrdersTable
+          aria-labelledby={titleId2}
+          orders={acceptedBtcOrders}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+        />
       </Flex>
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}

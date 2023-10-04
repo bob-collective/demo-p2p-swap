@@ -1,19 +1,20 @@
 import { CTA, Input, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P } from '@interlay/ui';
 import { useContract } from '../../../../hooks/useContract';
-import { ContractType } from '../../../../constants';
-import { BtcOrder } from '../../../../types/orders';
-import { isBtcOrder } from '../../../../utils/orders';
+import { Bitcoin, ContractType } from '../../../../constants';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { usePublicClient } from 'wagmi';
+import { AcceptedBtcOrder } from '../../../../types/orders';
 
-type CompleteAcceptedOrderModalProps = { order: BtcOrder | undefined; refetchOrders: () => void } & Omit<
-  ModalProps,
-  'children'
->;
+type CompleteAcceptedOrderModalProps = {
+  order: AcceptedBtcOrder | undefined;
+  refetchOrders: () => void;
+  refetchAcceptedBtcOrders: () => void;
+} & Omit<ModalProps, 'children'>;
 
 const CompleteAcceptedOrderModal = ({
   onClose,
   refetchOrders,
+  refetchAcceptedBtcOrders,
   order,
   ...props
 }: CompleteAcceptedOrderModalProps): JSX.Element | null => {
@@ -24,8 +25,17 @@ const CompleteAcceptedOrderModal = ({
     return null;
   }
 
-  const handleCloseOrder = async () => {
-    // TODO:
+  const handleCompleteOrder = async () => {
+    const mockedProof = { dummy: BigInt(0) };
+    if (order.type === 'buy') {
+      const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, mockedProof]);
+      await publicClient.waitForTransactionReceipt({ hash });
+    } else {
+      const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, mockedProof]);
+      await publicClient.waitForTransactionReceipt({ hash });
+    }
+
+    refetchAcceptedBtcOrders();
     refetchOrders();
     onClose();
   };
@@ -35,15 +45,14 @@ const CompleteAcceptedOrderModal = ({
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody>
         <P>
-          To complete trade send {order.totalAskingAmount.toString()}, you will get back{' '}
-          {toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker)} {order.offeringCurrency.ticker}. to
-          bitcoin address:
-          <Input isDisabled label='BTC Address' value='dummyBTCAddress' />
+          To complete accepted order send {toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC and submit proof, you will
+          get {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}.
+
         </P>
+        <Input isDisabled label='Send bitcoin here' value={order.bitcoinAddress} />
       </ModalBody>
       <ModalFooter direction='row'>
-        <CTA size='large' fullWidth onPress={handleCloseOrder}></CTA>
-        <CTA variant='primary' size='large' fullWidth onPress={handleCloseOrder}>
+        <CTA variant='primary' size='large' fullWidth onPress={handleCompleteOrder}>
           Complete order
         </CTA>
       </ModalFooter>

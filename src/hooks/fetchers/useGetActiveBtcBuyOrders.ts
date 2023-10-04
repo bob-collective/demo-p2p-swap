@@ -50,9 +50,10 @@ const useGetActiveBtcBuyOrders = () => {
   const getBtcBuyOrders = useCallback(async () => {
     const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcBuyOrders();
     const [rawOrderAcceptances] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
-    const parsedOrders = rawOrders.map((order, index) =>
-      parseBtcBuyOrder(order, ordersIds[index], rawOrderAcceptances)
-    );
+    const parsedOrders = rawOrders
+      .map((order, index) => parseBtcBuyOrder(order, ordersIds[index], rawOrderAcceptances))
+      // Filter out empty orders that are not in pending state.
+      .filter((order) => order.availableLiquidity > 0 || order.acceptTime);
     setBuyOrders(parsedOrders);
   }, [readBtcMarketplace]);
 
