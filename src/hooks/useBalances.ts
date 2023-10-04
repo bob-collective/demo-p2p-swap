@@ -49,11 +49,7 @@ const useBalances = () => {
 
   const getBalanceInBaseDecimals = useCallback(
     (ticker: CurrencyTicker) => {
-      if (isBitcoinTicker(ticker)) {
-        return 0;
-      }
-
-      if (balances[ticker] === undefined) {
+      if (isBitcoinTicker(ticker) || balances[ticker] === undefined) {
         return 0;
       }
 
