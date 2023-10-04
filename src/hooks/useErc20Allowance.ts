@@ -6,12 +6,21 @@ import { useContract } from './useContract';
 // Helper hook to check erc20 allowance and provide wrapper that handles allowance;
 const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) => {
   const [isErc20TransferApproved, setIsErc20TransferApproved] = useState(false);
+  const [contractType, setContractType] = useState(ContractType[ticker]);
+
+  useEffect(() => {
+    const type = ContractType[ticker];
+
+    if (!type) return;
+
+    setContractType(type);
+  }, [ticker]);
 
   const publicClient = usePublicClient();
 
   const { address } = useAccount();
 
-  const { read: readErc20Contract, write: writeErc20Contract } = useContract(ContractType[ticker]);
+  const { read: readErc20Contract, write: writeErc20Contract } = useContract(contractType);
 
   const fetchAllowance = useCallback(async () => {
     if (readErc20Contract && address) {

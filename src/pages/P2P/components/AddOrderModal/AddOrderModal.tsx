@@ -1,11 +1,11 @@
 import { Modal, ModalBody, ModalHeader, ModalProps } from '@interlay/ui';
 import { useCallback, useRef } from 'react';
+import { useAccount, usePublicClient } from 'wagmi';
+import { ContractType, Erc20Currency, currencies } from '../../../../constants';
+import { useContract } from '../../../../hooks/useContract';
+import { isBitcoinCurrency, toAtomicAmount } from '../../../../utils/currencies';
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
-import { useContract } from '../../../../hooks/useContract';
-import { ContractType, currencies, Bitcoin } from '../../../../constants';
-import { useAccount, usePublicClient } from 'wagmi';
-import { toAtomicAmount } from '../../../../utils/currencies';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -32,12 +32,18 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
       let tx;
 
-      if (outputCurrency.ticker === Bitcoin.ticker) {
+      if (isBitcoinCurrency(outputCurrency)) {
         const mockedBtcAddress = { bitcoinAddress: BigInt(0) };
         tx = await writeBTCMarketplace.placeBtcBuyOrder([
           outputAtomicAmount,
           mockedBtcAddress,
-          inputCurrency.address,
+          (inputCurrency as Erc20Currency).address,
+          inputAtomicAmount
+        ]);
+      } else if (isBitcoinCurrency(inputCurrency)) {
+        tx = await writeBTCMarketplace.placeBtcSellOrder([
+          inputAtomicAmount,
+          (outputCurrency as Erc20Currency).address,
           inputAtomicAmount
         ]);
       } else {

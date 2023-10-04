@@ -15,7 +15,7 @@ import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
     <Span size='s' weight='bold'>
-      {new Intl.NumberFormat("en-US", {maximumFractionDigits: 18}).format(Number(amount))} {ticker}
+      {new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} {ticker}
     </Span>
     {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
   </Flex>
@@ -45,7 +45,6 @@ type OrdersTableRow = {
   [OrdersTableColumns.ACTION]: ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
   orders: Array<Order> | undefined;
   refetchOrders: () => void;
@@ -80,8 +79,10 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
         if (isBtcBuyOrder(selectedOrder)) {
           const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([selectedOrder.id, atomicAmount]);
           const receipt = await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
-          console.log(receipt.logs.map(log => decodeEventLog({abi: contracts[ContractType.BTC_MARKETPLACE].abi, ...log})));
-          
+          console.log(
+            receipt.logs.map((log) => decodeEventLog({ abi: contracts[ContractType.BTC_MARKETPLACE].abi, ...log }))
+          );
+
           // handling mocked btc relay inclusion proof - just require 2txs
           const fakeId = BigInt(1);
           const mockedProof = { dummy: BigInt(0) };
