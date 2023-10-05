@@ -1,6 +1,7 @@
 import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { AcceptedBtcOrder } from '../../../../types/orders';
+import { useCountDown } from 'ahooks';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { Bitcoin } from '../../../../constants';
@@ -26,6 +27,35 @@ const AssetCell = ({ name, tickers }: { name: string; tickers: string[] }) => (
     </Span>
   </Flex>
 );
+
+const CancelOrderCTA = ({ deadline, showCTA, onPress }: { deadline: Date; showCTA: boolean; onPress?: () => void }) => {
+  const [number, formattedRes] = useCountDown({
+    targetDate: deadline
+  });
+
+  if (number <= 0) {
+    return showCTA ? (
+      <CTA onPress={onPress} size='small' variant='secondary'>
+        Cancel Order
+      </CTA>
+    ) : (
+      <></>
+    );
+  }
+
+  const { hours, minutes, seconds } = formattedRes;
+
+  return (
+    <Flex gap='spacing2'>
+      <Span weight='bold' color='tertiary' size='xs'>
+        Pending
+      </Span>{' '}
+      <Span weight='bold' size='xs' style={{ maxWidth: '3.3rem', width: '3.3rem' }}>
+        {hours}:{minutes}:{seconds}
+      </Span>
+    </Flex>
+  );
+};
 
 enum AcceptedOrdersTableColumns {
   ASSET = 'asset',
@@ -78,7 +108,6 @@ const AcceptedOrdersTable = ({
         ? orders.map((order) => {
             const isBtcReceiver = address && isAddressEqual(order.btcReceiver, address);
             const isBtcSender = address && isAddressEqual(order.btcSender, address);
-            const isBeforeDeadline = Date.now() < order.deadline.getTime();
             return {
               id: order.acceptId.toString(),
               asset: (
@@ -92,8 +121,16 @@ const AcceptedOrdersTable = ({
                 />
               ),
               action: (
-                <Flex justifyContent='flex-end' gap='spacing2'>
-                  {order.deadline.toDateString()}
+                <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
+                  {/* Add cancel order event */}
+                  <CancelOrderCTA
+                    deadline={order.deadline}
+                    onPress={() => {
+                      setSelectedOrder(order);
+                      setCancelOrderModalOpen(true);
+                    }}
+                    showCTA={!!isBtcReceiver}
+                  />
                   {isBtcSender && (
                     <CTA
                       onPress={() => {
@@ -103,19 +140,6 @@ const AcceptedOrdersTable = ({
                       size='small'
                     >
                       Complete Order
-                    </CTA>
-                  )}
-                  {!isBtcReceiver && (
-                    <CTA
-                      variant='secondary'
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCancelOrderModalOpen(true);
-                      }}
-                      disabled={isBeforeDeadline}
-                      size='small'
-                    >
-                      Cancel order
                     </CTA>
                   )}
                 </Flex>
