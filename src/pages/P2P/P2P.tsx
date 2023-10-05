@@ -43,17 +43,21 @@ const P2P = () => {
             Add an order
           </CTA>
         </Flex>
-        <Flex alignItems='center' justifyContent='space-between'>
-          <H1 size='xl2' id={titleId2}>
-            My Orders
-          </H1>
-        </Flex>
-        <OrdersTable
-          aria-labelledby={titleId}
-          orders={ownerOrders}
-          refetchOrders={refetchOrders}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        />
+        {ownerOrders.length && (
+          <>
+            <Flex alignItems='center' justifyContent='space-between'>
+              <H1 size='xl2' id={titleId2}>
+                My Orders
+              </H1>
+            </Flex>
+            <OrdersTable
+              aria-labelledby={titleId}
+              orders={ownerOrders}
+              refetchOrders={refetchOrders}
+              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+            />
+          </>
+        )}
         <Flex alignItems='center' justifyContent='space-between'>
           <H1 size='xl2' id={titleId2}>
             Marketplace Orders
