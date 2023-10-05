@@ -4,7 +4,7 @@ import { HexString } from '../../types';
 import { AcceptedBtcOrder } from '../../types/orders';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useContract } from '../useContract';
-import { BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS } from '../../constants/orders';
+import { calculateOrderDeadline } from '../../utils/orders';
 
 const parseBtcBuyOrder = (
   rawOrder: {
@@ -24,7 +24,7 @@ const parseBtcBuyOrder = (
     10 ** Bitcoin.decimals /
     (Number(rawOrder.ercAmount) / 10 ** offeringCurrency.decimals);
 
-  const deadline = new Date((Number(rawOrder.acceptTime) + BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS) * 1000);
+  const deadline = calculateOrderDeadline(rawOrder.acceptTime);
 
   return {
     type: 'buy',

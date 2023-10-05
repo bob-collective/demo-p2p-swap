@@ -1,7 +1,6 @@
 import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { AcceptedBtcOrder } from '../../../../types/orders';
-import { useCountDown } from 'ahooks';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { Bitcoin } from '../../../../constants';
@@ -9,6 +8,7 @@ import { useAccount } from 'wagmi';
 import { isAddressEqual } from 'viem';
 import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
 import { CancelAcceptedOrderModal } from '../CancelAcceptedOrderModal';
+import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -27,35 +27,6 @@ const AssetCell = ({ name, tickers }: { name: string; tickers: string[] }) => (
     </Span>
   </Flex>
 );
-
-const CancelOrderCTA = ({ deadline, showCTA, onPress }: { deadline: Date; showCTA: boolean; onPress?: () => void }) => {
-  const [number, formattedRes] = useCountDown({
-    targetDate: deadline
-  });
-
-  if (number <= 0) {
-    return showCTA ? (
-      <CTA onPress={onPress} size='small' variant='secondary'>
-        Cancel Order
-      </CTA>
-    ) : (
-      <></>
-    );
-  }
-
-  const { hours, minutes, seconds } = formattedRes;
-
-  return (
-    <Flex gap='spacing2'>
-      <Span weight='bold' color='tertiary' size='xs'>
-        Pending
-      </Span>{' '}
-      <Span weight='bold' size='xs' style={{ maxWidth: '3.3rem', width: '3.3rem' }}>
-        {hours}:{minutes}:{seconds}
-      </Span>
-    </Flex>
-  );
-};
 
 enum AcceptedOrdersTableColumns {
   ASSET = 'asset',
@@ -123,13 +94,14 @@ const AcceptedOrdersTable = ({
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {/* Add cancel order event */}
-                  <CancelOrderCTA
+                  <PendingOrderCTA
                     deadline={order.deadline}
                     onPress={() => {
                       setSelectedOrder(order);
                       setCancelOrderModalOpen(true);
                     }}
-                    showCTA={!!isBtcReceiver}
+                    ctaText='Cancel Order'
+                    showCta={!!isBtcReceiver}
                   />
                   {isBtcSender && (
                     <CTA

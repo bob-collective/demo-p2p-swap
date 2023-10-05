@@ -8,8 +8,9 @@ import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
 import { ContractType } from '../../../../constants';
 import { usePublicClient } from 'wagmi';
-import { Order } from '../../../../types/orders';
+import { Order } from '../../.../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
+import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -110,7 +111,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
     () =>
       orders
         ? orders.map((order) => {
-            const isPendingOrder = isBtcBuyOrder(order) && !!order.acceptTime;
+            const isPendingOrder = isBtcBuyOrder(order) && order.deadline !== undefined;
             return {
               id: order.id.toString(),
               asset: (
@@ -127,22 +128,20 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                 />
               ),
               action: (
-                <Flex justifyContent='flex-end' gap='spacing2'>
-                  {isBtcBuyOrder(order) && order.acceptTime
-                    ? new Date(parseInt(order.acceptTime.toString()) * 1000).toISOString()
-                    : order.isOwnerOfOrder && (
-                        <CTA
-                          variant='secondary'
-                          onPress={() => {
-                            setSelectedOrder(order);
-                            setCancelOrderModal(true);
-                          }}
-                          size='small'
-                        >
-                          Cancel order
-                        </CTA>
-                      )}
-                  {!order.isOwnerOfOrder && (
+                <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
+                  {isPendingOrder && <PendingOrderCTA showCta={false} deadline={order.deadline as Date} />}
+                  {order.isOwnerOfOrder ? (
+                    <CTA
+                      variant='secondary'
+                      onPress={() => {
+                        setSelectedOrder(order);
+                        setCancelOrderModal(true);
+                      }}
+                      size='small'
+                    >
+                      Cancel order
+                    </CTA>
+                  ) : (
                     <CTA
                       onPress={() => {
                         setSelectedOrder(order);

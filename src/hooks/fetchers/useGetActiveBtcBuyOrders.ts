@@ -6,6 +6,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useAccount } from 'wagmi';
 import { isAddressEqual } from 'viem';
+import { calculateOrderDeadline } from '../../utils/orders';
 
 const parseBtcBuyOrder = (
   rawOrder: {
@@ -42,7 +43,7 @@ const parseBtcBuyOrder = (
     requesterAddress: rawOrder.requester,
     availableLiquidity: rawOrder.offeringAmount,
     totalAskingAmount: rawOrder.amountBtc,
-    acceptTime: acceptedOrder?.acceptTime,
+    deadline: acceptedOrder?.acceptTime ? calculateOrderDeadline(acceptedOrder.acceptTime) : undefined,
     isOwnerOfOrder
   };
 };
@@ -59,7 +60,7 @@ const useGetActiveBtcBuyOrders = () => {
     const parsedOrders = rawOrders
       .map((order, index) => parseBtcBuyOrder(order, address, ordersIds[index], rawOrderAcceptances))
       // Filter out empty orders that are not in pending state.
-      .filter((order) => order.availableLiquidity > 0 || order.acceptTime);
+      .filter((order) => order.availableLiquidity > 0 || order.deadline);
     setBuyOrders(parsedOrders);
   }, [readBtcMarketplace, address]);
 

@@ -1,3 +1,4 @@
+import { BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS } from '../constants/orders';
 import { Order, BtcOrder, BtcBuyOrder, BtcSellOrder, Erc20Order } from '../types/orders';
 import { isBitcoinCurrency, isErc20Currency } from './currencies';
 
@@ -10,4 +11,7 @@ const isBtcSellOrder = (order: Order): order is BtcSellOrder => isBitcoinCurrenc
 
 const isBtcOrder = (order: Order): order is BtcOrder => isBtcBuyOrder(order) || isBtcSellOrder(order);
 
-export { isBtcBuyOrder, isBtcOrder, isBtcSellOrder, isErc20Order };
+const calculateOrderDeadline = (acceptTime: bigint): Date =>
+  new Date((Number(acceptTime) + BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS) * 1000);
+
+export { isBtcBuyOrder, isBtcOrder, isBtcSellOrder, isErc20Order, calculateOrderDeadline };
