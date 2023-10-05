@@ -44,7 +44,7 @@ const P2P = () => {
           </CTA>
         </Flex>
         {/* TODO: Combine with My Orders and Accepted BTC Orders tables, and add tabs */}
-        {ownerOrders.length && (
+        {!!ownerOrders.length && (
           <>
             <Flex alignItems='center' justifyContent='space-between'>
               <H1 size='xl2' id={titleId2}>
