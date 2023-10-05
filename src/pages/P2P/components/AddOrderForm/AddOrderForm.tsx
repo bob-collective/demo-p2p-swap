@@ -1,14 +1,15 @@
-import { CTA, Card, Flex, P, Strong, TokenInput, Input } from '@interlay/ui';
+import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
 import { ChangeEvent, FormEvent, RefObject, useState } from 'react';
-import { formatUSD } from '../../../../utils/format';
+import { ContractType, CurrencyTicker, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
-import { ContractType, CurrencyTicker, Erc20CurrencyTicker, Bitcoin } from '../../../../constants';
+import { formatUSD } from '../../../../utils/format';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
+import { isBitcoinTicker } from '../../../../utils/currencies';
 
 type AddOrderFormData = {
   inputValue?: string;
   outputValue?: string;
-  inputTicker: Erc20CurrencyTicker;
+  inputTicker: CurrencyTicker;
   outputTicker: CurrencyTicker;
   btcAddress?: string;
 };
@@ -25,9 +26,11 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
     outputTicker: Erc20CurrencyTicker.USDT
   });
 
+  const isSellingBTC = isBitcoinTicker(state.inputTicker);
+
   const { isAllowed: inputErc20TransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
-    state.outputTicker === Bitcoin.ticker ? ContractType.BTC_MARKETPLACE : ContractType.ERC20_MARKETPLACE,
-    state.inputTicker
+    isBitcoinTicker(state.outputTicker) ? ContractType.BTC_MARKETPLACE : ContractType.ERC20_MARKETPLACE,
+    state.inputTicker as Erc20CurrencyTicker
   );
 
   const { getBalanceInBaseDecimals } = useBalances();
@@ -36,6 +39,11 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isSellingBTC) {
+      return onSubmit?.(state as Required<AddOrderFormData>);
+    }
+
     wrapInErc20ApprovalTx(() => onSubmit?.(state as Required<AddOrderFormData>));
   };
 
@@ -77,7 +85,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         <TokenInput
           type='selectable'
           label='Offer'
-          balance={state.inputTicker ? getBalanceInBaseDecimals(Erc20CurrencyTicker[state.inputTicker]) : 0}
+          balance={getBalanceInBaseDecimals(state.inputTicker)}
           onChange={handleChangeInput}
           value={state.inputValue}
           valueUSD={0}
@@ -86,7 +94,8 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             value: state.inputTicker,
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
-              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 }
+              { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
+              { value: 'BTC', balance: 0, balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleInputTickerChange(key as Erc20CurrencyTicker)
           }}
@@ -94,11 +103,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         <TokenInput
           type='selectable'
           label='You will Receive'
-          balance={
-            state.outputTicker
-              ? getBalanceInBaseDecimals(Erc20CurrencyTicker[state.outputTicker as Erc20CurrencyTicker])
-              : 0
-          }
+          balance={getBalanceInBaseDecimals(state.outputTicker)}
           onChange={handleChangeOutput}
           value={state.outputValue}
           valueUSD={0}
@@ -135,11 +140,11 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         </Flex>
       </Flex>
       <CTA disabled={!isComplete} size='large' type='submit'>
-        {inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
+        {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
       </CTA>
     </form>
   );
 };
 
 export { AddOrderForm };
-export type { AddOrderFormProps, AddOrderFormData };
+export type { AddOrderFormData, AddOrderFormProps };

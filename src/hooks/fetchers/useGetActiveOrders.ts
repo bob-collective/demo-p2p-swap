@@ -1,30 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ContractType, Erc20Currency } from '../../constants';
+import { ContractType } from '../../constants';
 import { useContract } from '../useContract';
 import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
-
-interface Erc20Order {
-  id: bigint;
-  offeringCurrency: Erc20Currency;
-  askingCurrency: Erc20Currency;
-  price: number; // Price per unit of asking token.
-  availableLiquidity: bigint; // Amount in offering token.
-  requesterAddress: HexString;
-}
-
-// const calculateOfferPrice = (
-//   offeringAmount: bigint,
-//   offeringToken: HexString,
-//   askingAmount: bigint,
-//   askingToken: HexString
-// ) => {
-//   const offeringCurrency = getErc20CurrencyFromContractAddress(offeringToken);
-//   const askingCurrency = getErc20CurrencyFromContractAddress(askingToken);
-//   const atomicPrice = offeringAmount / askingAmount;
-//   const basePrice = parseInt(atomicPrice.toString()) / askingCurrency.decimals;
-//   return { atomic: atomicPrice, base: basePrice };
-// };
+import { Erc20Order } from '../../types/orders';
 
 const parseErc20Order = (rawOrder: {
   id: bigint;
@@ -42,7 +21,15 @@ const parseErc20Order = (rawOrder: {
   const price =
     Number(askingAmount) / 10 ** askingCurrency.decimals / (Number(offeringAmount) / 10 ** offeringCurrency.decimals);
 
-  return { id, offeringCurrency, askingCurrency, requesterAddress, availableLiquidity: offeringAmount, price };
+  return {
+    id,
+    offeringCurrency,
+    askingCurrency,
+    requesterAddress,
+    availableLiquidity: offeringAmount,
+    price,
+    totalAskingAmount: askingAmount
+  };
 };
 
 const useGetActiveErc20Orders = () => {

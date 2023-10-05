@@ -1,7 +1,8 @@
 import { useAccount, usePublicClient } from 'wagmi';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { useCallback, useEffect, useState } from 'react';
-import { Erc20CurrencyTicker, Erc20Currencies } from '../constants';
+import { Erc20CurrencyTicker, Erc20Currencies, CurrencyTicker } from '../constants';
+import { isBitcoinTicker } from '../utils/currencies';
 
 type Balances = {
   [ticker in Erc20CurrencyTicker]: bigint;
@@ -47,8 +48,8 @@ const useBalances = () => {
   });
 
   const getBalanceInBaseDecimals = useCallback(
-    (ticker: Erc20CurrencyTicker) => {
-      if (balances[ticker] === undefined) {
+    (ticker: CurrencyTicker) => {
+      if (isBitcoinTicker(ticker) || balances[ticker] === undefined) {
         return 0;
       }
 

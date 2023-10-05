@@ -7,6 +7,7 @@ interface BaseOrder {
   askingCurrency: Currency;
   price: number; // Price per unit of asking token.
   availableLiquidity: bigint; // Amount in offering token.
+  totalAskingAmount: bigint; // Amount in asking token.
   requesterAddress: HexString;
 }
 
@@ -19,6 +20,7 @@ interface BtcBuyOrder extends BaseOrder {
   offeringCurrency: Erc20Currency;
   askingCurrency: BitcoinCurrency;
   bitcoinAddress: string;
+  acceptTime: bigint | undefined; // If undefined then order has not been accepted.
 }
 
 interface BtcSellOrder extends BaseOrder {
@@ -26,8 +28,22 @@ interface BtcSellOrder extends BaseOrder {
   askingCurrency: Erc20Currency;
 }
 
+interface AcceptedBtcOrder {
+  acceptId: bigint;
+  orderId: bigint;
+  deadline: Date;
+  amountBtc: bigint;
+  price: number;
+  otherCurrency: Currency;
+  otherCurrencyAmount: bigint;
+  bitcoinAddress: string;
+  btcReceiver: HexString;
+  btcSender: HexString;
+  type: 'buy' | 'sell';
+}
+
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
 type Order = BtcOrder | Erc20Order;
 
-export type { Order, Erc20Order, BtcBuyOrder, BtcSellOrder, BtcOrder };
+export type { Order, Erc20Order, AcceptedBtcOrder, BtcBuyOrder, BtcSellOrder, BtcOrder };

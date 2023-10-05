@@ -15,8 +15,14 @@ const parseBtcBuyOrder = (
     offeringAmount: bigint;
     requester: HexString;
   },
-  id: bigint
+  id: bigint,
+  orderAcceptances: readonly {
+    orderId: bigint;
+    acceptTime: bigint;
+  }[]
 ): BtcBuyOrder => {
+  const acceptedOrder = orderAcceptances.find(({ orderId }) => orderId === id);
+
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.offeringToken);
   const price =
     Number(rawOrder.amountBtc) /
@@ -30,7 +36,9 @@ const parseBtcBuyOrder = (
     offeringCurrency,
     askingCurrency: Bitcoin,
     requesterAddress: rawOrder.requester,
-    availableLiquidity: rawOrder.amountBtc
+    availableLiquidity: rawOrder.offeringAmount,
+    totalAskingAmount: rawOrder.amountBtc,
+    acceptTime: acceptedOrder?.acceptTime
   };
 };
 
@@ -40,8 +48,12 @@ const useGetActiveBtcBuyOrders = () => {
   const [buyOrders, setBuyOrders] = useState<Array<BtcBuyOrder>>();
 
   const getBtcBuyOrders = useCallback(async () => {
-    const [rawOrders, ids] = await readBtcMarketplace.getOpenBtcBuyOrders();
-    const parsedOrders = rawOrders.map((order, index) => parseBtcBuyOrder(order, ids[index]));
+    const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcBuyOrders();
+    const [rawOrderAcceptances] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
+    const parsedOrders = rawOrders
+      .map((order, index) => parseBtcBuyOrder(order, ordersIds[index], rawOrderAcceptances))
+      // Filter out empty orders that are not in pending state.
+      .filter((order) => order.availableLiquidity > 0 || order.acceptTime);
     setBuyOrders(parsedOrders);
   }, [readBtcMarketplace]);
 

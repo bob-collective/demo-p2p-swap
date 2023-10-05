@@ -6,16 +6,16 @@ import { CancelOrderModal } from '../CancelOrderModal';
 import { toAtomicAmount, toBaseAmount } from '../../../../utils/currencies';
 import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
-import { ContractType, contracts } from '../../../../constants';
+import { ContractType } from '../../../../constants';
 import { useAccount, usePublicClient } from 'wagmi';
-import { decodeEventLog, isAddressEqual } from 'viem';
+import { isAddressEqual } from 'viem';
 import { Order } from '../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
     <Span size='s' weight='bold'>
-      {new Intl.NumberFormat("en-US", {maximumFractionDigits: 18}).format(Number(amount))} {ticker}
+      {new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} {ticker}
     </Span>
     {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
   </Flex>
@@ -45,17 +45,17 @@ type OrdersTableRow = {
   [OrdersTableColumns.ACTION]: ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
   orders: Array<Order> | undefined;
   refetchOrders: () => void;
+  refetchAcceptedBtcOrders: () => void;
 };
 
 type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 
 type OrdersTableProps = Props & InheritAttrs;
 
-const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX.Element => {
+const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props }: OrdersTableProps): JSX.Element => {
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const [isCancelOrderModalOpen, setCancelOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order>();
@@ -68,29 +68,28 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
   const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
   const handleFillOrder = useCallback(
-    async (data: FillOrderFormData) => {
-      if (!selectedOrder || !data.input) {
+    async (data?: FillOrderFormData) => {
+      if (!selectedOrder) {
         return;
       }
-      // !TODO: handle case when erc20 allowance is not set for contract
-      const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
-
       // If we are dealing with BTC, use btc marketplace contract.
       if (isBtcOrder(selectedOrder)) {
         if (isBtcBuyOrder(selectedOrder)) {
-          const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([selectedOrder.id, atomicAmount]);
-          const receipt = await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
-          console.log(receipt.logs.map(log => decodeEventLog({abi: contracts[ContractType.BTC_MARKETPLACE].abi, ...log})));
-          
-          // handling mocked btc relay inclusion proof - just require 2txs
-          const fakeId = BigInt(1);
-          const mockedProof = { dummy: BigInt(0) };
-          const postBuyOrderProofTxHash = await writeBtcMarketplace.proofBtcBuyOrder([fakeId, mockedProof]);
-          await publicClient.waitForTransactionReceipt({ hash: postBuyOrderProofTxHash });
+          const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([
+            selectedOrder.id,
+            selectedOrder.totalAskingAmount
+          ]);
+          await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
+          refetchAcceptedBtcOrders();
         } else {
           // TODO: handle sell order in similar fashion
         }
       } else {
+        if (!data?.input) {
+          return;
+        }
+        const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
+
         const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
         await publicClient.waitForTransactionReceipt({ hash });
       }
@@ -98,7 +97,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
       handleCloseOrderModal();
       refetchOrders();
     },
-    [selectedOrder, refetchOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
+    [selectedOrder, refetchOrders, refetchAcceptedBtcOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
   );
 
   const handleCloseOrderModal = () => setOrderModalOpen(false);
@@ -115,6 +114,7 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
       orders
         ? orders.map((order) => {
             const isOwnerOfOrder = address && isAddressEqual(order.requesterAddress, address);
+            const isPendingOrder = isBtcBuyOrder(order) && !!order.acceptTime;
             return {
               id: order.id.toString(),
               asset: (
@@ -132,23 +132,26 @@ const OrdersTable = ({ orders, refetchOrders, ...props }: OrdersTableProps): JSX
               ),
               action: (
                 <Flex justifyContent='flex-end' gap='spacing2'>
-                  {isOwnerOfOrder && (
-                    <CTA
-                      variant='secondary'
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCancelOrderModal(true);
-                      }}
-                      size='small'
-                    >
-                      Cancel order
-                    </CTA>
-                  )}
+                  {isBtcBuyOrder(order) && order.acceptTime
+                    ? new Date(parseInt(order.acceptTime.toString()) * 1000).toISOString()
+                    : isOwnerOfOrder && (
+                        <CTA
+                          variant='secondary'
+                          onPress={() => {
+                            setSelectedOrder(order);
+                            setCancelOrderModal(true);
+                          }}
+                          size='small'
+                        >
+                          Cancel order
+                        </CTA>
+                      )}
                   <CTA
                     onPress={() => {
                       setSelectedOrder(order);
                       setOrderModalOpen(true);
                     }}
+                    disabled={isPendingOrder}
                     size='small'
                   >
                     Fill Order

@@ -1,17 +1,21 @@
 import { CTA, Flex, H1 } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
-import { AddOrderModal, OrdersTable } from './components';
+import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
+import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 
 const P2P = () => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
     isOpen: false
   });
   const titleId = 'titleId';
+  const titleId2 = 'titleId2';
 
   const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
   const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
+  // TODO: refetch accepted buy btc orders
+  const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
 
   const orders = useMemo(
     () => [...(erc20Orders ? erc20Orders : []), ...(btcBuyOrders ? btcBuyOrders : [])],
@@ -36,12 +40,29 @@ const P2P = () => {
           </CTA>
         </Flex>
         {/* NEW TABLE */}
-        <OrdersTable aria-labelledby={titleId} orders={orders} refetchOrders={refetchOrders} />
+        <OrdersTable
+          aria-labelledby={titleId}
+          orders={orders}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+        />
+        <Flex alignItems='center' justifyContent='space-between'>
+          <H1 size='xl2' id={titleId2}>
+            Accepted BTC Orders
+          </H1>
+        </Flex>
+        {/* NEW TABLE */}
+        <AcceptedOrdersTable
+          aria-labelledby={titleId2}
+          orders={acceptedBtcOrders}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+        />
       </Flex>
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
         onClose={handleCloseNewOrderModal}
-        refetchOrders={refetchActiveErc20Orders}
+        refetchOrders={refetchOrders}
       />
     </>
   );

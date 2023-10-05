@@ -1,5 +1,14 @@
 import { isAddressEqual } from 'viem';
-import { BitcoinCurrency, Currency, CurrencyTicker, Erc20Currencies, Erc20Currency, currencies } from '../constants';
+import {
+  BitcoinCurrency,
+  Currency,
+  CurrencyTicker,
+  Erc20Currencies,
+  Erc20Currency,
+  currencies,
+  BitcoinTicker,
+  Bitcoin
+} from '../constants';
 import { HexString } from '../types';
 
 const getErc20CurrencyFromContractAddress = (address: HexString): Erc20Currency => {
@@ -26,6 +35,15 @@ const toBaseAmount = (amount: bigint, ticker: CurrencyTicker): string => {
 const isErc20Currency = (currency: Currency): currency is Erc20Currency =>
   (currency as Erc20Currency)?.address !== undefined;
 
-const isBitcoinCurrency = (currency: Currency): currency is BitcoinCurrency => currency.ticker === 'BTC';
+const isBitcoinCurrency = (currency: Currency): currency is BitcoinCurrency => currency.ticker === Bitcoin.ticker;
 
-export { getErc20CurrencyFromContractAddress, toAtomicAmount, toBaseAmount, isErc20Currency, isBitcoinCurrency };
+const isBitcoinTicker = (ticker: string): ticker is BitcoinTicker => ticker === Bitcoin.ticker;
+
+export {
+  getErc20CurrencyFromContractAddress,
+  isBitcoinTicker,
+  toAtomicAmount,
+  toBaseAmount,
+  isErc20Currency,
+  isBitcoinCurrency
+};
