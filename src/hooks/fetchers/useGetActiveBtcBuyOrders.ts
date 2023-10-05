@@ -4,6 +4,8 @@ import { Bitcoin, ContractType } from '../../constants';
 import { BtcBuyOrder } from '../../types/orders';
 import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
+import { useAccount } from 'wagmi';
+import { isAddressEqual } from 'viem';
 
 const parseBtcBuyOrder = (
   rawOrder: {
@@ -15,6 +17,7 @@ const parseBtcBuyOrder = (
     offeringAmount: bigint;
     requester: HexString;
   },
+  address: HexString | undefined,
   id: bigint,
   orderAcceptances: readonly {
     orderId: bigint;
@@ -22,6 +25,7 @@ const parseBtcBuyOrder = (
   }[]
 ): BtcBuyOrder => {
   const acceptedOrder = orderAcceptances.find(({ orderId }) => orderId === id);
+  const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.offeringToken);
   const price =
@@ -38,7 +42,8 @@ const parseBtcBuyOrder = (
     requesterAddress: rawOrder.requester,
     availableLiquidity: rawOrder.offeringAmount,
     totalAskingAmount: rawOrder.amountBtc,
-    acceptTime: acceptedOrder?.acceptTime
+    acceptTime: acceptedOrder?.acceptTime,
+    isOwnerOfOrder
   };
 };
 
@@ -46,16 +51,17 @@ const useGetActiveBtcBuyOrders = () => {
   const { read: readBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
   const [buyOrders, setBuyOrders] = useState<Array<BtcBuyOrder>>();
+  const { address } = useAccount();
 
   const getBtcBuyOrders = useCallback(async () => {
     const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcBuyOrders();
     const [rawOrderAcceptances] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
     const parsedOrders = rawOrders
-      .map((order, index) => parseBtcBuyOrder(order, ordersIds[index], rawOrderAcceptances))
+      .map((order, index) => parseBtcBuyOrder(order, address, ordersIds[index], rawOrderAcceptances))
       // Filter out empty orders that are not in pending state.
       .filter((order) => order.availableLiquidity > 0 || order.acceptTime);
     setBuyOrders(parsedOrders);
-  }, [readBtcMarketplace]);
+  }, [readBtcMarketplace, address]);
 
   useEffect(() => {
     getBtcBuyOrders();
