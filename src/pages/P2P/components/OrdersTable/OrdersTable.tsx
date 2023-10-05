@@ -11,6 +11,7 @@ import { useAccount, usePublicClient } from 'wagmi';
 import { isAddressEqual } from 'viem';
 import { Order } from '../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
+import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -114,7 +115,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
       orders
         ? orders.map((order) => {
             const isOwnerOfOrder = address && isAddressEqual(order.requesterAddress, address);
-            const isPendingOrder = isBtcBuyOrder(order) && !!order.acceptTime;
+            const isPendingOrder = isBtcBuyOrder(order) && order.deadline !== undefined;
             return {
               id: order.id.toString(),
               asset: (
@@ -131,21 +132,21 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                 />
               ),
               action: (
-                <Flex justifyContent='flex-end' gap='spacing2'>
-                  {isBtcBuyOrder(order) && order.acceptTime
-                    ? new Date(parseInt(order.acceptTime.toString()) * 1000).toISOString()
-                    : isOwnerOfOrder && (
-                        <CTA
-                          variant='secondary'
-                          onPress={() => {
-                            setSelectedOrder(order);
-                            setCancelOrderModal(true);
-                          }}
-                          size='small'
-                        >
-                          Cancel order
-                        </CTA>
-                      )}
+                <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
+                  {isPendingOrder && <PendingOrderCTA showCta={false} deadline={order.deadline as Date} />}
+                  {isOwnerOfOrder && (
+                    <CTA
+                      variant='secondary'
+                      onPress={() => {
+                        setSelectedOrder(order);
+                        setCancelOrderModal(true);
+                      }}
+                      size='small'
+                    >
+                      Cancel order
+                    </CTA>
+                  )}
+
                   <CTA
                     onPress={() => {
                       setSelectedOrder(order);
