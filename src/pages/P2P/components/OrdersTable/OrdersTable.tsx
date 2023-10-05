@@ -7,9 +7,8 @@ import { toAtomicAmount, toBaseAmount } from '../../../../utils/currencies';
 import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
 import { ContractType } from '../../../../constants';
-import { useAccount, usePublicClient } from 'wagmi';
-import { isAddressEqual } from 'viem';
-import { Order } from '../../../../types/orders';
+import { usePublicClient } from 'wagmi';
+import { Order } from '../../.../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
@@ -63,8 +62,6 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
 
   const publicClient = usePublicClient();
 
-  const { address } = useAccount();
-
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
   const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
@@ -114,7 +111,6 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
     () =>
       orders
         ? orders.map((order) => {
-            const isOwnerOfOrder = address && isAddressEqual(order.requesterAddress, address);
             const isPendingOrder = isBtcBuyOrder(order) && order.deadline !== undefined;
             return {
               id: order.id.toString(),
@@ -134,7 +130,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {isPendingOrder && <PendingOrderCTA showCta={false} deadline={order.deadline as Date} />}
-                  {isOwnerOfOrder && (
+                  {order.isOwnerOfOrder ? (
                     <CTA
                       variant='secondary'
                       onPress={() => {
@@ -145,24 +141,24 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                     >
                       Cancel order
                     </CTA>
+                  ) : (
+                    <CTA
+                      onPress={() => {
+                        setSelectedOrder(order);
+                        setOrderModalOpen(true);
+                      }}
+                      disabled={isPendingOrder}
+                      size='small'
+                    >
+                      Fill Order
+                    </CTA>
                   )}
-
-                  <CTA
-                    onPress={() => {
-                      setSelectedOrder(order);
-                      setOrderModalOpen(true);
-                    }}
-                    disabled={isPendingOrder}
-                    size='small'
-                  >
-                    Fill Order
-                  </CTA>
                 </Flex>
               )
             };
           })
         : [],
-    [orders, address]
+    [orders]
   );
 
   return (
