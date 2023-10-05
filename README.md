@@ -1,27 +1,31 @@
-# React + TypeScript + Vite
+# BOB Collective: BTC Peer to peer swap
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Local development
 
-Currently, two official plugins are available:
+### Installing the project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install [pnpm](https://pnpm.io/installation)
+2. Run `pnpm install`
 
-## Expanding the ESLint configuration
+### Connecting Metamask
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Go to [Conduit](https://app.conduit.xyz/published/view/fluffy-bob-7mjgi9pmtg)
+2. Click the 'Add to wallet button.'
 
-- Configure the top-level `parserOptions` property like this:
+### Funding your account
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+#### Native token
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+1. Create a new account in your wallet
+2. From the L2 Faucet section in [Conduit](https://app.conduit.xyz/published/view/fluffy-bob-7mjgi9pmtg), enter your address and click the 'Claim' button.
+
+Note: we have seen instances of this failing. If this happens, the api can be called from a terminal:
+`curl -XPOST -i https://faucetl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/drip/0x4062e44077b1e58C3D630a0e4e632fF81868e448`
+
+#### Other supported tokens
+
+1. This can be done either by using the faucet button in the UI or by interacting with the smart contract in [Conduit](https://explorerl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/address/0xFeCC3F37038999Ede8e58A3c9E5B0E9a16e7d5bC)
+
+### Starting the project
+
+1. Run `pnpm dev`
