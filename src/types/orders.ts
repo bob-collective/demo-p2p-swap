@@ -9,6 +9,7 @@ interface BaseOrder {
   availableLiquidity: bigint; // Amount in offering token.
   totalAskingAmount: bigint; // Amount in asking token.
   requesterAddress: HexString;
+  isOwnerOfOrder: boolean;
 }
 
 interface Erc20Order extends BaseOrder {

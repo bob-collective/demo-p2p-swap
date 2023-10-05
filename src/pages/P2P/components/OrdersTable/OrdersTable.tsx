@@ -7,8 +7,7 @@ import { toAtomicAmount, toBaseAmount } from '../../../../utils/currencies';
 import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
 import { useContract } from '../../../../hooks/useContract';
 import { ContractType } from '../../../../constants';
-import { useAccount, usePublicClient } from 'wagmi';
-import { isAddressEqual } from 'viem';
+import { usePublicClient } from 'wagmi';
 import { Order } from '../../../../types/orders';
 import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
 
@@ -62,8 +61,6 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
 
   const publicClient = usePublicClient();
 
-  const { address } = useAccount();
-
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
   const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
 
@@ -113,7 +110,6 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
     () =>
       orders
         ? orders.map((order) => {
-            const isOwnerOfOrder = address && isAddressEqual(order.requesterAddress, address);
             const isPendingOrder = isBtcBuyOrder(order) && !!order.acceptTime;
             return {
               id: order.id.toString(),
@@ -134,7 +130,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                 <Flex justifyContent='flex-end' gap='spacing2'>
                   {isBtcBuyOrder(order) && order.acceptTime
                     ? new Date(parseInt(order.acceptTime.toString()) * 1000).toISOString()
-                    : isOwnerOfOrder && (
+                    : order.isOwnerOfOrder && (
                         <CTA
                           variant='secondary'
                           onPress={() => {
@@ -146,22 +142,24 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                           Cancel order
                         </CTA>
                       )}
-                  <CTA
-                    onPress={() => {
-                      setSelectedOrder(order);
-                      setOrderModalOpen(true);
-                    }}
-                    disabled={isPendingOrder}
-                    size='small'
-                  >
-                    Fill Order
-                  </CTA>
+                  {!order.isOwnerOfOrder && (
+                    <CTA
+                      onPress={() => {
+                        setSelectedOrder(order);
+                        setOrderModalOpen(true);
+                      }}
+                      disabled={isPendingOrder}
+                      size='small'
+                    >
+                      Fill Order
+                    </CTA>
+                  )}
                 </Flex>
               )
             };
           })
         : [],
-    [orders, address]
+    [orders]
   );
 
   return (

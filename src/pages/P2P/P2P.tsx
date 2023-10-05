@@ -21,6 +21,10 @@ const P2P = () => {
     () => [...(erc20Orders ? erc20Orders : []), ...(btcBuyOrders ? btcBuyOrders : [])],
     [erc20Orders, btcBuyOrders]
   );
+
+  const ownerOrders = orders.filter((order) => order.isOwnerOfOrder);
+  const marketplaceOrders = orders.filter((order) => !order.isOwnerOfOrder);
+
   const refetchOrders = useCallback(() => {
     refetchActiveErc20Orders();
     refetchBtcBuyOrders();
@@ -39,10 +43,25 @@ const P2P = () => {
             Add an order
           </CTA>
         </Flex>
-        {/* NEW TABLE */}
+        <Flex alignItems='center' justifyContent='space-between'>
+          <H1 size='xl2' id={titleId2}>
+            My Orders
+          </H1>
+        </Flex>
         <OrdersTable
           aria-labelledby={titleId}
-          orders={orders}
+          orders={ownerOrders}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+        />
+        <Flex alignItems='center' justifyContent='space-between'>
+          <H1 size='xl2' id={titleId2}>
+            Marketplace Orders
+          </H1>
+        </Flex>
+        <OrdersTable
+          aria-labelledby={titleId}
+          orders={marketplaceOrders}
           refetchOrders={refetchOrders}
           refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
         />
