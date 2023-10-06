@@ -19,7 +19,7 @@ const parseBtcSellOrder = (
 ): BtcSellOrder => {
   const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
-  const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.askingToken);
+  const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.askingToken);
   const price =
     Number(rawOrder.amountBtc) /
     10 ** Bitcoin.decimals /
