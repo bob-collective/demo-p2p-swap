@@ -53,35 +53,44 @@ const P2P = () => {
         <Tabs>
           {!!ownerOrders.length && (
             <TabsItem key='sell' title='Sell'>
+              <Flex alignItems='center' justifyContent='space-between'>
+                <H1 size='xl2' id={titleId2}>
+                  My Open Orders
+                </H1>
+              </Flex>
               <OrdersTable
                 aria-labelledby={titleId}
                 orders={ownerOrders}
                 refetchOrders={refetchOrders}
                 refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
               />
+              <Flex alignItems='center' justifyContent='space-between'>
+                <H1 size='xl2' id={titleId2}>
+                  Accepted BTC Orders
+                </H1>
+              </Flex>
+              <AcceptedOrdersTable
+                aria-labelledby={titleId2}
+                orders={acceptedBtcOrders}
+                refetchOrders={refetchOrders}
+                refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+              />
             </TabsItem>
           )}
           <TabsItem key='buy' title='Buy'>
+            <Flex alignItems='center' justifyContent='space-between'>
+              <H1 size='xl2' id={titleId2}>
+                Buy
+              </H1>
+            </Flex>
             <OrdersTable
               aria-labelledby={titleId}
               orders={marketplaceOrders}
               refetchOrders={refetchOrders}
               refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
             />
-            <Flex alignItems='center' justifyContent='space-between'>
-              <H1 size='xl2' id={titleId2}>
-                Accepted BTC Orders
-              </H1>
-            </Flex>
           </TabsItem>
         </Tabs>
-        {/* NEW TABLE */}
-        <AcceptedOrdersTable
-          aria-labelledby={titleId2}
-          orders={acceptedBtcOrders}
-          refetchOrders={refetchOrders}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        />
       </Flex>
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
