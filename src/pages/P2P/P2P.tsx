@@ -1,4 +1,4 @@
-import { CTA, Flex, H1 } from '@interlay/ui';
+import { CTA, Flex, H1, Tabs, TabsItem } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
@@ -46,38 +46,31 @@ const P2P = () => {
             Add an order
           </CTA>
         </Flex>
-        {/* TODO: Combine with My Orders and Accepted BTC Orders tables, and add tabs */}
-        {!!ownerOrders.length && (
-          <>
-            <Flex alignItems='center' justifyContent='space-between'>
-              <H1 size='xl2' id={titleId2}>
-                My Orders
-              </H1>
-            </Flex>
+        <Tabs>
+          {!!ownerOrders.length && (
+            <TabsItem key='sell' title='Sell'>
+              <OrdersTable
+                aria-labelledby={titleId}
+                orders={ownerOrders}
+                refetchOrders={refetchOrders}
+                refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+              />
+            </TabsItem>
+          )}
+          <TabsItem key='buy' title='Buy'>
             <OrdersTable
               aria-labelledby={titleId}
-              orders={ownerOrders}
+              orders={marketplaceOrders}
               refetchOrders={refetchOrders}
               refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
             />
-          </>
-        )}
-        <Flex alignItems='center' justifyContent='space-between'>
-          <H1 size='xl2' id={titleId2}>
-            Marketplace Orders
-          </H1>
-        </Flex>
-        <OrdersTable
-          aria-labelledby={titleId}
-          orders={marketplaceOrders}
-          refetchOrders={refetchOrders}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        />
-        <Flex alignItems='center' justifyContent='space-between'>
-          <H1 size='xl2' id={titleId2}>
-            Accepted BTC Orders
-          </H1>
-        </Flex>
+            <Flex alignItems='center' justifyContent='space-between'>
+              <H1 size='xl2' id={titleId2}>
+                Accepted BTC Orders
+              </H1>
+            </Flex>
+          </TabsItem>
+        </Tabs>
         {/* NEW TABLE */}
         <AcceptedOrdersTable
           aria-labelledby={titleId2}

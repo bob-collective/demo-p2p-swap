@@ -1,4 +1,5 @@
 import { CTA, Card, Flex, Modal, ModalBody, ModalHeader, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { theme } from '@interlay/theme';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { formatUSD } from '../../../../utils/format';
 import { FillOrderForm } from '../FillOrderForm';
@@ -164,7 +165,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
   );
 
   return (
-    <>
+    <div style={{ marginTop: theme.spacing.spacing4 }}>
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>
@@ -178,7 +179,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
         order={selectedOrder}
         onClose={() => setCancelOrderModal(false)}
       />
-    </>
+    </div>
   );
 };
 
