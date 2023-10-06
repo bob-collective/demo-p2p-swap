@@ -35,7 +35,6 @@ const FillBtcBuyOrderForm = ({ order, onSubmit }: FillBtcBuyOrderFormProps): JSX
         </Card>
         <TokenInput
           label='Pay with'
-          balance={undefined}
           value={inputAmount}
           isDisabled // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}

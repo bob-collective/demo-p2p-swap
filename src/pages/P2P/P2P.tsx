@@ -15,14 +15,17 @@ const P2P = () => {
 
   const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
   const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
-  const { data: btcSellOrders, refetch: refetchBtSellOrders } = useGetActiveBtcSellOrders();
-  console.log('btcSellOrders, refetchBtSellOrders', btcSellOrders, refetchBtSellOrders);
-  // TODO: refetch accepted buy btc orders
+  const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
+
   const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
 
   const orders = useMemo(
-    () => [...(erc20Orders ? erc20Orders : []), ...(btcBuyOrders ? btcBuyOrders : [])],
-    [erc20Orders, btcBuyOrders]
+    () => [
+      ...(erc20Orders ? erc20Orders : []),
+      ...(btcBuyOrders ? btcBuyOrders : []),
+      ...(btcSellOrders ? btcSellOrders : [])
+    ],
+    [erc20Orders, btcBuyOrders, btcSellOrders]
   );
 
   const ownerOrders = orders.filter((order) => order.isOwnerOfOrder);
@@ -31,7 +34,8 @@ const P2P = () => {
   const refetchOrders = useCallback(() => {
     refetchActiveErc20Orders();
     refetchBtcBuyOrders();
-  }, [refetchActiveErc20Orders, refetchBtcBuyOrders]);
+    refetchBtcSellOrders();
+  }, [refetchActiveErc20Orders, refetchBtcBuyOrders, refetchBtcSellOrders]);
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
