@@ -6,7 +6,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useAccount } from 'wagmi';
 import { isAddressEqual } from 'viem';
-import { calculateOrderPrice } from '../../utils/orders';
+import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
 
 const parseBtcSellOrder = (
   rawOrder: {
@@ -16,8 +16,15 @@ const parseBtcSellOrder = (
     requester: HexString;
   },
   address: HexString | undefined,
-  id: bigint
+  id: bigint,
+  orderAcceptances: readonly {
+    orderId: bigint;
+    acceptTime: bigint;
+    amountBtc: bigint;
+    ercAmount: bigint;
+  }[]
 ): BtcSellOrder => {
+  const acceptedOrder = orderAcceptances.find(({ orderId }) => orderId === id);
   const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.askingToken);
@@ -29,14 +36,19 @@ const parseBtcSellOrder = (
     askingCurrency.decimals
   );
 
+  const acceptedOrderPrice =
+    acceptedOrder &&
+    calculateOrderPrice(acceptedOrder.amountBtc, Bitcoin.decimals, acceptedOrder.ercAmount, askingCurrency.decimals);
+
   return {
     id,
-    price,
+    price: price || acceptedOrderPrice || 0,
     offeringCurrency: Bitcoin,
     askingCurrency: askingCurrency,
     requesterAddress: rawOrder.requester,
     availableLiquidity: rawOrder.amountBtc,
     totalAskingAmount: rawOrder.askingAmount,
+    deadline: acceptedOrder?.acceptTime ? calculateOrderDeadline(acceptedOrder.acceptTime) : undefined,
     isOwnerOfOrder
   };
 };
@@ -48,12 +60,14 @@ const useGetActiveBtcSellOrders = () => {
   const { address } = useAccount();
 
   const getBtcBuyOrders = useCallback(async () => {
-    const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcSellOrders();
-
+    const [[rawOrders, ordersIds], [rawOrderAcceptances]] = await Promise.all([
+      readBtcMarketplace.getOpenBtcSellOrders(),
+      readBtcMarketplace.getOpenAcceptedBtcSellOrders()
+    ]);
     const parsedOrders = rawOrders
-      .map((order, index) => parseBtcSellOrder(order, address, ordersIds[index]))
+      .map((order, index) => parseBtcSellOrder(order, address, ordersIds[index], rawOrderAcceptances))
       // Filter out empty orders that are not in pending state.
-      .filter((order) => order.availableLiquidity > 0);
+      .filter((order) => order.availableLiquidity > 0 || order.deadline);
     setSellOrders(parsedOrders);
   }, [readBtcMarketplace, address]);
 

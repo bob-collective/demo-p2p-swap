@@ -93,7 +93,10 @@ const P2P = () => {
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
         onClose={handleCloseNewOrderModal}
-        refetchOrders={refetchOrders}
+        refetchOrders={() => {
+          refetchOrders();
+          refetchAcceptedBtcOrders();
+        }}
       />
     </>
   );

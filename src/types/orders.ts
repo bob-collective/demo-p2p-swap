@@ -27,6 +27,7 @@ interface BtcBuyOrder extends BaseOrder {
 interface BtcSellOrder extends BaseOrder {
   offeringCurrency: BitcoinCurrency;
   askingCurrency: Erc20Currency;
+  deadline: Date | undefined; // If undefined then order has not been accepted.
 }
 
 interface AcceptedBtcOrder {

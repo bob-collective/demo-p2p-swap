@@ -146,6 +146,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                         setSelectedOrder(order);
                         setCancelOrderModal(true);
                       }}
+                      disabled={isPendingOrder} // MEM0: remove when implementing partial fulfillment.
                       size='small'
                     >
                       Cancel order

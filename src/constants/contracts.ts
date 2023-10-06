@@ -26,7 +26,7 @@ const contracts = {
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x2B3f19879C00C93898787AA5b87e28903452dfbe',
+    address: '0xE616424D89CB81b6a7714529339df4B0A1B1a3BF',
     abi: BtcMarketplaceAbi
   }
 } as const;
