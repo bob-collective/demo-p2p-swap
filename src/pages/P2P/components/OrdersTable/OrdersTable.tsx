@@ -82,7 +82,14 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
           await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
           refetchAcceptedBtcOrders();
         } else {
-          // TODO: handle sell order in similar fashion
+          const mockedBtcAddress = { bitcoinAddress: BigInt(1) };
+          const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
+            selectedOrder.id,
+            mockedBtcAddress,
+            selectedOrder.availableLiquidity
+          ]);
+          await publicClient.waitForTransactionReceipt({ hash: acceptBtcSellOrderTxHash });
+          refetchAcceptedBtcOrders();
         }
       } else {
         if (!data?.input) {

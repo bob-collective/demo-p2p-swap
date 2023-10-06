@@ -36,7 +36,7 @@ const parseBtcSellOrder = (
     askingCurrency: askingCurrency,
     requesterAddress: rawOrder.requester,
     availableLiquidity: rawOrder.amountBtc,
-    totalAskingAmount: rawOrder.amountBtc,
+    totalAskingAmount: rawOrder.askingAmount,
     isOwnerOfOrder
   };
 };
