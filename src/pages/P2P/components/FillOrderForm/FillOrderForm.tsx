@@ -1,7 +1,8 @@
 import { Order } from '../../../../types/orders';
-import { isBtcBuyOrder, isErc20Order } from '../../../../utils/orders';
+import { isBtcBuyOrder, isErc20Order, isBtcSellOrder } from '../../../../utils/orders';
 import { FillErc20OrderForm } from './FillErc20OrderForm';
 import { FillBtcBuyOrderForm } from './FillBtcBuyOrderForm';
+import { FillBtcSellOrderForm } from './FillBtcSellOrderForm';
 
 type FillOrderFormData = {
   input?: string;
@@ -17,6 +18,7 @@ const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => 
     return <FillErc20OrderForm {...{ order, onSubmit }} />;
   }
   if (isBtcBuyOrder(order)) return <FillBtcBuyOrderForm {...{ order, onSubmit }} />;
+  if (isBtcSellOrder(order)) return <FillBtcSellOrderForm {...{ order, onSubmit }} />;
   return <></>;
   // TODO: handle btc sell order
 };
