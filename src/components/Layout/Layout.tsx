@@ -7,7 +7,6 @@ const Layout = (props: HTMLAttributes<unknown>) => (
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '100%',
-      minHeight: '100vh',
       padding: theme.spacing.spacing4,
       maxWidth: theme.breakpoints.values.md,
       display: 'flex',

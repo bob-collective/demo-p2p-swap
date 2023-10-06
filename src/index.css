@@ -16,4 +16,5 @@
 
 body {
   background-color: rgba(29, 35, 48, 1);
+  min-height: 100vh;
 }
