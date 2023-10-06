@@ -1,4 +1,4 @@
-import { CTA, Flex, H1, H2, Tabs, TabsItem } from '@interlay/ui';
+import { CTA, Flex, H1, Tabs, TabsItem } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
@@ -71,11 +71,6 @@ const P2P = (): JSX.Element => {
           )}
           {acceptedBtcOrders?.length && (
             <TabsItem key='accepted-btc-orders' title='Accepted BTC Orders'>
-              <Flex alignItems='center' justifyContent='space-between'>
-                <H2 size='xl' id={titleId2}>
-                  Accepted BTC Orders
-                </H2>
-              </Flex>
               <AcceptedOrdersTable
                 aria-labelledby={titleId2}
                 orders={acceptedBtcOrders}
