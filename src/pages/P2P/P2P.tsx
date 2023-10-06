@@ -4,6 +4,7 @@ import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
 import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
+import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
 
 const P2P = () => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -14,6 +15,8 @@ const P2P = () => {
 
   const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
   const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
+  const { data: btcSellOrders, refetch: refetchBtSellOrders } = useGetActiveBtcSellOrders();
+  console.log('btcSellOrders, refetchBtSellOrders', btcSellOrders, refetchBtSellOrders);
   // TODO: refetch accepted buy btc orders
   const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
 
