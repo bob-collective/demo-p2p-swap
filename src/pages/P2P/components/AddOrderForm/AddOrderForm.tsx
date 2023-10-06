@@ -35,7 +35,8 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
 
   const { getBalanceInBaseDecimals } = useBalances();
 
-  const isComplete = state.inputTicker && state.outputTicker && state.inputValue && state.outputValue;
+  const btcAddressCheck = (!isBitcoinTicker(state.outputTicker)) || state.btcAddress
+  const isComplete = state.inputTicker && state.outputTicker && state.inputValue && state.outputValue && btcAddressCheck;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,7 +86,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         <TokenInput
           type='selectable'
           label='Offer'
-          balance={getBalanceInBaseDecimals(state.inputTicker)}
+          balance={isBitcoinTicker(state.inputTicker) ? undefined : getBalanceInBaseDecimals(state.inputTicker)}
           onChange={handleChangeInput}
           value={state.inputValue}
           valueUSD={0}
@@ -95,7 +96,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
               { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
-              { value: 'BTC', balance: 0, balanceUSD: 0 }
+              { value: 'BTC', balance: "—", balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleInputTickerChange(key as Erc20CurrencyTicker)
           }}
@@ -103,7 +104,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
         <TokenInput
           type='selectable'
           label='You will Receive'
-          balance={getBalanceInBaseDecimals(state.outputTicker)}
+          balance={isBitcoinTicker(state.outputTicker) ? undefined : getBalanceInBaseDecimals(state.outputTicker)}
           onChange={handleChangeOutput}
           value={state.outputValue}
           valueUSD={0}
@@ -113,13 +114,13 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
               { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
-              { value: 'BTC', balance: 0, balanceUSD: 0 }
+              { value: 'BTC', balance: "—", balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleOutputTickerChange(key as Erc20CurrencyTicker)
           }}
         />
         {state.outputTicker === 'BTC' && (
-          <Input onValueChange={handleBTCAddressChange} label='BTC Address' placeholder='Enter your BTC address' />
+          <Input onValueChange={handleBTCAddressChange} label='Bitcoin Address' placeholder='Enter your bitcoin address' />
         )}
 
         <Flex direction='column' gap='spacing2'>

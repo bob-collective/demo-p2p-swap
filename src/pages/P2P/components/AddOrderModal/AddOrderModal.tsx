@@ -44,7 +44,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
         tx = await writeBTCMarketplace.placeBtcSellOrder([
           inputAtomicAmount,
           (outputCurrency as Erc20Currency).address,
-          inputAtomicAmount
+          outputAtomicAmount
         ]);
       } else {
         tx = await writeErc20Marketplace.placeErcErcOrder([
