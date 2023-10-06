@@ -1,4 +1,4 @@
-import { CTA, Flex, H1, Tabs, TabsItem } from '@interlay/ui';
+import { CTA, Flex, H1, H2, Tabs, TabsItem } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
@@ -53,11 +53,6 @@ const P2P = () => {
         <Tabs>
           {!!ownerOrders.length && (
             <TabsItem key='sell' title='Sell'>
-              <Flex alignItems='center' justifyContent='space-between'>
-                <H1 size='xl2' id={titleId2}>
-                  My Open Orders
-                </H1>
-              </Flex>
               <OrdersTable
                 aria-labelledby={titleId}
                 orders={ownerOrders}
@@ -65,9 +60,9 @@ const P2P = () => {
                 refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
               />
               <Flex alignItems='center' justifyContent='space-between'>
-                <H1 size='xl2' id={titleId2}>
+                <H2 size='xl' id={titleId2}>
                   Accepted BTC Orders
-                </H1>
+                </H2>
               </Flex>
               <AcceptedOrdersTable
                 aria-labelledby={titleId2}
@@ -78,11 +73,6 @@ const P2P = () => {
             </TabsItem>
           )}
           <TabsItem key='buy' title='Buy'>
-            <Flex alignItems='center' justifyContent='space-between'>
-              <H1 size='xl2' id={titleId2}>
-                Buy
-              </H1>
-            </Flex>
             <OrdersTable
               aria-labelledby={titleId}
               orders={marketplaceOrders}
