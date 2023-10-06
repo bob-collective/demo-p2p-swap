@@ -16,11 +16,8 @@ const CancelAcceptedOrderModal = ({
   order,
   ...props
 }: CancelAcceptedOrderModalProps): JSX.Element | null => {
-  const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
-
-  const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
+  const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const publicClient = usePublicClient();
-
   if (!order) {
     return null;
   }
@@ -29,8 +26,8 @@ const CancelAcceptedOrderModal = ({
     const isBuyOrder = order.type === 'buy';
 
     const hash = await (isBuyOrder
-      ? writeBTCMarketplace.cancelAcceptedBtcBuyOrder([order.acceptId])
-      : writeErc20Marketplace.cancelAcceptedBtcSellOrder([order.acceptId]));
+      ? writeBtcMarketplace.cancelAcceptedBtcBuyOrder([order.acceptId])
+      : writeBtcMarketplace.cancelAcceptedBtcSellOrder([order.acceptId]));
     await publicClient.waitForTransactionReceipt({ hash });
     refetchOrders();
     onClose();
