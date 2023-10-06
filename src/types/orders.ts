@@ -42,6 +42,7 @@ interface AcceptedBtcOrder {
   btcReceiver: HexString;
   btcSender: HexString;
   type: 'buy' | 'sell';
+  isOwnerOfOrder: boolean;
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
