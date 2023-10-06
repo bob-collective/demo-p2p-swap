@@ -59,34 +59,35 @@ const P2P = (): JSX.Element => {
               refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
             />
           </TabsItem>
-          {!!ownerOrders.length && (
-            <TabsItem key='sell' title='Sell'>
-              <>
-                <OrdersTable
-                  aria-labelledby={titleId}
-                  orders={ownerOrders}
-                  refetchOrders={refetchOrders}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                />
-              </>
-              {/* NEW TABLE */}
-              {acceptedBtcOrders?.length && (
+          {ownerOrders.length ||
+            (acceptedBtcOrders?.length && (
+              <TabsItem key='sell' title='Sell'>
                 <>
-                  <Flex alignItems='center' justifyContent='space-between'>
-                    <H2 size='xl' id={titleId2}>
-                      Accepted BTC Orders
-                    </H2>
-                  </Flex>
-                  <AcceptedOrdersTable
-                    aria-labelledby={titleId2}
-                    orders={acceptedBtcOrders}
+                  <OrdersTable
+                    aria-labelledby={titleId}
+                    orders={ownerOrders}
                     refetchOrders={refetchOrders}
                     refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                   />
                 </>
-              )}
-            </TabsItem>
-          )}
+                {/* NEW TABLE */}
+                {acceptedBtcOrders?.length && (
+                  <>
+                    <Flex alignItems='center' justifyContent='space-between'>
+                      <H2 size='xl' id={titleId2}>
+                        Accepted BTC Orders
+                      </H2>
+                    </Flex>
+                    <AcceptedOrdersTable
+                      aria-labelledby={titleId2}
+                      orders={acceptedBtcOrders}
+                      refetchOrders={refetchOrders}
+                      refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                    />
+                  </>
+                )}
+              </TabsItem>
+            ))}
         </Tabs>
       </Flex>
       <AddOrderModal
