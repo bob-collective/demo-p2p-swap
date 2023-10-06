@@ -172,7 +172,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
   );
 
   return (
-    <div style={{ marginTop: theme.spacing.spacing4 }}>
+    <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>

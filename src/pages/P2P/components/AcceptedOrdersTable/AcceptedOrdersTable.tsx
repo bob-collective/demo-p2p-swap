@@ -1,4 +1,5 @@
 import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { theme } from '@interlay/theme';
 import { ReactNode, useMemo, useState } from 'react';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -123,7 +124,7 @@ const AcceptedOrdersTable = ({
   );
 
   return (
-    <>
+    <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>
@@ -140,7 +141,7 @@ const AcceptedOrdersTable = ({
         order={selectedOrder}
         onClose={() => setCancelOrderModalOpen(false)}
       />
-    </>
+    </div>
   );
 };
 
