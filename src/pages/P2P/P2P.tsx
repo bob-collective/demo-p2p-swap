@@ -51,6 +51,14 @@ const P2P = () => {
           </CTA>
         </Flex>
         <Tabs>
+          <TabsItem key='buy' title='Buy'>
+            <OrdersTable
+              aria-labelledby={titleId}
+              orders={marketplaceOrders}
+              refetchOrders={refetchOrders}
+              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+            />
+          </TabsItem>
           {!!ownerOrders.length && (
             <TabsItem key='sell' title='Sell'>
               <OrdersTable
@@ -72,14 +80,6 @@ const P2P = () => {
               />
             </TabsItem>
           )}
-          <TabsItem key='buy' title='Buy'>
-            <OrdersTable
-              aria-labelledby={titleId}
-              orders={marketplaceOrders}
-              refetchOrders={refetchOrders}
-              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-            />
-          </TabsItem>
         </Tabs>
       </Flex>
       <AddOrderModal
