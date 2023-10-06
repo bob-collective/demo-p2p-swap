@@ -6,7 +6,7 @@ import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBu
 import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
 
-const P2P = () => {
+const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
     isOpen: false
   });
@@ -77,18 +77,23 @@ const P2P = () => {
           refetchOrders={refetchOrders}
           refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
         />
-        <Flex alignItems='center' justifyContent='space-between'>
-          <H1 size='xl2' id={titleId2}>
-            Accepted BTC Orders
-          </H1>
-        </Flex>
+
         {/* NEW TABLE */}
-        <AcceptedOrdersTable
-          aria-labelledby={titleId2}
-          orders={acceptedBtcOrders}
-          refetchOrders={refetchOrders}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        />
+        {acceptedBtcOrders?.length && (
+          <>
+            <Flex alignItems='center' justifyContent='space-between'>
+              <H1 size='xl2' id={titleId2}>
+                Accepted BTC Orders
+              </H1>
+            </Flex>{' '}
+            <AcceptedOrdersTable
+              aria-labelledby={titleId2}
+              orders={acceptedBtcOrders}
+              refetchOrders={refetchOrders}
+              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+            />
+          </>
+        )}
       </Flex>
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
