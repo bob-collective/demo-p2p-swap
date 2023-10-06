@@ -15,7 +15,9 @@ import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
     <Span size='s' weight='bold'>
-      {new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} {ticker}
+      {!Number(amount)
+        ? '—'
+        : `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} ${ticker}`}
     </Span>
     {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
   </Flex>

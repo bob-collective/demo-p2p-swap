@@ -6,7 +6,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useAccount } from 'wagmi';
 import { isAddressEqual } from 'viem';
-import { calculateOrderDeadline } from '../../utils/orders';
+import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
 
 const parseBtcBuyOrder = (
   rawOrder: {
@@ -23,21 +23,30 @@ const parseBtcBuyOrder = (
   orderAcceptances: readonly {
     orderId: bigint;
     acceptTime: bigint;
+    amountBtc: bigint;
+    ercAmount: bigint;
   }[]
 ): BtcBuyOrder => {
   const acceptedOrder = orderAcceptances.find(({ orderId }) => orderId === id);
   const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.offeringToken);
-  const price =
-    Number(rawOrder.amountBtc) /
-    10 ** Bitcoin.decimals /
-    (Number(rawOrder.offeringAmount) / 10 ** offeringCurrency.decimals);
+
+  const price = calculateOrderPrice(
+    rawOrder.offeringAmount,
+    offeringCurrency.decimals,
+    rawOrder.amountBtc,
+    Bitcoin.decimals
+  );
+
+  const acceptedOrderPrice =
+    acceptedOrder &&
+    calculateOrderPrice(acceptedOrder.ercAmount, offeringCurrency.decimals, acceptedOrder.amountBtc, Bitcoin.decimals);
 
   return {
     id,
     bitcoinAddress: rawOrder.bitcoinAddress.bitcoinAddress.toString(), // TODO: change when contract is updated to handle real address
-    price,
+    price: price || acceptedOrderPrice || 0,
     offeringCurrency,
     askingCurrency: Bitcoin,
     requesterAddress: rawOrder.requester,

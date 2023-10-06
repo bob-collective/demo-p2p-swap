@@ -47,7 +47,6 @@ const CompleteAcceptedOrderModal = ({
         <P>
           To complete accepted order send {toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC and submit proof, you will
           get {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}.
-
         </P>
         <Input isDisabled label='Send bitcoin here' value={order.bitcoinAddress} />
       </ModalBody>

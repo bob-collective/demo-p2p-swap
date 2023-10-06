@@ -6,6 +6,7 @@ import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { Erc20Order } from '../../types/orders';
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
+import { calculateOrderPrice } from '../../utils/orders';
 
 const parseErc20Order = (
   rawOrder: {
@@ -23,9 +24,13 @@ const parseErc20Order = (
 
   const offeringCurrency = getErc20CurrencyFromContractAddress(offeringToken);
   const askingCurrency = getErc20CurrencyFromContractAddress(askingToken);
-  // TODO: make common util to handle decimal conversions or handle all monetary amounts in standalone class
-  const price =
-    Number(askingAmount) / 10 ** askingCurrency.decimals / (Number(offeringAmount) / 10 ** offeringCurrency.decimals);
+
+  const price = calculateOrderPrice(
+    rawOrder.offeringAmount,
+    offeringCurrency.decimals,
+    rawOrder.askingAmount,
+    askingCurrency.decimals
+  );
 
   return {
     id,
