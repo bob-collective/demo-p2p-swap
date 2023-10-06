@@ -14,4 +14,11 @@ const isBtcOrder = (order: Order): order is BtcOrder => isBtcBuyOrder(order) || 
 const calculateOrderDeadline = (acceptTime: bigint): Date =>
   new Date((Number(acceptTime) + BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS) * 1000);
 
-export { isBtcBuyOrder, isBtcOrder, isBtcSellOrder, isErc20Order, calculateOrderDeadline };
+const calculateOrderPrice = (
+  offeringAmount: bigint,
+  offeringDecimals: number,
+  askingAmount: bigint,
+  askingDecimals: number
+) => Number(askingAmount) / 10 ** askingDecimals / (Number(offeringAmount) / 10 ** offeringDecimals);
+
+export { isBtcBuyOrder, isBtcOrder, isBtcSellOrder, isErc20Order, calculateOrderDeadline, calculateOrderPrice };

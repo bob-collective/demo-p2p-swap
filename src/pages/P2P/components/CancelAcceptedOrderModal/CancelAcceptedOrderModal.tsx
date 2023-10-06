@@ -10,7 +10,12 @@ type CancelAcceptedOrderModalProps = { order: AcceptedBtcOrder | undefined; refe
   'children'
 >;
 
-const CancelAcceptedOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelAcceptedOrderModalProps): JSX.Element | null => {
+const CancelAcceptedOrderModal = ({
+  onClose,
+  refetchOrders,
+  order,
+  ...props
+}: CancelAcceptedOrderModalProps): JSX.Element | null => {
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
 
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
