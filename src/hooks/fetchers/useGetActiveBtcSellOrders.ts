@@ -6,6 +6,7 @@ import { HexString } from '../../types';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useAccount } from 'wagmi';
 import { isAddressEqual } from 'viem';
+import { calculateOrderPrice } from '../../utils/orders';
 
 const parseBtcSellOrder = (
   rawOrder: {
@@ -20,16 +21,19 @@ const parseBtcSellOrder = (
   const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.askingToken);
-  const price =
-    Number(rawOrder.amountBtc) /
-    10 ** Bitcoin.decimals /
-    (Number(rawOrder.askingAmount) / 10 ** offeringCurrency.decimals);
+
+  const price = calculateOrderPrice(
+    rawOrder.amountBtc,
+    Bitcoin.decimals,
+    rawOrder.askingAmount,
+    askingCurrency.decimals
+  );
 
   return {
     id,
     price,
     offeringCurrency: Bitcoin,
-    askingCurrency: offeringCurrency,
+    askingCurrency: askingCurrency,
     requesterAddress: rawOrder.requester,
     availableLiquidity: rawOrder.askingAmount,
     totalAskingAmount: rawOrder.amountBtc,
