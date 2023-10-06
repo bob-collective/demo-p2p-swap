@@ -123,7 +123,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
         ? orders.map((order) => {
             const isPendingOrder = isBtcBuyOrder(order) && order.deadline !== undefined;
             return {
-              id: order.id.toString(),
+              id: `${order.offeringCurrency.ticker}-${order.askingCurrency.ticker}-${order.id.toString()}`,
               asset: (
                 <AssetCell
                   name={order.offeringCurrency.ticker}
@@ -147,6 +147,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                         setSelectedOrder(order);
                         setCancelOrderModal(true);
                       }}
+                      disabled={isPendingOrder} // MEM0: remove when implementing partial fulfillment.
                       size='small'
                     >
                       Cancel order

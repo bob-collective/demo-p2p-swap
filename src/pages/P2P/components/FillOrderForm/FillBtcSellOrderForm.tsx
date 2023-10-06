@@ -28,13 +28,12 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
   };
 
   const handleBtcAddressInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setReceivingBtcAddress(event.target.value)
-  }
+    setReceivingBtcAddress(event.target.value);
+  };
   const outputAmount = toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker);
 
   const inputAmount = order.price * parseFloat(outputAmount);
 
-  
   return (
     <form onSubmit={handleSubmit}>
       <Flex direction='column' gap='spacing4'>
@@ -59,7 +58,12 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
         />
-        <Input label='Bitcoin Address' placeholder='Enter your bitcoin address' onChange={handleBtcAddressInput} value={receivingBtcAddress} />
+        <Input
+          label='Bitcoin Address'
+          placeholder='Enter your bitcoin address'
+          onChange={handleBtcAddressInput}
+          value={receivingBtcAddress}
+        />
 
         <Flex direction='column' gap='spacing2'>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
@@ -76,7 +80,7 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
         </Flex>
       </Flex>
       <CTA disabled={!receivingBtcAddress} size='large' type='submit'>
-       {!isAskingCurrencyTransferApproved && "Approve & "} Fill Order
+        {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
       </CTA>
     </form>
   );

@@ -35,8 +35,9 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
 
   const { getBalanceInBaseDecimals } = useBalances();
 
-  const btcAddressCheck = (!isBitcoinTicker(state.outputTicker)) || state.btcAddress
-  const isComplete = state.inputTicker && state.outputTicker && state.inputValue && state.outputValue && btcAddressCheck;
+  const btcAddressCheck = !isBitcoinTicker(state.outputTicker) || state.btcAddress;
+  const isComplete =
+    state.inputTicker && state.outputTicker && state.inputValue && state.outputValue && btcAddressCheck;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -96,7 +97,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
               { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
-              { value: 'BTC', balance: "—", balanceUSD: 0 }
+              { value: 'BTC', balance: '—', balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleInputTickerChange(key as Erc20CurrencyTicker)
           }}
@@ -114,13 +115,17 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             items: [
               { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
               { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
-              { value: 'BTC', balance: "—", balanceUSD: 0 }
+              { value: 'BTC', balance: '—', balanceUSD: 0 }
             ],
             onSelectionChange: (key) => handleOutputTickerChange(key as Erc20CurrencyTicker)
           }}
         />
         {state.outputTicker === 'BTC' && (
-          <Input onValueChange={handleBTCAddressChange} label='Bitcoin Address' placeholder='Enter your bitcoin address' />
+          <Input
+            onValueChange={handleBTCAddressChange}
+            label='Bitcoin Address'
+            placeholder='Enter your bitcoin address'
+          />
         )}
 
         <Flex direction='column' gap='spacing2'>

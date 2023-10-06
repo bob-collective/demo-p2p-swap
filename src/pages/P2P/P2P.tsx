@@ -6,7 +6,7 @@ import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBu
 import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
 
-const P2P = () => {
+const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
     isOpen: false
   });
@@ -61,23 +61,30 @@ const P2P = () => {
           </TabsItem>
           {!!ownerOrders.length && (
             <TabsItem key='sell' title='Sell'>
-              <OrdersTable
-                aria-labelledby={titleId}
-                orders={ownerOrders}
-                refetchOrders={refetchOrders}
-                refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-              />
-              <Flex alignItems='center' justifyContent='space-between'>
-                <H2 size='xl' id={titleId2}>
-                  Accepted BTC Orders
-                </H2>
-              </Flex>
-              <AcceptedOrdersTable
-                aria-labelledby={titleId2}
-                orders={acceptedBtcOrders}
-                refetchOrders={refetchOrders}
-                refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-              />
+              <>
+                <OrdersTable
+                  aria-labelledby={titleId}
+                  orders={ownerOrders}
+                  refetchOrders={refetchOrders}
+                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+              {/* NEW TABLE */}
+              {acceptedBtcOrders?.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId2}>
+                      Accepted BTC Orders
+                    </H2>
+                  </Flex>
+                  <AcceptedOrdersTable
+                    aria-labelledby={titleId2}
+                    orders={acceptedBtcOrders}
+                    refetchOrders={refetchOrders}
+                    refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                  />
+                </>
+              )}
             </TabsItem>
           )}
         </Tabs>
@@ -85,7 +92,10 @@ const P2P = () => {
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
         onClose={handleCloseNewOrderModal}
-        refetchOrders={refetchOrders}
+        refetchOrders={() => {
+          refetchOrders();
+          refetchAcceptedBtcOrders();
+        }}
       />
     </>
   );

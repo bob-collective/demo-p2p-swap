@@ -6,7 +6,7 @@ import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { useContract } from '../useContract';
 import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
 
-const parseBtcBuyOrder = (
+const parseAcceptedBtcOrder = (
   rawOrder: {
     orderId: bigint;
     acceptTime: bigint;
@@ -16,7 +16,8 @@ const parseBtcBuyOrder = (
     accepter: HexString;
     requester: HexString;
   },
-  id: bigint
+  id: bigint,
+  type: 'buy' | 'sell'
 ): AcceptedBtcOrder => {
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.ercToken);
 
@@ -30,14 +31,14 @@ const parseBtcBuyOrder = (
   const deadline = calculateOrderDeadline(rawOrder.acceptTime);
 
   return {
-    type: 'buy',
+    type,
     acceptId: id,
     orderId: rawOrder.orderId,
     price,
     amountBtc: rawOrder.amountBtc,
     otherCurrency: offeringCurrency,
-    btcReceiver: rawOrder.requester,
-    btcSender: rawOrder.accepter,
+    btcReceiver: type === 'buy' ? rawOrder.requester : rawOrder.accepter,
+    btcSender: type === 'buy' ? rawOrder.accepter : rawOrder.requester,
     deadline,
     otherCurrencyAmount: rawOrder.ercAmount,
     bitcoinAddress: 'bc1ptEstAddress99skmssjd93deaDnteray'
@@ -50,10 +51,16 @@ const useGetAcceptedBtcOrders = () => {
   const [acceptedBtcOrders, setBuyOrders] = useState<Array<AcceptedBtcOrder>>();
 
   const getBtcBuyOrders = useCallback(async () => {
-    const [rawOrders, ids] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
+    const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds]] = await Promise.all([
+      readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
+      readBtcMarketplace.getOpenAcceptedBtcSellOrders()
+    ]);
 
-    const parsedOrders = rawOrders.map((order, index) => parseBtcBuyOrder(order, ids[index]));
-    setBuyOrders(parsedOrders);
+    const parsedBuyOrders = rawBuyOrders.map((order, index) => parseAcceptedBtcOrder(order, buyOrderIds[index], 'buy'));
+    const parsedSellOrders = rawSellOrders.map((order, index) =>
+      parseAcceptedBtcOrder(order, sellOrderIds[index], 'sell')
+    );
+    setBuyOrders([...parsedBuyOrders, ...parsedSellOrders]);
   }, [readBtcMarketplace]);
 
   useEffect(() => {
