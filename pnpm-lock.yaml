@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.0.1
     version: 0.0.1(react-dom@18.2.0)(react@18.2.0)
   '@interlay/theme':
-    specifier: ^0.0.4
-    version: 0.0.4(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^0.0.5
+    version: 0.0.5(react-dom@18.2.0)(react@18.2.0)
   '@interlay/ui':
     specifier: 0.0.6
     version: 0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
@@ -1901,16 +1901,6 @@ packages:
     dependencies:
       '@react-aria/i18n': 3.8.2(react@18.2.0)
       '@react-aria/overlays': 3.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /@interlay/theme@0.0.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-rRW0dYpBF8MFfHp4b4fc4kJCdhZblxbLBMgwMholNlfIvxWrvcOgd0iD4jXrR5H7ctCdppNyncfDryxpSZaFOQ==}
-    peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
-    dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
