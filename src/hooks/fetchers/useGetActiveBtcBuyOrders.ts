@@ -12,7 +12,7 @@ const parseBtcBuyOrder = (
   rawOrder: {
     amountBtc: bigint;
     bitcoinAddress: {
-      bitcoinAddress: bigint;
+      bitcoinAddress: string;
     };
     offeringToken: HexString;
     offeringAmount: bigint;

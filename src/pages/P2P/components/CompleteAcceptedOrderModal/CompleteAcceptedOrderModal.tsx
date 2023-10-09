@@ -1,4 +1,4 @@
-import { CTA, Input, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P } from '@interlay/ui';
+import { CTA, Flex, Input, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P } from '@interlay/ui';
 import { useContract } from '../../../../hooks/useContract';
 import { Bitcoin, ContractType } from '../../../../constants';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -43,7 +43,7 @@ const CompleteAcceptedOrderModal = ({
     onClose();
   };
 
-  const isSubmissionDisabled = !!confirmations && confirmations < 6;
+  const isSubmissionDisabled = !confirmations || confirmations < 6;
 
   console.log(status, txId, confirmations)
 
@@ -56,18 +56,18 @@ const CompleteAcceptedOrderModal = ({
           get {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}.
         </P>
         <Input isDisabled label='Send bitcoin here' value={order.bitcoinAddress} />
+        <Flex style={{padding: "2rem"}} alignItems='center' justifyContent='center'>
         {
           status === "NOT_FOUND" ?
-          <>
-          Waiting for transaction
-          </>
-          : status === "IN_MEMPOOL" ?
-          <>
-          Bitcoin transaction found in mempool with txid {txId};
-          </> : <>
-          Bitcoin transaction found with {confirmations} / 6 confirmations.
-          </>
+          <div>
+          Waiting for bitcoin transaction to be made...
+          </div>
+          : 
+          <div>
+          Bitcoin transaction found (<a target='_blank' href={`http://127.0.0.1:3002/tx/${txId}`}>{txId?.slice(0,4)}...{txId?.slice(txId.length -4)}</a>) with <strong>{confirmations} / 6</strong> confirmations.
+          </div>
         }
+        </Flex>
       </ModalBody>
       <ModalFooter direction='row'>
         <CTA disabled={isSubmissionDisabled} variant='primary' size='large' fullWidth onPress={handleCompleteOrder}>

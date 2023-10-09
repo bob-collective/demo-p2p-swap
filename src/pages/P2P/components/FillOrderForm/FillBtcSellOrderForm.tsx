@@ -6,10 +6,11 @@ import { BtcSellOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
+import { FillOrderFormData } from './FillOrderForm';
 
 type FillBtcSellOrderFormProps = {
   order: BtcSellOrder;
-  onSubmit: () => void;
+  onSubmit:(data?: FillOrderFormData) => void;
 };
 
 const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
@@ -24,7 +25,7 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    wrapInErc20ApprovalTx(() => onSubmit?.());
+    wrapInErc20ApprovalTx(() => onSubmit?.({btcAddress: receivingBtcAddress || undefined, input: undefined}))
   };
 
   const handleBtcAddressInput = (event: ChangeEvent<HTMLInputElement>) => {

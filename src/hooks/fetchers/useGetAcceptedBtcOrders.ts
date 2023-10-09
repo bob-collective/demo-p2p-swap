@@ -17,10 +17,19 @@ const parseAcceptedBtcOrder = (
     ercAmount: bigint;
     accepter: HexString;
     requester: HexString;
+    bitcoinAddress?: {
+      bitcoinAddress: string;
+    };
   },
   id: bigint,
   type: 'buy' | 'sell',
-  address: HexString | undefined
+  address: HexString | undefined,
+  underlyingBuyOrders: readonly {
+    bitcoinAddress: {
+      bitcoinAddress: string;
+    };
+  }[],
+  buyids: readonly bigint[]
 ): AcceptedBtcOrder => {
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.ercToken);
 
@@ -36,6 +45,12 @@ const parseAcceptedBtcOrder = (
 
   const isOwnerOfOrder = !!address && isAddressEqual(ownerAddress, address);
 
+  const underlyingBtcAddress = underlyingBuyOrders.find((_, index) => buyids[index] === rawOrder.orderId);
+  const bitcoinAddress = rawOrder.bitcoinAddress || underlyingBtcAddress?.bitcoinAddress;
+  if (!bitcoinAddress?.bitcoinAddress) {
+    throw new Error('Bitcoin address not found');
+  }
+
   return {
     type,
     acceptId: id,
@@ -47,7 +62,7 @@ const parseAcceptedBtcOrder = (
     btcSender: type === 'buy' ? rawOrder.accepter : rawOrder.requester,
     deadline,
     otherCurrencyAmount: rawOrder.ercAmount,
-    bitcoinAddress: 'bc1ptEstAddress99skmssjd93deaDnteray',
+    bitcoinAddress: bitcoinAddress?.bitcoinAddress,
     isOwnerOfOrder
   };
 };
@@ -59,16 +74,18 @@ const useGetAcceptedBtcOrders = () => {
   const [acceptedBtcOrders, setBuyOrders] = useState<Array<AcceptedBtcOrder>>();
 
   const getBtcBuyOrders = useCallback(async () => {
-    const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds]] = await Promise.all([
-      readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
-      readBtcMarketplace.getOpenAcceptedBtcSellOrders()
-    ]);
+    const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds], [rawUnderlyingBuyOrders, underlyingBuyIds]] =
+      await Promise.all([
+        readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
+        readBtcMarketplace.getOpenAcceptedBtcSellOrders(),
+        readBtcMarketplace.getOpenBtcBuyOrders()
+      ]);
 
     const parsedBuyOrders = rawBuyOrders.map((order, index) =>
-      parseAcceptedBtcOrder(order, buyOrderIds[index], 'buy', address)
+      parseAcceptedBtcOrder(order, buyOrderIds[index], 'buy', address, rawUnderlyingBuyOrders, underlyingBuyIds)
     );
     const parsedSellOrders = rawSellOrders.map((order, index) =>
-      parseAcceptedBtcOrder(order, sellOrderIds[index], 'sell', address)
+      parseAcceptedBtcOrder(order, sellOrderIds[index], 'sell', address, rawUnderlyingBuyOrders, underlyingBuyIds)
     );
     setBuyOrders([...parsedBuyOrders, ...parsedSellOrders]);
   }, [readBtcMarketplace, address]);

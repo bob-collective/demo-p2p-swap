@@ -20,7 +20,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
   const { address } = useAccount();
 
   const handleAddOrder = useCallback(
-    async ({ inputTicker, outputTicker, inputValue, outputValue }: AddOrderFormData) => {
+    async ({ inputTicker, outputTicker, inputValue, outputValue, btcAddress }: AddOrderFormData) => {
       if (!inputTicker || !outputTicker || !inputValue || !outputValue || !address) {
         return;
       }
@@ -33,10 +33,11 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       let tx;
 
       if (isBitcoinCurrency(outputCurrency)) {
-        const mockedBtcAddress = { bitcoinAddress: BigInt(0) };
+        if (!btcAddress) return;
+        const bitcoinAddress = { bitcoinAddress: btcAddress };
         tx = await writeBTCMarketplace.placeBtcBuyOrder([
           outputAtomicAmount,
-          mockedBtcAddress,
+          bitcoinAddress,
           (inputCurrency as Erc20Currency).address,
           inputAtomicAmount
         ]);
