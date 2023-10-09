@@ -62,6 +62,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
   const [isCancelOrderModalOpen, setCancelOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order>();
+  const [isLoading, setLoading] = useState(false);
 
   const publicClient = usePublicClient();
 
@@ -73,34 +74,43 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
       if (!selectedOrder) {
         return;
       }
-      // If we are dealing with BTC, use btc marketplace contract.
-      if (isBtcOrder(selectedOrder)) {
-        if (isBtcBuyOrder(selectedOrder)) {
-          const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([
-            selectedOrder.id,
-            selectedOrder.totalAskingAmount
-          ]);
-          await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
-          refetchAcceptedBtcOrders();
-        } else {
-          const mockedBtcAddress = { bitcoinAddress: BigInt(1) };
-          const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
-            selectedOrder.id,
-            mockedBtcAddress,
-            selectedOrder.availableLiquidity
-          ]);
-          await publicClient.waitForTransactionReceipt({ hash: acceptBtcSellOrderTxHash });
-          refetchAcceptedBtcOrders();
-        }
-      } else {
-        if (!data?.input) {
-          return;
-        }
-        const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
 
-        const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
-        await publicClient.waitForTransactionReceipt({ hash });
+      setLoading(true);
+
+      try {
+        // If we are dealing with BTC, use btc marketplace contract.
+        if (isBtcOrder(selectedOrder)) {
+          if (isBtcBuyOrder(selectedOrder)) {
+            const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([
+              selectedOrder.id,
+              selectedOrder.totalAskingAmount
+            ]);
+            await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
+            refetchAcceptedBtcOrders();
+          } else {
+            const mockedBtcAddress = { bitcoinAddress: BigInt(1) };
+            const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
+              selectedOrder.id,
+              mockedBtcAddress,
+              selectedOrder.availableLiquidity
+            ]);
+            await publicClient.waitForTransactionReceipt({ hash: acceptBtcSellOrderTxHash });
+            refetchAcceptedBtcOrders();
+          }
+        } else {
+          if (!data?.input) {
+            return;
+          }
+          const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
+
+          const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
+          await publicClient.waitForTransactionReceipt({ hash });
+        }
+      } catch (e) {
+        return setLoading(false);
       }
+
+      setLoading(false);
 
       handleCloseOrderModal();
       refetchOrders();
@@ -179,7 +189,9 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
       </Card>
       <Modal isOpen={isOrderModalOpen} onClose={handleCloseOrderModal}>
         <ModalHeader>Fill Order</ModalHeader>
-        <ModalBody>{selectedOrder && <FillOrderForm onSubmit={handleFillOrder} order={selectedOrder} />}</ModalBody>
+        <ModalBody>
+          {selectedOrder && <FillOrderForm isLoading={isLoading} onSubmit={handleFillOrder} order={selectedOrder} />}
+        </ModalBody>
       </Modal>
       <CancelOrderModal
         isOpen={isCancelOrderModalOpen}

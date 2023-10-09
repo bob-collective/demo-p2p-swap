@@ -6,14 +6,14 @@ settings:
 
 dependencies:
   '@interlay/hooks':
-    specifier: ^0.0.6
-    version: 0.0.6(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^0.0.7
+    version: 0.0.7(react-dom@18.2.0)(react@18.2.0)
   '@interlay/system':
     specifier: ^0.0.1
     version: 0.0.1(react-dom@18.2.0)(react@18.2.0)
   '@interlay/theme':
-    specifier: ^0.0.5
-    version: 0.0.5(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^0.0.6
+    version: 0.0.6(react-dom@18.2.0)(react@18.2.0)
   '@interlay/ui':
     specifier: 0.0.6
     version: 0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
@@ -1889,6 +1889,23 @@ packages:
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
+  /@interlay/hooks@0.0.7(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-ew5jaQWJ4vAap2BtWexJNYnx9rGpJwQS13kV2HO28ag4J/qEuPaI1TPrBL43b624su1mnyb0QTFucjzxCf/+wg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@interlay/theme': 0.0.6(react-dom@18.2.0)(react@18.2.0)
+      '@internationalized/number': 3.2.1
+      '@react-aria/i18n': 3.8.2(react@18.2.0)
+      '@react-aria/utils': 3.21.0(react@18.2.0)
+      decimal.js-light: 2.5.1
+      formik: 2.4.5(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
+    dev: false
+
   /@interlay/icons@0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
     resolution: {integrity: sha512-WY1+7XQlXs3py0KgF3eZJIVpBQF+8VTBzY9a2zZ/eofVUvkvYgNFQ8Mni9Np+gd7weGrz8IO8YI3gJFB5WvtQA==}
     peerDependencies:
@@ -1916,6 +1933,16 @@ packages:
 
   /@interlay/theme@0.0.5(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-GcUDwO+baZzwaes12lmarnc3Fo8Wl8U50ZodA8v1BaUYz+FSDHGIHaBpfUI5f0rQSewxpT7Liah+QCQGFtseDQ==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@interlay/theme@0.0.6(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-AmxhKBqrTX0Qb9gCotuLxVQv/MLkjHy2TFvCmXtlpvvIQRuwMk0y8nVyh2MZqOWi4y+MDnr3LE8Ix32yXTZumQ==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'

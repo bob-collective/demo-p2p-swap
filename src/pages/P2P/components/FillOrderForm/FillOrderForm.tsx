@@ -9,16 +9,17 @@ type FillOrderFormData = {
 };
 
 type FillOrderFormProps = {
+  isLoading: boolean;
   order: Order;
   onSubmit: (data?: Required<FillOrderFormData>) => void;
 };
 
-const FillOrderForm = ({ order, onSubmit }: FillOrderFormProps): JSX.Element => {
+const FillOrderForm = ({ isLoading, order, onSubmit }: FillOrderFormProps): JSX.Element => {
   if (isErc20Order(order)) {
-    return <FillErc20OrderForm {...{ order, onSubmit }} />;
+    return <FillErc20OrderForm {...{ isLoading, order, onSubmit }} />;
   }
-  if (isBtcBuyOrder(order)) return <FillBtcBuyOrderForm {...{ order, onSubmit }} />;
-  else return <FillBtcSellOrderForm {...{ order, onSubmit }} />;
+  if (isBtcBuyOrder(order)) return <FillBtcBuyOrderForm {...{ isLoading, order, onSubmit }} />;
+  else return <FillBtcSellOrderForm {...{ isLoading, order, onSubmit }} />;
 };
 
 export { FillOrderForm };

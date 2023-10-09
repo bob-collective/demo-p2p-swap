@@ -16,11 +16,12 @@ type FillBTCSellOrderForm = {
 };
 
 type FillBtcSellOrderFormProps = {
+  isLoading: boolean;
   order: BtcSellOrder;
   onSubmit: (values: FillBTCSellOrderForm) => void;
 };
 
-const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
+const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
   const { getBalanceInBaseDecimals } = useBalances();
 
   const handleSubmit = (values: FillBTCSellOrderForm) => {
@@ -51,10 +52,11 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
     hideErrors: 'untouched'
   });
 
-  const { isAllowed: isAskingCurrencyTransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
-    ContractType.BTC_MARKETPLACE,
-    order.askingCurrency.ticker
-  );
+  const {
+    isLoading: isLoadingAllowance,
+    isAllowed: isAskingCurrencyTransferApproved,
+    wrapInErc20ApprovalTx
+  } = useErc20Allowance(ContractType.BTC_MARKETPLACE, order.askingCurrency.ticker);
 
   const isSubmitDisabled = isFormDisabled(form);
 
@@ -101,7 +103,7 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
           </Card>
         </Flex>
       </Flex>
-      <CTA disabled={isSubmitDisabled} size='large' type='submit'>
+      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
       </CTA>
     </form>

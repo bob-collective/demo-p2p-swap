@@ -79,7 +79,11 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
     hideErrors: 'untouched'
   });
 
-  const { isAllowed: inputErc20TransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
+  const {
+    isLoading,
+    isAllowed: inputErc20TransferApproved,
+    wrapInErc20ApprovalTx
+  } = useErc20Allowance(
     isBitcoinTicker(form.values.outputTicker) ? ContractType.BTC_MARKETPLACE : ContractType.ERC20_MARKETPLACE,
     form.values.inputTicker as Erc20CurrencyTicker
   );
@@ -196,7 +200,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
           </Card>
         </Flex>
       </Flex>
-      <CTA disabled={isSubmitDisabled} size='large' type='submit'>
+      <CTA loading={isLoading} disabled={isSubmitDisabled} size='large' type='submit'>
         {state.isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
       </CTA>
     </form>

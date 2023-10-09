@@ -12,19 +12,21 @@ type FillOrderFormData = {
 };
 
 type FillErc20OrderFormProps = {
+  isLoading: boolean;
   order: Erc20Order;
   onSubmit: (data: Required<FillOrderFormData>) => void;
 };
 
-const FillErc20OrderForm = ({ order, onSubmit }: FillErc20OrderFormProps): JSX.Element => {
+const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormProps): JSX.Element => {
   const [state, setState] = useState<FillOrderFormData>({});
 
   const { getBalanceInBaseDecimals } = useBalances();
 
-  const { isAllowed: isAskingCurrencyTransferApproved, wrapInErc20ApprovalTx } = useErc20Allowance(
-    ContractType.ERC20_MARKETPLACE,
-    order.askingCurrency.ticker
-  );
+  const {
+    isLoading: isLoadingAllowance,
+    isAllowed: isAskingCurrencyTransferApproved,
+    wrapInErc20ApprovalTx
+  } = useErc20Allowance(ContractType.ERC20_MARKETPLACE, order.askingCurrency.ticker);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,7 +82,7 @@ const FillErc20OrderForm = ({ order, onSubmit }: FillErc20OrderFormProps): JSX.E
           </Card>
         </Flex>
       </Flex>
-      <CTA disabled={!isComplete} size='large' type='submit'>
+      <CTA loading={isLoading || isLoadingAllowance} disabled={!isComplete} size='large' type='submit'>
         {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
       </CTA>
     </form>

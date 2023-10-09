@@ -7,11 +7,12 @@ import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 
 type FillBtcBuyOrderFormProps = {
+  isLoading: boolean;
   order: BtcBuyOrder;
   onSubmit: () => void;
 };
 
-const FillBtcBuyOrderForm = ({ order, onSubmit }: FillBtcBuyOrderFormProps): JSX.Element => {
+const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderFormProps): JSX.Element => {
   const { getBalanceInBaseDecimals } = useBalances();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -62,7 +63,7 @@ const FillBtcBuyOrderForm = ({ order, onSubmit }: FillBtcBuyOrderFormProps): JSX
           </Card>
         </Flex>
       </Flex>
-      <CTA size='large' type='submit'>
+      <CTA disabled={isLoading} size='large' type='submit'>
         Fill Order
       </CTA>
     </form>
