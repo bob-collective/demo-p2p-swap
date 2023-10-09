@@ -10,7 +10,7 @@ import { FillOrderFormData } from './FillOrderForm';
 
 type FillBtcSellOrderFormProps = {
   order: BtcSellOrder;
-  onSubmit:(data?: FillOrderFormData) => void;
+  onSubmit: (data?: FillOrderFormData) => void;
 };
 
 const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
@@ -25,7 +25,7 @@ const FillBtcSellOrderForm = ({ order, onSubmit }: FillBtcSellOrderFormProps): J
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    wrapInErc20ApprovalTx(() => onSubmit?.({btcAddress: receivingBtcAddress || undefined, input: undefined}))
+    wrapInErc20ApprovalTx(() => onSubmit?.({ btcAddress: receivingBtcAddress || undefined, input: undefined }));
   };
 
   const handleBtcAddressInput = (event: ChangeEvent<HTMLInputElement>) => {

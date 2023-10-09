@@ -45,7 +45,7 @@ const CompleteAcceptedOrderModal = ({
 
   const isSubmissionDisabled = !confirmations || confirmations < 6;
 
-  console.log(status, txId, confirmations)
+  console.log(status, txId, confirmations);
 
   return (
     <Modal {...props} onClose={onClose}>
@@ -56,17 +56,18 @@ const CompleteAcceptedOrderModal = ({
           get {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}.
         </P>
         <Input isDisabled label='Send bitcoin here' value={order.bitcoinAddress} />
-        <Flex style={{padding: "2rem"}} alignItems='center' justifyContent='center'>
-        {
-          status === "NOT_FOUND" ?
-          <div>
-          Waiting for bitcoin transaction to be made...
-          </div>
-          : 
-          <div>
-          Bitcoin transaction found (<a target='_blank' href={`http://127.0.0.1:3002/tx/${txId}`}>{txId?.slice(0,4)}...{txId?.slice(txId.length -4)}</a>) with <strong>{confirmations} / 6</strong> confirmations.
-          </div>
-        }
+        <Flex style={{ padding: '2rem' }} alignItems='center' justifyContent='center'>
+          {status === 'NOT_FOUND' ? (
+            <div>Waiting for bitcoin transaction to be made...</div>
+          ) : (
+            <div>
+              Bitcoin transaction found (
+              <a target='_blank' href={`http://127.0.0.1:3002/tx/${txId}`}>
+                {txId?.slice(0, 4)}...{txId?.slice(txId.length - 4)}
+              </a>
+              ) with <strong>{confirmations} / 6</strong> confirmations.
+            </div>
+          )}
         </Flex>
       </ModalBody>
       <ModalFooter direction='row'>
