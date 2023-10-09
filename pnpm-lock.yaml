@@ -9,11 +9,11 @@ dependencies:
     specifier: ^0.0.1
     version: 0.0.1(react-dom@18.2.0)(react@18.2.0)
   '@interlay/theme':
-    specifier: ^0.0.4
-    version: 0.0.4(react-dom@18.2.0)(react@18.2.0)
-  '@interlay/ui':
     specifier: ^0.0.5
-    version: 0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
+    version: 0.0.5(react-dom@18.2.0)(react@18.2.0)
+  '@interlay/ui':
+    specifier: 0.0.6
+    version: 0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
   '@metamask/providers':
     specifier: ^12.0.0
     version: 12.0.0
@@ -1850,26 +1850,26 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@interlay/coin-icons@0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
-    resolution: {integrity: sha512-Y8m5Jn+SO+A/Z7bd/FywwF0eE7QDpXf24Dxwcm9wJWQ/xoaY/zs+ZDaZvptO7AXhTypTptzyo1I6J8a7a4MW+g==}
+  /@interlay/coin-icons@0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
+    resolution: {integrity: sha512-jc5GteLm8C+mhTj1FMoVklZSVmjJ1hm+yP9B+iqQfnZ16SnA4ZJ3y3Ay5RyBdARI4rBHtF3zdl0hg9Omkswz3Q==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
     dependencies:
-      '@interlay/icons': 0.0.4(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
+      '@interlay/icons': 0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
       - styled-components
     dev: false
 
-  /@interlay/hooks@0.0.5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Re7so1RCcipqNASn9S8FYaVeQ3DOKZUPSTnqj5Aja/gabRuZ1yS9++7febLQ0KQZ4onpe+M6ncFKVMBcvkaDwA==}
+  /@interlay/hooks@0.0.6(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Zx/3bWCp+zGU8L5ENIusvlKjliIePOnHVxzufLliaqCpDx3GrIApUu3eL11D47PpEZVv3ZK4X2a6Ji6sm0B+ww==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
     dependencies:
-      '@interlay/theme': 0.0.4(react-dom@18.2.0)(react@18.2.0)
+      '@interlay/theme': 0.0.5(react-dom@18.2.0)(react@18.2.0)
       '@internationalized/number': 3.2.1
       '@react-aria/i18n': 3.8.2(react@18.2.0)
       '@react-aria/utils': 3.20.0(react@18.2.0)
@@ -1880,14 +1880,14 @@ packages:
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
-  /@interlay/icons@0.0.4(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
-    resolution: {integrity: sha512-kyDDzTlJiqLmmRITDwLIQFcXSm/PxfOcYu7sOJ4iObVI1eY3o/PF9VXySU8zGhZxxSa9G3UMVzq4s4FDb3Vraw==}
+  /@interlay/icons@0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
+    resolution: {integrity: sha512-WY1+7XQlXs3py0KgF3eZJIVpBQF+8VTBzY9a2zZ/eofVUvkvYgNFQ8Mni9Np+gd7weGrz8IO8YI3gJFB5WvtQA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
       styled-components: '>=6.0.0'
     dependencies:
-      '@interlay/theme': 0.0.4(react-dom@18.2.0)(react@18.2.0)
+      '@interlay/theme': 0.0.5(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       styled-components: 6.0.8(react-dom@18.2.0)(react@18.2.0)
@@ -1905,8 +1905,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@interlay/theme@0.0.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-rRW0dYpBF8MFfHp4b4fc4kJCdhZblxbLBMgwMholNlfIvxWrvcOgd0iD4jXrR5H7ctCdppNyncfDryxpSZaFOQ==}
+  /@interlay/theme@0.0.5(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-GcUDwO+baZzwaes12lmarnc3Fo8Wl8U50ZodA8v1BaUYz+FSDHGIHaBpfUI5f0rQSewxpT7Liah+QCQGFtseDQ==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -1915,18 +1915,18 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@interlay/ui@0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
-    resolution: {integrity: sha512-SawYEy0ikxyOGdwAgd34zccMQzWnfusgru72UQMFQXsSKC/xcXgruJ+HGaeXg+jNtDdwbhBxuWvC+yoeMz75tw==}
+  /@interlay/ui@0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8):
+    resolution: {integrity: sha512-QJaDgg+xvFopxW1IfL2moFlaBd7YsMjYNJi4VR5KUhWvjso0yzttUaoWYZ2imCJJio3xOlmlDb8r0ysXfmYUkg==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
       styled-components: '>=6.0.0'
     dependencies:
-      '@interlay/coin-icons': 0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
-      '@interlay/hooks': 0.0.5(react-dom@18.2.0)(react@18.2.0)
-      '@interlay/icons': 0.0.4(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
+      '@interlay/coin-icons': 0.0.6(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
+      '@interlay/hooks': 0.0.6(react-dom@18.2.0)(react@18.2.0)
+      '@interlay/icons': 0.0.5(react-dom@18.2.0)(react@18.2.0)(styled-components@6.0.8)
       '@interlay/system': 0.0.1(react-dom@18.2.0)(react@18.2.0)
-      '@interlay/theme': 0.0.4(react-dom@18.2.0)(react@18.2.0)
+      '@interlay/theme': 0.0.5(react-dom@18.2.0)(react@18.2.0)
       '@react-aria/accordion': 3.0.0-alpha.20(react@18.2.0)
       '@react-aria/breadcrumbs': 3.5.5(react@18.2.0)
       '@react-aria/button': 3.8.2(react@18.2.0)

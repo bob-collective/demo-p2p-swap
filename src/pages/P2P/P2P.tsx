@@ -1,10 +1,11 @@
-import { CTA, Flex, H1 } from '@interlay/ui';
+import { CTA, Flex, H1, H2, Tabs, TabsItem } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
 import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
+import { theme } from '@interlay/theme';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -12,6 +13,8 @@ const P2P = (): JSX.Element => {
   });
   const titleId = 'titleId';
   const titleId2 = 'titleId2';
+  const titleId3 = 'titleId3';
+  const titleId4 = 'titleId4';
 
   const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
   const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
@@ -28,8 +31,12 @@ const P2P = (): JSX.Element => {
     [erc20Orders, btcBuyOrders, btcSellOrders]
   );
 
-  const ownerOrders = orders.filter((order) => order.isOwnerOfOrder);
-  const marketplaceOrders = orders.filter((order) => !order.isOwnerOfOrder);
+  // TODO: Merge ownedOrders and ownedAcceptedBtcOrders, and unownedOrders and unownedAcceptedBtcOrders
+  // into single arrays.
+  const ownedOrders = orders.filter((order) => order.isOwnerOfOrder);
+  const unownedOrders = orders.filter((order) => !order.isOwnerOfOrder);
+  const ownedAcceptedBtcOrders = acceptedBtcOrders?.filter((order) => order.isOwnerOfOrder);
+  const unownedAcceptedBtcOrders = acceptedBtcOrders?.filter((order) => !order.isOwnerOfOrder);
 
   const refetchOrders = useCallback(() => {
     refetchActiveErc20Orders();
@@ -50,50 +57,72 @@ const P2P = (): JSX.Element => {
             Add an order
           </CTA>
         </Flex>
-        {/* TODO: Combine with My Orders and Accepted BTC Orders tables, and add tabs */}
-        {!!ownerOrders.length && (
-          <>
-            <Flex alignItems='center' justifyContent='space-between'>
-              <H1 size='xl2' id={titleId2}>
-                My Orders
-              </H1>
-            </Flex>
-            <OrdersTable
-              aria-labelledby={titleId}
-              orders={ownerOrders}
-              refetchOrders={refetchOrders}
-              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-            />
-          </>
-        )}
-        <Flex alignItems='center' justifyContent='space-between'>
-          <H1 size='xl2' id={titleId2}>
-            Marketplace Orders
-          </H1>
-        </Flex>
-        <OrdersTable
-          aria-labelledby={titleId}
-          orders={marketplaceOrders}
-          refetchOrders={refetchOrders}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        />
-
-        {/* NEW TABLE */}
-        {acceptedBtcOrders?.length && (
-          <>
-            <Flex alignItems='center' justifyContent='space-between'>
-              <H1 size='xl2' id={titleId2}>
-                Accepted BTC Orders
-              </H1>
-            </Flex>{' '}
-            <AcceptedOrdersTable
-              aria-labelledby={titleId2}
-              orders={acceptedBtcOrders}
-              refetchOrders={refetchOrders}
-              refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-            />
-          </>
-        )}
+        <Tabs>
+          <TabsItem key='buy' title='Buy'>
+            {!!unownedOrders.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Buy
+                  </H2>
+                </Flex>
+                <OrdersTable
+                  aria-labelledby={titleId}
+                  orders={unownedOrders}
+                  refetchOrders={refetchOrders}
+                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+            )}
+            {!!unownedAcceptedBtcOrders?.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Accepted BTC Orders
+                  </H2>
+                </Flex>
+                <AcceptedOrdersTable
+                  aria-labelledby={titleId2}
+                  orders={unownedAcceptedBtcOrders}
+                  refetchOrders={refetchOrders}
+                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+            )}
+          </TabsItem>
+          <TabsItem key='sell' title='Sell'>
+            {!!ownedOrders.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId3} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Sell
+                  </H2>
+                </Flex>
+                <OrdersTable
+                  aria-labelledby={titleId3}
+                  orders={ownedOrders}
+                  refetchOrders={refetchOrders}
+                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+            )}
+            {!!ownedAcceptedBtcOrders?.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Accepted BTC Orders
+                  </H2>
+                </Flex>
+                <AcceptedOrdersTable
+                  aria-labelledby={titleId4}
+                  orders={ownedAcceptedBtcOrders}
+                  refetchOrders={refetchOrders}
+                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+            )}
+          </TabsItem>
+        </Tabs>
       </Flex>
       <AddOrderModal
         isOpen={isAddNewOrderModal.isOpen}
