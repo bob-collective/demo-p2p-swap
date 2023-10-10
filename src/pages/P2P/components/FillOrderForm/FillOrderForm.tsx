@@ -6,12 +6,13 @@ import { FillBtcSellOrderForm } from './FillBtcSellOrderForm';
 
 type FillOrderFormData = {
   input?: string;
+  btcAddress?: string;
 };
 
 type FillOrderFormProps = {
   isLoading: boolean;
   order: Order;
-  onSubmit: (data?: Required<FillOrderFormData>) => void;
+  onSubmit: (data?: FillOrderFormData) => void;
 };
 
 const FillOrderForm = ({ isLoading, order, onSubmit }: FillOrderFormProps): JSX.Element => {

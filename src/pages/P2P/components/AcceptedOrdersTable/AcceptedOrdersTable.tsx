@@ -81,7 +81,7 @@ const AcceptedOrdersTable = ({
             const isBtcReceiver = address && isAddressEqual(order.btcReceiver, address);
             const isBtcSender = address && isAddressEqual(order.btcSender, address);
             return {
-               id: `${order.type}-${order.acceptId.toString()}`,
+              id: `${order.type}-${order.acceptId.toString()}`,
               asset: (
                 <AssetCell name={order.otherCurrency.ticker} tickers={[order.otherCurrency.ticker, Bitcoin.ticker]} />
               ),
