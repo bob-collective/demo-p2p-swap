@@ -1,4 +1,4 @@
-import { CTA, Flex, H1, H2, Tabs, TabsItem } from '@interlay/ui';
+import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
@@ -59,21 +59,25 @@ const P2P = (): JSX.Element => {
         </Flex>
         <Tabs>
           <TabsItem key='buy' title='Buy'>
-            {!!unownedOrders.length && (
-              <>
-                <Flex alignItems='center' justifyContent='space-between'>
-                  <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
-                    Buy
-                  </H2>
-                </Flex>
+            <>
+              <Flex alignItems='center' justifyContent='space-between'>
+                <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
+                  Buy
+                </H2>
+              </Flex>
+              {unownedOrders.length ? (
                 <OrdersTable
                   aria-labelledby={titleId}
                   orders={unownedOrders}
                   refetchOrders={refetchOrders}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
-              </>
-            )}
+              ) : (
+                <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
+                  <LoadingSpinner color='secondary' variant='indeterminate' diameter={36} thickness={4} />
+                </Flex>
+              )}
+            </>
             {!!unownedAcceptedBtcOrders?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>

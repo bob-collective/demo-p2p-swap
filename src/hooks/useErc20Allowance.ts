@@ -7,6 +7,7 @@ import { useContract } from './useContract';
 const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) => {
   const [isErc20TransferApproved, setIsErc20TransferApproved] = useState(false);
   const [contractType, setContractType] = useState(ContractType[ticker]);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     const type = ContractType[ticker];
@@ -44,16 +45,24 @@ const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) 
         return subroutine();
       }
 
-      const txHash = await writeErc20Contract.approve([contracts[contract].address, UINT_256_MAX]);
-      await publicClient.waitForTransactionReceipt({ hash: txHash });
+      setLoading(true);
+
+      try {
+        const txHash = await writeErc20Contract.approve([contracts[contract].address, UINT_256_MAX]);
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
+      } catch (e) {
+        setLoading(false);
+      }
 
       fetchAllowance();
+      setLoading(false);
+
       return subroutine();
     },
     [fetchAllowance, publicClient, writeErc20Contract, isErc20TransferApproved, contract]
   );
 
-  return { isAllowed: isErc20TransferApproved, wrapInErc20ApprovalTx };
+  return { isLoading, isAllowed: isErc20TransferApproved, wrapInErc20ApprovalTx };
 };
 
 export { useErc20Allowance };
