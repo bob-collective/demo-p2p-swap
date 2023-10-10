@@ -10,6 +10,7 @@ import {
   Bitcoin
 } from '../constants';
 import { HexString } from '../types';
+import Big from 'big.js';
 
 const getErc20CurrencyFromContractAddress = (address: HexString): Erc20Currency => {
   const currency = Object.values(Erc20Currencies).find(({ address: erc20Address }) =>
@@ -24,7 +25,8 @@ const getErc20CurrencyFromContractAddress = (address: HexString): Erc20Currency 
 // TODO: handle float amounts too, now handles only integers.
 const toAtomicAmount = (amount: string, ticker: CurrencyTicker): bigint => {
   const { decimals } = currencies[ticker];
-  return BigInt(amount) * BigInt(10 ** decimals);
+
+  return BigInt(new Big(amount).mul(new Big(10).pow(decimals)).toString());
 };
 
 const toBaseAmount = (amount: bigint, ticker: CurrencyTicker): string => {

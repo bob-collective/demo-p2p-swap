@@ -26,6 +26,9 @@ dependencies:
   ahooks:
     specifier: ^3.7.8
     version: 3.7.8(react@18.2.0)
+  big.js:
+    specifier: ^6.2.1
+    version: 6.2.1
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -49,6 +52,9 @@ devDependencies:
   '@typechain/ethers-v6':
     specifier: ^0.5.0
     version: 0.5.0(ethers@6.7.1)(typechain@8.3.1)(typescript@5.2.2)
+  '@types/big.js':
+    specifier: ^6.2.0
+    version: 6.2.0
   '@types/react':
     specifier: ^18.2.15
     version: 18.2.21
@@ -3471,6 +3477,10 @@ packages:
       typescript: 5.2.2
     dev: true
 
+  /@types/big.js@6.2.0:
+    resolution: {integrity: sha512-ubLURWoc4tCw/8Yds0P3CE9cBG5q+aoycwWBiXXx4gp7XPYZy9ch0L9+Pv6osSoSRgvuQNqJdlwEhP5QhKKl6w==}
+    dev: true
+
   /@types/connect@3.4.36:
     resolution: {integrity: sha512-P63Zd/JUGq+PdrM1lv0Wv5SBYeA2+CORvbrXbngriYY0jzLUWfQMQQxOhjONEz/wlHOAxOdY7CY65rgQdTjq2w==}
     dependencies:
@@ -4346,6 +4356,10 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: false
+
+  /big.js@6.2.1:
+    resolution: {integrity: sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==}
     dev: false
 
   /bigint-buffer@1.1.5:
