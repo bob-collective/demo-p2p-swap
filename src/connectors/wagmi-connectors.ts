@@ -1,7 +1,17 @@
 import { configureChains, createConfig, Chain } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { L2_BLOCK_EXPLORER, L2_CHAIN_ID, L2_MULTICALL3_ADDRESS, L2_RPC_URL } from '../config';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+import { L2_BLOCK_EXPLORER, L2_CHAIN_ID, L2_MULTICALL3_ADDRESS, L2_RPC_URL, L2_WSS_URL } from '../config';
+
+const L2_PROJECT_ID = 'BOB_P2P_Swap';
+
+const metadata = {
+  name: 'Web3Modal',
+  description: 'Web3Modal Example',
+  url: 'https://web3modal.com',
+  icons: ['https://avatars.githubusercontent.com/u/37784886']
+};
 
 const L2_CHAIN_CONFIG = {
   id: L2_CHAIN_ID,
@@ -13,8 +23,8 @@ const L2_CHAIN_CONFIG = {
     symbol: 'BOB'
   },
   rpcUrls: {
-    public: { http: [L2_RPC_URL] },
-    default: { http: [L2_RPC_URL] }
+    public: { http: [L2_RPC_URL], webSocket: [L2_WSS_URL] },
+    default: { http: [L2_RPC_URL], webSocket: [L2_WSS_URL] }
   },
   blockExplorers: {
     default: { name: 'BobScan', url: L2_BLOCK_EXPLORER }
@@ -32,7 +42,10 @@ const config = createConfig({
   autoConnect: true,
   publicClient,
   webSocketPublicClient,
-  connectors: [new MetaMaskConnector({ chains })]
+  connectors: [
+    new MetaMaskConnector({ chains }),
+    new WalletConnectConnector({ chains, options: { projectId: L2_PROJECT_ID, showQrModal: false, metadata } })
+  ]
 });
 
-export { config, L2_CHAIN_CONFIG };
+export { config, L2_CHAIN_CONFIG, L2_PROJECT_ID };
