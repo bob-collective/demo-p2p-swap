@@ -9,6 +9,7 @@ import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { isBitcoinTicker } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { isFormDisabled, isValidBTCAddress } from '../../../../utils/validation';
+import Big from 'big.js';
 
 type AddOrderFormData = {
   inputValue?: string;
@@ -19,12 +20,13 @@ type AddOrderFormData = {
 };
 
 type AddOrderFormProps = {
+  isLoading: boolean;
   offerModalRef: RefObject<HTMLDivElement>;
   receiveModalRef: RefObject<HTMLDivElement>;
   onSubmit: (data: Required<AddOrderFormData>) => void;
 };
 
-const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderFormProps): JSX.Element => {
+const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: AddOrderFormProps): JSX.Element => {
   const inititalTickers = useMemo(
     () => ({
       inputTicker: Erc20CurrencyTicker.ZBTC as CurrencyTicker,
@@ -80,7 +82,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
   });
 
   const {
-    isLoading,
+    isLoading: isLoadingAllowance,
     isAllowed: inputErc20TransferApproved,
     wrapInErc20ApprovalTx
   } = useErc20Allowance(
@@ -188,8 +190,8 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
             <P size='xs'>
               Price 1 {form.values.inputTicker} ={' '}
               <Strong>
-                {form.values.inputValue && form.values.outputValue
-                  ? parseFloat(form.values.outputValue) / parseFloat(form.values.inputValue)
+                {form.values.inputValue && new Big(form.values.inputValue || 0).gt(0) && !!form.values.outputValue
+                  ? new Big(form.values.outputValue).div(form.values.inputValue).toString()
                   : 0}{' '}
                 {form.values.outputTicker}{' '}
               </Strong>
@@ -200,7 +202,7 @@ const AddOrderForm = ({ offerModalRef, receiveModalRef, onSubmit }: AddOrderForm
           </Card>
         </Flex>
       </Flex>
-      <CTA loading={isLoading} disabled={isSubmitDisabled} size='large' type='submit'>
+      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {state.isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
       </CTA>
     </form>
