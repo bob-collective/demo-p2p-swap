@@ -25,6 +25,7 @@
     "react-router-dom": "^6.16.0",
     "styled-components": "^6.0.8",
     "viem": "^1.10.9",
+    "vite-plugin-node-polyfills": "^0.15.0",
     "wagmi": "^1.4.1",
     "yup": "^0.32.11"
   },

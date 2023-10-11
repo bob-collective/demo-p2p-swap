@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { HexString } from '../types';
+import { DefaultElectrsClient, getBitcoinTxProof } from 'bob-sdk/src/index';
+
 export const REGTEST_ESPLORA_BASE_PATH = 'http://localhost:3002';
 
 type TxStatus = 'NOT_FOUND' | 'IN_MEMPOOL' | 'IN_BLOCK';
@@ -18,6 +20,14 @@ const fetchBtcNetwork = async (path: `/${string}`) => {
     console.error(`Error fetching regtest electrs server: ${err}`);
     console.error('Make sure that electrs server is running at:', REGTEST_ESPLORA_BASE_PATH);
   }
+};
+
+const fetchProof = async (txId: string) => {
+  // TODO
+  const electrsClient = new DefaultElectrsClient('regtest');
+  // TODO: fetch from chain
+  const ToBeChanged_proofDifficulty = 2;
+  getBitcoinTxProof(electrsClient, txId, ToBeChanged_proofDifficulty);
 };
 
 const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): UseBtcTxResult => {
