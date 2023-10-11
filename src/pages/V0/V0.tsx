@@ -3,7 +3,7 @@ import { useAccount, useConnect, usePublicClient } from 'wagmi';
 import { formatUnits, parseUnits, formatEther, decodeEventLog } from 'viem';
 
 import './App.css';
-import { ContractType } from '../../contracts/config';
+import { ContractType } from '../../constants';
 import { useContract } from '../../hooks/useContract';
 import { config } from '../../connectors/wagmi-connectors';
 

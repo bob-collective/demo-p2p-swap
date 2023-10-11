@@ -1,6 +1,6 @@
 import { getContract } from 'viem';
 import { usePublicClient, useWalletClient } from 'wagmi';
-import { contracts, ContractType } from '../contracts/config';
+import { contracts, ContractType } from '../constants';
 import { useMemo } from 'react';
 
 // Wrapper around ethers Contract to automatically get contract types
