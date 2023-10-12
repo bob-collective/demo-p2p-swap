@@ -12,6 +12,7 @@
     "format:write": "prettier --write src/** --cache"
   },
   "dependencies": {
+    "@gobob/bob-sdk": "^1.0.3",
     "@interlay/hooks": "^0.0.7",
     "@interlay/system": "^0.0.1",
     "@interlay/theme": "^0.0.6",
