@@ -32,7 +32,6 @@ const CompleteAcceptedOrderModal = ({
   order,
   ...props
 }: CompleteAcceptedOrderModalProps): JSX.Element | null => {
-  console.log(order);
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const publicClient = usePublicClient();
 
