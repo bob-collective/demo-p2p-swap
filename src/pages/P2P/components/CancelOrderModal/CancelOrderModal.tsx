@@ -5,6 +5,7 @@ import { Order } from '../../../../types/orders';
 import { isBtcOrder } from '../../../../utils/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { usePublicClient } from 'wagmi';
+import { useState } from 'react';
 
 type CancelOrderModalProps = { order: Order | undefined; refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -12,7 +13,10 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
 
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
+
   const publicClient = usePublicClient();
+
+  const [isLoading, setLoading] = useState(false);
 
   if (!order) {
     return null;
@@ -21,12 +25,18 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
   const handleCloseOrder = async () => {
     const isBTCOrder = order ? isBtcOrder(order) : false;
 
-    const hash = await (isBTCOrder
-      ? writeBTCMarketplace.withdrawBtcBuyOrder([order.id])
-      : writeErc20Marketplace.withdrawErcErcOrder([order.id]));
-    await publicClient.waitForTransactionReceipt({ hash });
-    refetchOrders();
-    onClose();
+    setLoading(true);
+    try {
+      const hash = await (isBTCOrder
+        ? writeBTCMarketplace.withdrawBtcBuyOrder([order.id])
+        : writeErc20Marketplace.withdrawErcErcOrder([order.id]));
+      await publicClient.waitForTransactionReceipt({ hash });
+      refetchOrders();
+      onClose();
+    } catch (e) {
+      setLoading(false);
+    }
+    setLoading(false);
   };
 
   return (
@@ -42,7 +52,7 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
         <CTA size='large' fullWidth onPress={handleCloseOrder}>
           Back
         </CTA>
-        <CTA variant='secondary' size='large' fullWidth onPress={handleCloseOrder}>
+        <CTA loading={isLoading} variant='secondary' size='large' fullWidth onPress={handleCloseOrder}>
           Cancel Order
         </CTA>
       </ModalFooter>
