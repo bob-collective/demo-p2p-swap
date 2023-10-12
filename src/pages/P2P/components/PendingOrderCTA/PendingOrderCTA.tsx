@@ -1,17 +1,14 @@
 import { CTA, Flex, Span } from '@interlay/ui';
 import { useCountDown } from 'ahooks';
 
-const PendingOrderCTA = ({
-  deadline,
-  showCta,
-  ctaText,
-  onPress
-}: {
+type PendingOrderCTAProps = {
   deadline: Date;
   showCta: boolean;
   ctaText?: string;
   onPress?: () => void;
-}) => {
+};
+
+const PendingOrderCTA = ({ deadline, showCta, ctaText, onPress }: PendingOrderCTAProps) => {
   const [number, formattedRes] = useCountDown({
     targetDate: deadline
   });
@@ -41,3 +38,4 @@ const PendingOrderCTA = ({
 };
 
 export { PendingOrderCTA };
+export type { PendingOrderCTAProps };

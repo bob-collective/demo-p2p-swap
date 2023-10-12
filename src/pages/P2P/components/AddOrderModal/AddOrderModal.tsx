@@ -3,7 +3,8 @@ import { useCallback, useRef, useState } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ContractType, Erc20Currency, currencies } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
-import { isBitcoinCurrency, toAtomicAmount } from '../../../../utils/currencies';
+import { Amount } from '../../../../utils/amount';
+import { isBitcoinCurrency } from '../../../../utils/currencies';
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 
@@ -29,8 +30,8 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
       const inputCurrency = currencies[inputTicker];
       const outputCurrency = currencies[outputTicker];
-      const inputAtomicAmount = toAtomicAmount(inputValue, inputTicker);
-      const outputAtomicAmount = toAtomicAmount(outputValue, outputTicker);
+      const inputAtomicAmount = new Amount(inputCurrency, inputValue, true).toAtomic();
+      const outputAtomicAmount = new Amount(outputCurrency, outputValue, true).toAtomic();
 
       setLoading(true);
 

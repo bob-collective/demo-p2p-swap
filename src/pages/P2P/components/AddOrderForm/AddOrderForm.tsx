@@ -1,15 +1,15 @@
 import { useForm } from '@interlay/hooks';
 import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
-import { Key, RefObject, useMemo, useState } from 'react';
-import * as yup from 'yup';
+import Big from 'big.js';
+import { Key, RefObject, useState } from 'react';
 import { ContractType, CurrencyTicker, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { isBitcoinTicker } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
-import { isFormDisabled, isValidBTCAddress } from '../../../../utils/validation';
-import Big from 'big.js';
+import { AddOrderSchemaParams, addOrderSchema } from '../../../../utils/schemas';
+import { isFormDisabled } from '../../../../utils/validation';
 
 type AddOrderFormData = {
   inputValue?: string;
@@ -27,56 +27,44 @@ type AddOrderFormProps = {
 };
 
 const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: AddOrderFormProps): JSX.Element => {
-  const inititalTickers = useMemo(
-    () => ({
-      inputTicker: Erc20CurrencyTicker.ZBTC as CurrencyTicker,
-      outputTicker: Erc20CurrencyTicker.USDT as CurrencyTicker
-    }),
-    []
-  );
-
-  const [state, setState] = useState<{ isSellingBTC: boolean; isBuyingBTC: boolean }>({
-    isSellingBTC: inititalTickers.inputTicker === 'BTC',
-    isBuyingBTC: inititalTickers.outputTicker === 'BTC'
+  const [tickers, setTickers] = useState<{ inputTicker: CurrencyTicker; outputTicker: CurrencyTicker }>({
+    inputTicker: Erc20CurrencyTicker.ZBTC,
+    outputTicker: Erc20CurrencyTicker.USDT
   });
 
-  const { getBalanceInBaseDecimals } = useBalances();
+  const isSellingBTC = tickers.inputTicker === 'BTC';
+  const isBuyingBTC = tickers.outputTicker === 'BTC';
+
+  const { getBalance } = useBalances();
 
   const handleSubmit = (values: AddOrderFormData) => {
-    if (state.isSellingBTC) {
+    if (isSellingBTC) {
       return onSubmit?.(values as Required<AddOrderFormData>);
     }
 
     wrapInErc20ApprovalTx(() => onSubmit?.(values as Required<AddOrderFormData>));
   };
 
+  const inputBalance = isSellingBTC ? undefined : getBalance(tickers.inputTicker);
+  const outputBalance = isBuyingBTC ? undefined : getBalance(tickers.outputTicker);
+
+  const schemaParams: AddOrderSchemaParams = {
+    input: {
+      maxAmount: inputBalance !== undefined ? inputBalance.toBig() : undefined
+    },
+    output: {
+      maxAmount: outputBalance !== undefined ? outputBalance.toBig() : undefined
+    }
+  };
+
   const form = useForm<AddOrderFormData>({
     initialValues: {
-      ...inititalTickers,
+      ...tickers,
       inputValue: '',
       outputValue: '',
       btcAddress: ''
     },
-    validationSchema: yup.object().shape({
-      inputTicker: yup.string().required(),
-      outputTicker: yup.string().required(),
-      inputValue: yup.string().required('Please enter offer amount'),
-      outputValue: yup.string().required('Please enter '),
-      btcAddress: state.isBuyingBTC
-        ? yup
-            .string()
-            .required('Please enter bitcoin address')
-            .test('btcAddress', (value, ctx) => {
-              if (value === undefined) {
-                return true;
-              }
-
-              const isValid = isValidBTCAddress(value || '');
-
-              return isValid ? true : ctx.createError({ message: 'Please enter a valid address' });
-            })
-        : yup.string()
-    }),
+    validationSchema: addOrderSchema(schemaParams),
     onSubmit: handleSubmit,
     hideErrors: 'untouched'
   });
@@ -90,11 +78,8 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
     form.values.inputTicker as Erc20CurrencyTicker
   );
 
-  const handleTickerChange = (values: { inputTicker: string; outputTicker: string }) => {
-    setState({
-      isSellingBTC: values.inputTicker === 'BTC',
-      isBuyingBTC: values.outputTicker === 'BTC'
-    });
+  const handleTickerChange = (values: { inputTicker: CurrencyTicker; outputTicker: CurrencyTicker }) => {
+    setTickers(values);
   };
 
   const handleInputTickerChange = (ticker: Erc20CurrencyTicker) => {
@@ -113,7 +98,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
     });
   };
 
-  const handleOutputTickerChange = (ticker: Erc20CurrencyTicker) => {
+  const handleOutputTickerChange = (ticker: CurrencyTicker) => {
     const isDuplicate = ticker === form.values.inputTicker;
 
     const values = {
@@ -138,16 +123,14 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
         <TokenInput
           type='selectable'
           label='Offer'
-          balance={
-            isBitcoinTicker(form.values.inputTicker) ? undefined : getBalanceInBaseDecimals(form.values.inputTicker)
-          }
+          balance={inputBalance?.toBig().toString()}
           valueUSD={0}
           selectProps={mergeProps(
             {
               modalProps: { ref: offerModalRef },
               items: [
-                { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
-                { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
+                { value: 'ZBTC', balance: getBalance(Erc20CurrencyTicker.ZBTC).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'USDT', balance: getBalance(Erc20CurrencyTicker.USDT).toBig().toNumber(), balanceUSD: 0 },
                 { value: 'BTC', balance: '—', balanceUSD: 0 }
               ],
               onSelectionChange: (key: Key) => handleInputTickerChange(key as Erc20CurrencyTicker)
@@ -159,16 +142,14 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
         <TokenInput
           type='selectable'
           label='You will Receive'
-          balance={
-            isBitcoinTicker(form.values.outputTicker) ? undefined : getBalanceInBaseDecimals(form.values.outputTicker)
-          }
+          balance={outputBalance?.toBig().toString()}
           valueUSD={0}
           selectProps={mergeProps(
             {
               modalProps: { ref: receiveModalRef },
               items: [
-                { value: 'ZBTC', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.ZBTC), balanceUSD: 0 },
-                { value: 'USDT', balance: getBalanceInBaseDecimals(Erc20CurrencyTicker.USDT), balanceUSD: 0 },
+                { value: 'ZBTC', balance: getBalance(Erc20CurrencyTicker.ZBTC).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'USDT', balance: getBalance(Erc20CurrencyTicker.USDT).toBig().toNumber(), balanceUSD: 0 },
                 { value: 'BTC', balance: '—', balanceUSD: 0 }
               ],
               onSelectionChange: (key: Key) => handleOutputTickerChange(key as Erc20CurrencyTicker)
@@ -177,7 +158,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
           )}
           {...form.getTokenFieldProps('outputValue')}
         />
-        {state.isBuyingBTC && (
+        {isBuyingBTC && (
           <Input
             label='Bitcoin Address'
             placeholder='Enter your bitcoin address'
@@ -203,7 +184,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
         </Flex>
       </Flex>
       <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-        {state.isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
+        {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
       </CTA>
     </form>
   );

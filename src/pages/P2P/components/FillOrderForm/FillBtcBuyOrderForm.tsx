@@ -1,32 +1,55 @@
-import { Flex, Card, P, TokenInput, Strong, CTA } from '@interlay/ui';
-import { FormEvent } from 'react';
-import { Erc20CurrencyTicker } from '../../../../constants';
-import { useBalances } from '../../../../hooks/useBalances';
+import { useForm } from '@interlay/hooks';
+import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
 import { BtcBuyOrder } from '../../../../types/orders';
+import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
+import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
+import { isFormDisabled } from '../../../../utils/validation';
+
+type FillBTCBuyOrderFormData = {
+  inputValue: string;
+  outputValue: string;
+};
 
 type FillBtcBuyOrderFormProps = {
   isLoading: boolean;
   order: BtcBuyOrder;
-  onSubmit: () => void;
+  onSubmit: (values: FillBTCBuyOrderFormData) => void;
 };
 
 const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderFormProps): JSX.Element => {
-  const { getBalanceInBaseDecimals } = useBalances();
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    onSubmit?.();
+  const handleSubmit = (values: FillBTCBuyOrderFormData) => {
+    onSubmit(values);
   };
 
-  const outputAmount = toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker);
+  const outputMaxAmount = new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig();
+  const inputMaxAmount = outputMaxAmount.mul(order.price);
 
-  const inputAmount = order.price * parseFloat(outputAmount);
+  const schemaParams: FillOrderSchemaParams = {
+    inputValue: {
+      maxAmount: inputMaxAmount
+    },
+    outputValue: {
+      maxAmount: outputMaxAmount
+    }
+  };
+
+  const form = useForm<FillBTCBuyOrderFormData>({
+    initialValues: {
+      inputValue: inputMaxAmount.toString(),
+      outputValue: outputMaxAmount.toString()
+    },
+    validationSchema: fillOrderSchema(schemaParams),
+    onSubmit: handleSubmit,
+    validateOnMount: true
+    // TODO: set to hideErrors: "untouced" when allowing partial fullfilments
+  });
+
+  const isSubmitDisabled = isFormDisabled(form);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
         <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
           <P size='xs'>
@@ -36,18 +59,19 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
         </Card>
         <TokenInput
           label='Pay with'
-          value={inputAmount}
           isDisabled // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
+          {...form.getTokenFieldProps('inputValue')}
         />
         <TokenInput
           label='You will Receive'
-          balance={getBalanceInBaseDecimals(Erc20CurrencyTicker[order.offeringCurrency.ticker])}
-          value={outputAmount}
+          balance={outputMaxAmount.toString()}
+          balanceLabel='Limit'
           isDisabled
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
+          {...form.getTokenFieldProps('outputValue')}
         />
         <Flex direction='column' gap='spacing2'>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
@@ -63,7 +87,7 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
           </Card>
         </Flex>
       </Flex>
-      <CTA disabled={isLoading} size='large' type='submit'>
+      <CTA disabled={isSubmitDisabled} loading={isLoading} size='large' type='submit'>
         Fill Order
       </CTA>
     </form>
@@ -71,3 +95,4 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
 };
 
 export { FillBtcBuyOrderForm };
+export type { FillBTCBuyOrderFormData };

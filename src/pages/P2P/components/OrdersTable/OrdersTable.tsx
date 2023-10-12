@@ -1,16 +1,12 @@
-import { CTA, Card, Flex, Modal, ModalBody, ModalHeader, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { theme } from '@interlay/theme';
-import { ReactNode, useCallback, useMemo, useState } from 'react';
-import { formatUSD } from '../../../../utils/format';
-import { FillOrderForm } from '../FillOrderForm';
-import { CancelOrderModal } from '../CancelOrderModal';
-import { toAtomicAmount, toBaseAmount } from '../../../../utils/currencies';
-import { FillOrderFormData } from '../FillOrderForm/FillOrderForm';
-import { useContract } from '../../../../hooks/useContract';
-import { ContractType } from '../../../../constants';
-import { usePublicClient } from 'wagmi';
+import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { ReactNode, useMemo, useState } from 'react';
 import { Order } from '../../.../../../../types/orders';
-import { isBtcBuyOrder, isBtcOrder } from '../../../../utils/orders';
+import { toBaseAmount } from '../../../../utils/currencies';
+import { formatUSD } from '../../../../utils/format';
+import { isBtcBuyOrder } from '../../../../utils/orders';
+import { CancelOrderModal } from '../CancelOrderModal';
+import { FillOrderModal } from '../FillOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
@@ -59,67 +55,16 @@ type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 type OrdersTableProps = Props & InheritAttrs;
 
 const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props }: OrdersTableProps): JSX.Element => {
-  const [isOrderModalOpen, setOrderModalOpen] = useState(false);
-  const [isCancelOrderModalOpen, setCancelOrderModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order>();
-  const [isLoading, setLoading] = useState(false);
+  const [orderModal, setOrderModal] = useState<{ isOpen: boolean; type: 'fill' | 'cancel'; order?: Order }>({
+    isOpen: false,
+    type: 'fill'
+  });
 
-  const publicClient = usePublicClient();
+  const handleOpenFillOrderModal = (order: Order) => setOrderModal({ isOpen: true, type: 'fill', order });
 
-  const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
-  const { write: writeBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
+  const handleOpenCancelOrderModal = (order: Order) => setOrderModal({ isOpen: true, type: 'cancel', order });
 
-  const handleFillOrder = useCallback(
-    async (data?: FillOrderFormData) => {
-      if (!selectedOrder) {
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        // If we are dealing with BTC, use btc marketplace contract.
-        if (isBtcOrder(selectedOrder)) {
-          if (isBtcBuyOrder(selectedOrder)) {
-            const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([
-              selectedOrder.id,
-              selectedOrder.totalAskingAmount
-            ]);
-            await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
-            refetchAcceptedBtcOrders();
-          } else {
-            if (!data?.btcAddress) return;
-            const btcAddress = { bitcoinAddress: data.btcAddress };
-            const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
-              selectedOrder.id,
-              btcAddress,
-              selectedOrder.availableLiquidity
-            ]);
-            await publicClient.waitForTransactionReceipt({ hash: acceptBtcSellOrderTxHash });
-            refetchAcceptedBtcOrders();
-          }
-        } else {
-          if (!data?.input) {
-            return;
-          }
-          const atomicAmount = toAtomicAmount(data.input, selectedOrder.askingCurrency.ticker);
-
-          const hash = await writeErc20Marketplace.acceptErcErcOrder([selectedOrder.id, atomicAmount]);
-          await publicClient.waitForTransactionReceipt({ hash });
-        }
-      } catch (e) {
-        return setLoading(false);
-      }
-
-      setLoading(false);
-
-      handleCloseOrderModal();
-      refetchOrders();
-    },
-    [selectedOrder, refetchOrders, refetchAcceptedBtcOrders, writeBtcMarketplace, publicClient, writeErc20Marketplace]
-  );
-
-  const handleCloseOrderModal = () => setOrderModalOpen(false);
+  const handleCloseAnyOrderModal = () => setOrderModal((s) => ({ ...s, isOpen: false }));
 
   const columns = [
     { name: 'Asset', id: OrdersTableColumns.ASSET },
@@ -154,24 +99,14 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
                   {order.isOwnerOfOrder ? (
                     <CTA
                       variant='secondary'
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCancelOrderModal(true);
-                      }}
+                      onPress={() => handleOpenCancelOrderModal(order)}
                       disabled={isPendingOrder} // MEM0: remove when implementing partial fulfillment.
                       size='small'
                     >
                       Cancel order
                     </CTA>
                   ) : (
-                    <CTA
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setOrderModalOpen(true);
-                      }}
-                      disabled={isPendingOrder}
-                      size='small'
-                    >
+                    <CTA onPress={() => handleOpenFillOrderModal(order)} disabled={isPendingOrder} size='small'>
                       Fill Order
                     </CTA>
                   )}
@@ -188,18 +123,23 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>
-      <Modal isOpen={isOrderModalOpen} onClose={handleCloseOrderModal}>
-        <ModalHeader>Fill Order</ModalHeader>
-        <ModalBody>
-          {selectedOrder && <FillOrderForm isLoading={isLoading} onSubmit={handleFillOrder} order={selectedOrder} />}
-        </ModalBody>
-      </Modal>
-      <CancelOrderModal
-        isOpen={isCancelOrderModalOpen}
-        refetchOrders={refetchOrders}
-        order={selectedOrder}
-        onClose={() => setCancelOrderModal(false)}
-      />
+      {orderModal.order && (
+        <FillOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'fill'}
+          onClose={handleCloseAnyOrderModal}
+          refetchOrders={refetchOrders}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+          order={orderModal.order}
+        />
+      )}
+      {orderModal.order && (
+        <CancelOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'cancel'}
+          onClose={handleCloseAnyOrderModal}
+          order={orderModal.order}
+          refetchOrders={refetchOrders}
+        />
+      )}
     </div>
   );
 };

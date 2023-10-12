@@ -1,20 +1,16 @@
-import { useAccount, usePublicClient } from 'wagmi';
-import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { useCallback, useEffect, useState } from 'react';
-import { Erc20CurrencyTicker, Erc20Currencies, CurrencyTicker } from '../constants';
+import { useAccount, usePublicClient } from 'wagmi';
+import { Bitcoin, CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
+import { ERC20Abi } from '../contracts/abi/ERC20.abi';
+import { Amount } from '../utils/amount';
 import { isBitcoinTicker } from '../utils/currencies';
 
 type Balances = {
   [ticker in Erc20CurrencyTicker]: bigint;
 };
 
-const initialBalances = Object.keys(Erc20Currencies).reduce(
-  (result, ticker) => ({ ...result, [ticker]: undefined }),
-  {}
-) as Balances;
-
 const useBalances = () => {
-  const [balances, setBalances] = useState<Balances>(initialBalances);
+  const [balances, setBalances] = useState<Balances | undefined>(undefined);
   const publicClient = usePublicClient();
   const { address } = useAccount();
 
@@ -47,9 +43,20 @@ const useBalances = () => {
     // TODO: add transfer event listener and update balance on transfer in/out
   });
 
+  const getBalance = useCallback(
+    (ticker: CurrencyTicker) => {
+      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
+        return new Amount(Bitcoin, 0);
+      }
+
+      return new Amount(currencies[ticker], Number(balances[ticker]));
+    },
+    [balances]
+  );
+
   const getBalanceInBaseDecimals = useCallback(
     (ticker: CurrencyTicker) => {
-      if (isBitcoinTicker(ticker) || balances[ticker] === undefined) {
+      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
         return 0;
       }
 
@@ -58,7 +65,7 @@ const useBalances = () => {
     [balances]
   );
 
-  return { balances, getBalanceInBaseDecimals };
+  return { balances, getBalance, getBalanceInBaseDecimals };
 };
 
 export { useBalances };

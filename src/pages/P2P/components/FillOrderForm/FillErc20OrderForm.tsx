@@ -1,26 +1,31 @@
+import { useForm } from '@interlay/hooks';
 import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { mergeProps } from '@react-aria/utils';
+import Big from 'big.js';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { Erc20Order } from '../../../../types/orders';
+import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
+import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
+import { isFormDisabled } from '../../../../utils/validation';
+import { useEffect } from 'react';
 
-type FillOrderFormData = {
-  input?: string;
+type FillErc20OrderFormData = {
+  inputValue: string;
+  outputValue: string;
 };
 
 type FillErc20OrderFormProps = {
   isLoading: boolean;
   order: Erc20Order;
-  onSubmit: (data: Required<FillOrderFormData>) => void;
+  onSubmit: (values: FillErc20OrderFormData) => void;
 };
 
 const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormProps): JSX.Element => {
-  const [state, setState] = useState<FillOrderFormData>({});
-
-  const { getBalanceInBaseDecimals } = useBalances();
+  const { balances, getBalance } = useBalances();
 
   const {
     isLoading: isLoadingAllowance,
@@ -28,22 +33,53 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
     wrapInErc20ApprovalTx
   } = useErc20Allowance(ContractType.ERC20_MARKETPLACE, order.askingCurrency.ticker);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    wrapInErc20ApprovalTx(() => onSubmit?.(state as Required<FillOrderFormData>));
+  const handleSubmit = (values: FillErc20OrderFormData) => {
+    wrapInErc20ApprovalTx(() => onSubmit?.(values));
   };
 
-  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => setState((s) => ({ ...s, input: e.target.value }));
+  const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
-  const handleChangeOutput = (e: ChangeEvent<HTMLInputElement>) => setState((s) => ({ ...s, output: e.target.value }));
+  const outputMaxAmount = new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig();
+  const inputMaxAmount = outputMaxAmount.mul(order.price);
 
-  const isComplete = state.input;
+  const inputLimitAmount = inputBalance.toBig().gt(inputMaxAmount) ? inputMaxAmount : inputBalance.toBig();
 
-  const outputAmount = state.input ? parseFloat(state.input) / order.price : 0;
+  const schemaParams: FillOrderSchemaParams = {
+    inputValue: {
+      maxAmount: inputLimitAmount
+    },
+    outputValue: {
+      maxAmount: outputMaxAmount
+    }
+  };
+
+  const form = useForm<FillErc20OrderFormData>({
+    initialValues: {
+      inputValue: '',
+      outputValue: ''
+    },
+    validationSchema: fillOrderSchema(schemaParams),
+    onSubmit: handleSubmit,
+    hideErrors: false
+  });
+
+  useEffect(() => {
+    if (!balances) return;
+
+    form.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balances]);
+
+  const handleInputChange = (value: string) => {
+    const calculated = new Big(value || 0).gt(0) ? new Big(value).div(order.price).toString() : '0';
+
+    form.setFieldValue('outputValue', calculated, true);
+  };
+
+  const isSubmitDisabled = isFormDisabled(form);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
         <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
           <P size='xs'>
@@ -53,20 +89,20 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
         </Card>
         <TokenInput
           label='Pay with'
-          balance={getBalanceInBaseDecimals(Erc20CurrencyTicker[order.askingCurrency.ticker])}
-          onChange={handleChangeInput}
-          value={state.input}
+          balance={inputLimitAmount.toString()}
+          balanceLabel='Limit'
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
+          {...mergeProps(form.getTokenFieldProps('inputValue'), { onValueChange: handleInputChange })}
         />
         <TokenInput
           label='You will Receive'
-          balance={getBalanceInBaseDecimals(Erc20CurrencyTicker[order.offeringCurrency.ticker])}
-          onChange={handleChangeOutput}
-          value={outputAmount}
+          balance={outputMaxAmount.toString()}
+          balanceLabel='Limit'
           isDisabled
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
+          {...form.getTokenFieldProps('outputValue')}
         />
         <Flex direction='column' gap='spacing2'>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
@@ -82,7 +118,7 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
           </Card>
         </Flex>
       </Flex>
-      <CTA loading={isLoading || isLoadingAllowance} disabled={!isComplete} size='large' type='submit'>
+      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
       </CTA>
     </form>
@@ -90,4 +126,4 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
 };
 
 export { FillErc20OrderForm };
-export type { FillErc20OrderFormProps, FillOrderFormData };
+export type { FillErc20OrderFormProps, FillErc20OrderFormData };

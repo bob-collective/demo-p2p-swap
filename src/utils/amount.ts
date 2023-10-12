@@ -1,0 +1,24 @@
+import Big from 'big.js';
+import { Currency } from '../constants';
+
+export class Amount<T extends Currency> {
+  public readonly currency: T;
+  private readonly amount: Big;
+
+  constructor(currency: T, amount: Big.BigSource, base?: boolean) {
+    this.currency = currency;
+    this.amount = base ? new Big(amount) : new Big(amount).div(new Big(10).pow(currency.decimals));
+  }
+
+  public mul(value: Big.BigSource) {
+    return this.amount.mul(value);
+  }
+
+  public toBig() {
+    return this.amount;
+  }
+
+  public toAtomic() {
+    return BigInt(this.amount.mul(new Big(10).pow(this.currency.decimals)).toString());
+  }
+}
