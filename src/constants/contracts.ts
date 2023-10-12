@@ -1,6 +1,7 @@
 import { BtcMarketplaceAbi } from '../contracts/abi/BtcMarketplace.abi';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { Erc20MarketplaceAbi } from '../contracts/abi/Marketplace.abi';
+import { MintUsdtAbi } from '../contracts/abi/MintUsdt.abi';
 import { HexString } from '../types';
 import { Erc20Currencies, Erc20CurrencyTicker } from './currencies';
 
@@ -10,7 +11,8 @@ enum ContractType {
   ZBTC = 'ZBTC',
   USDT = 'USDT',
   ERC20_MARKETPLACE = 'ERC20_MARKETPLACE',
-  BTC_MARKETPLACE = 'BTC_MARKETPLACE'
+  BTC_MARKETPLACE = 'BTC_MARKETPLACE',
+  MINT_USDT = 'MINT_USDT'
 }
 
 // Contracts config with contract address and ABI
@@ -28,6 +30,11 @@ const contracts = {
   [ContractType.BTC_MARKETPLACE]: {
     address: '0x086645De538290e5147cD399A160E8339c529191',
     abi: BtcMarketplaceAbi
+  },
+  [ContractType.MINT_USDT]: {
+    // TODO: switch to deployed contract address
+    address: '0x117680E8f787DB385A1965c46b36FAE0313Db4C4',
+    abi: MintUsdtAbi
   }
 } as const;
 
