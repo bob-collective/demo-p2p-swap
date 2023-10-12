@@ -5,7 +5,9 @@ import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders
 import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
 import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
 import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
+import { useFaucet } from '../../hooks/useFaucet';
 import { theme } from '@interlay/theme';
+import { useAccount, usePublicClient } from 'wagmi';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -21,6 +23,20 @@ const P2P = (): JSX.Element => {
   const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
 
   const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
+
+  // START FAUCET
+  const { write: writeFaucet } = useFaucet();
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+
+  const handleCallFaucet = async () => {
+    if (!address) return;
+
+    const tx = await writeFaucet.mint([address, BigInt(10000000000000000000)]);
+    await publicClient.waitForTransactionReceipt({ hash: tx });
+  };
+
+  // END FAUCET
 
   const orders = useMemo(
     () => [
@@ -48,6 +64,9 @@ const P2P = (): JSX.Element => {
 
   return (
     <>
+      <CTA onPress={() => handleCallFaucet()} size='small'>
+        Get tokens
+      </CTA>
       <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
         <Flex alignItems='center' justifyContent='space-between'>
           <H1 size='xl2' id={titleId}>
