@@ -12,7 +12,7 @@ import {
   TextLink
 } from '@interlay/ui';
 import { usePublicClient } from 'wagmi';
-import { Bitcoin, ContractType } from '../../../../constants';
+import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useBtcTx } from '../../../../hooks/useBtcTx';
 import { useContract } from '../../../../hooks/useContract';
 import { AcceptedBtcOrder } from '../../../../types/orders';
@@ -35,19 +35,21 @@ const CompleteAcceptedOrderModal = ({
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const publicClient = usePublicClient();
 
-  const { status, txId, confirmations } = useBtcTx(order?.bitcoinAddress);
+  const { status, txId, confirmations, proofData } = useBtcTx(order?.bitcoinAddress);
 
   if (!order) {
     return null;
   }
 
   const handleCompleteOrder = async () => {
-    const mockedProof = { dummy: BigInt(0) };
+    if (!proofData) {
+      return;
+    }
     if (order.type === 'buy') {
-      const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, mockedProof]);
+      const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, proofData.info, proofData.proof]);
       await publicClient.waitForTransactionReceipt({ hash });
     } else {
-      const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, mockedProof]);
+      const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, proofData.info, proofData.proof]);
       await publicClient.waitForTransactionReceipt({ hash });
     }
 
@@ -56,9 +58,7 @@ const CompleteAcceptedOrderModal = ({
     onClose();
   };
 
-  const isSubmissionDisabled = !confirmations || confirmations < 6;
-
-  console.log(status, txId, confirmations);
+  const isSubmissionDisabled = !confirmations || !proofData || confirmations < REQUIRED_BITCOIN_CONFIRMATIONS;
 
   return (
     <Modal {...props} onClose={onClose}>
@@ -100,7 +100,7 @@ const CompleteAcceptedOrderModal = ({
               {isSubmissionDisabled && <StyledLoadingSpinner variant='indeterminate' diameter={18} thickness={2} />}
               <P size='s'>
                 Bitcoin transaction found (
-                <TextLink external href={`http://127.0.0.1:3002/tx/${txId}`}>
+                <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>
                   {txId?.slice(0, 4)}...{txId?.slice(txId.length - 4)}
                 </TextLink>
                 ) with <Strong color='secondary'>{confirmations} / 6</Strong> confirmations.

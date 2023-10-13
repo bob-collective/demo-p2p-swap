@@ -28,7 +28,7 @@ const contracts = {
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x086645De538290e5147cD399A160E8339c529191',
+    address: '0x2BC97dF1B877972AD5fc7639979d116F7D9D87b9',
     abi: BtcMarketplaceAbi
   },
   [ContractType.MINT_USDT]: {
