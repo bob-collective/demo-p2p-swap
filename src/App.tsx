@@ -1,11 +1,9 @@
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { WagmiConfig, useConnect } from 'wagmi';
 import { Layout } from './components';
-import { L2_PROJECT_ID, L2_CHAIN_CONFIG, config, L2_METADATA } from './connectors/wagmi-connectors';
+import { L2_CHAIN_CONFIG, L2_METADATA, L2_PROJECT_ID, config } from './connectors/wagmi-connectors';
 import { P2P } from './pages/P2P';
 import { V0 } from './pages/V0';
-import { useEffect } from 'react';
 import './utils/yup.custom';
 
 const wagmiConfig = defaultWagmiConfig({ chains: [L2_CHAIN_CONFIG], projectId: L2_PROJECT_ID, metadata: L2_METADATA });
@@ -18,24 +16,15 @@ createWeb3Modal({
 });
 
 function App() {
-  const { connect } = useConnect({ connector: config.connectors[0] });
-
-  /** PROMPT WALLET CONNECTION */
-  useEffect(() => {
-    connect();
-  }, [connect]);
-
   return (
-    <WagmiConfig config={config}>
-      <Layout>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<P2P />} path='/' />
-            <Route element={<V0 />} path='v0/' />
-          </Routes>
-        </BrowserRouter>
-      </Layout>
-    </WagmiConfig>
+    <Layout>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<P2P />} path='/' />
+          <Route element={<V0 />} path='v0/' />
+        </Routes>
+      </BrowserRouter>
+    </Layout>
   );
 }
 

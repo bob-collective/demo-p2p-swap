@@ -1,11 +1,8 @@
-import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
-import { useCallback, useMemo, useState } from 'react';
-import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
-import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
-import { useGetActiveBtcBuyOrders } from '../../hooks/fetchers/useGetActiveBtcBuyOrders';
-import { useGetAcceptedBtcOrders } from '../../hooks/fetchers/useGetAcceptedBtcOrders';
-import { useGetActiveBtcSellOrders } from '../../hooks/fetchers/useGetActiveBtcSellOrders';
 import { theme } from '@interlay/theme';
+import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
+import { useState } from 'react';
+import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
+import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -16,33 +13,7 @@ const P2P = (): JSX.Element => {
   const titleId3 = 'titleId3';
   const titleId4 = 'titleId4';
 
-  const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
-  const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
-  const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
-
-  const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
-
-  const orders = useMemo(
-    () => [
-      ...(erc20Orders ? erc20Orders : []),
-      ...(btcBuyOrders ? btcBuyOrders : []),
-      ...(btcSellOrders ? btcSellOrders : [])
-    ],
-    [erc20Orders, btcBuyOrders, btcSellOrders]
-  );
-
-  // TODO: Merge ownedOrders and ownedAcceptedBtcOrders, and unownedOrders and unownedAcceptedBtcOrders
-  // into single arrays.
-  const ownedOrders = orders.filter((order) => order.isOwnerOfOrder);
-  const unownedOrders = orders.filter((order) => !order.isOwnerOfOrder);
-  const ownedAcceptedBtcOrders = acceptedBtcOrders?.filter((order) => order.isOwnerOfOrder);
-  const unownedAcceptedBtcOrders = acceptedBtcOrders?.filter((order) => !order.isOwnerOfOrder);
-
-  const refetchOrders = useCallback(() => {
-    refetchActiveErc20Orders();
-    refetchBtcBuyOrders();
-    refetchBtcSellOrders();
-  }, [refetchActiveErc20Orders, refetchBtcBuyOrders, refetchBtcSellOrders]);
+  const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
@@ -65,11 +36,11 @@ const P2P = (): JSX.Element => {
                   Buy
                 </H2>
               </Flex>
-              {unownedOrders.length ? (
+              {orders?.unowned.length ? (
                 <OrdersTable
                   aria-labelledby={titleId}
-                  orders={unownedOrders}
-                  refetchOrders={refetchOrders}
+                  orders={orders?.unowned}
+                  refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
               ) : (
@@ -78,7 +49,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
               )}
             </>
-            {!!unownedAcceptedBtcOrders?.length && (
+            {!!orders?.acceptedBtc.unowned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -87,15 +58,15 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId2}
-                  orders={unownedAcceptedBtcOrders}
-                  refetchOrders={refetchOrders}
+                  orders={orders?.acceptedBtc.unowned}
+                  refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
               </>
             )}
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
-            {!!ownedOrders.length && (
+            {!!orders?.owned.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId3} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -104,13 +75,13 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <OrdersTable
                   aria-labelledby={titleId3}
-                  orders={ownedOrders}
-                  refetchOrders={refetchOrders}
+                  orders={orders?.owned}
+                  refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
               </>
             )}
-            {!!ownedAcceptedBtcOrders?.length && (
+            {!!orders?.acceptedBtc.owned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -119,8 +90,8 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId4}
-                  orders={ownedAcceptedBtcOrders}
-                  refetchOrders={refetchOrders}
+                  orders={orders?.acceptedBtc.owned}
+                  refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
               </>
@@ -132,7 +103,7 @@ const P2P = (): JSX.Element => {
         isOpen={isAddNewOrderModal.isOpen}
         onClose={handleCloseNewOrderModal}
         refetchOrders={() => {
-          refetchOrders();
+          refetch();
           refetchAcceptedBtcOrders();
         }}
       />
