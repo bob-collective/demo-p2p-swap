@@ -3,6 +3,7 @@ import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui'
 import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
+import { useBalances } from '../../hooks/useBalances';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -14,6 +15,9 @@ const P2P = (): JSX.Element => {
   const titleId4 = 'titleId4';
 
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
+
+  // just to prefetch
+  useBalances();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
