@@ -90,14 +90,14 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
           label='Pay with'
           balance={inputLimitAmount.toString()}
           balanceLabel='Limit'
-          isDisabled // TODO: remove after we start allowing partial fullfilments
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
           {...form.getTokenFieldProps('inputValue')}
         />
         <TokenInput
           label='You will Receive'
-          isDisabled
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
           {...form.getTokenFieldProps('outputValue')}

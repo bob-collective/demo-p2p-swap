@@ -4,7 +4,7 @@ import { usePublicClient } from 'wagmi';
 import { ContractType } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
 import { Order } from '../../../../types/orders';
-import { toAtomicAmount } from '../../../../utils/currencies';
+import { Amount } from '../../../../utils/amount';
 import { FillOrderForm, FillOrderFormData } from '../FillOrderForm';
 
 type Props = {
@@ -58,9 +58,9 @@ const FillOrderModal = ({
             break;
           }
           case 'erc20': {
-            const atomicAmount = toAtomicAmount(data.values.inputValue, order.askingCurrency.ticker);
+            const inputAtomicAmount = new Amount(order.askingCurrency, data.values.inputValue, true).toAtomic();
 
-            const hash = await writeErc20Marketplace.acceptErcErcOrder([order.id, atomicAmount]);
+            const hash = await writeErc20Marketplace.acceptErcErcOrder([order.id, inputAtomicAmount]);
             await publicClient.waitForTransactionReceipt({ hash });
             break;
           }

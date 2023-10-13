@@ -46,7 +46,7 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
     // TODO: set to hideErrors: "untouced" when allowing partial fullfilments
   });
 
-  const isSubmitDisabled = isFormDisabled(form);
+  const isSubmitDisabled = isFormDisabled(form, false);
 
   return (
     <form onSubmit={form.handleSubmit}>
@@ -59,16 +59,16 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
         </Card>
         <TokenInput
           label='Pay with'
-          isDisabled // TODO: remove after we start allowing partial fullfilments
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
           {...form.getTokenFieldProps('inputValue')}
         />
         <TokenInput
           label='You will Receive'
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           balance={outputMaxAmount.toString()}
           balanceLabel='Limit'
-          isDisabled
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
           {...form.getTokenFieldProps('outputValue')}

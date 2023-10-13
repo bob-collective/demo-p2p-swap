@@ -2,7 +2,7 @@ import { useForm } from '@interlay/hooks';
 import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
 import Big from 'big.js';
-import { Key, RefObject, useState } from 'react';
+import { Key, RefObject, useEffect, useState } from 'react';
 import { ContractType, CurrencyTicker, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
@@ -35,7 +35,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
   const isSellingBTC = tickers.inputTicker === 'BTC';
   const isBuyingBTC = tickers.outputTicker === 'BTC';
 
-  const { getBalance } = useBalances();
+  const { balances, getBalance } = useBalances();
 
   const handleSubmit = (values: AddOrderFormData) => {
     if (isSellingBTC) {
@@ -64,6 +64,13 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
     onSubmit: handleSubmit,
     hideErrors: 'untouched'
   });
+
+  useEffect(() => {
+    if (!balances) return;
+
+    form.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balances]);
 
   const {
     isLoading: isLoadingAllowance,

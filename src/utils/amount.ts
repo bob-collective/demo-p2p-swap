@@ -10,10 +10,6 @@ export class Amount<T extends Currency> {
     this.amount = base ? new Big(amount) : new Big(amount).div(new Big(10).pow(currency.decimals));
   }
 
-  public mul(value: Big.BigSource) {
-    return this.amount.mul(value);
-  }
-
   public toBig() {
     return this.amount;
   }
