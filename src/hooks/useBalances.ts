@@ -1,25 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+import Big from 'big.js';
+import { useCallback } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
-import { Bitcoin, CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
+import { CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
+import { REFETCH_INTERVAL } from '../constants/query';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { Amount } from '../utils/amount';
-import { isBitcoinTicker, toBaseAmount } from '../utils/currencies';
+import { isBitcoinTicker } from '../utils/currencies';
+import { useGetOrders } from './fetchers/useGetOrders';
 
 type Balances = {
   [ticker in Erc20CurrencyTicker]: bigint;
 };
 
 const useBalances = () => {
-  const [balances, setBalances] = useState<Balances | undefined>(undefined);
   const publicClient = usePublicClient();
   const { address } = useAccount();
 
-  useEffect(() => {
-    const fetchBalances = async () => {
-      if (!address || !publicClient) {
-        return;
-      }
+  const { data: orders } = useGetOrders();
 
+  // TODO: add transfer event listener and update balance on transfer in/out
+  const { data, ...queryResult } = useQuery({
+    queryKey: ['balances', address],
+    enabled: !!address && !!publicClient,
+    queryFn: async () => {
       const balancesMulticallResult = await publicClient.multicall({
         contracts: Object.values(Erc20Currencies).map(({ address: erc20Address }) => ({
           abi: ERC20Abi,
@@ -29,43 +34,40 @@ const useBalances = () => {
         }))
       });
 
-      const balancesResult = Object.keys(Erc20Currencies).reduce<Balances>(
+      return Object.keys(Erc20Currencies).reduce<Balances>(
         (result, ticker, index) => ({ ...result, [ticker]: balancesMulticallResult[index].result }),
         {} as Balances
       );
-
-      setBalances(balancesResult);
-    };
-    fetchBalances();
-  }, [address, publicClient]);
-
-  useEffect(() => {
-    // TODO: add transfer event listener and update balance on transfer in/out
+    },
+    refetchInterval: REFETCH_INTERVAL.MINUTE
   });
 
   const getBalance = useCallback(
     (ticker: CurrencyTicker) => {
-      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
-        return new Amount(Bitcoin, 0);
+      const currency = currencies[ticker];
+
+      if (isBitcoinTicker(ticker) || data?.[ticker] === undefined) {
+        return new Amount(currency, 0);
       }
 
-      return new Amount(currencies[ticker], Number(balances[ticker]));
+      const current = new Amount(currencies[ticker], Number(data[ticker]));
+
+      const toDeduct = orders.owned.reduce(
+        (acc, order) =>
+          order.offeringCurrency.ticker === currency.ticker
+            ? acc.add(new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig())
+            : acc,
+        new Big(0)
+      );
+
+      const balance = current.toBig().minus(toDeduct);
+
+      return balance.gt(0) ? new Amount(currency, balance, true) : new Amount(currency, 0);
     },
-    [balances]
+    [data, orders.owned]
   );
 
-  const getBalanceInBaseDecimals = useCallback(
-    (ticker: CurrencyTicker) => {
-      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
-        return 0;
-      }
-
-      return toBaseAmount(balances[ticker], Erc20Currencies[ticker].ticker);
-    },
-    [balances]
-  );
-
-  return { balances, getBalance, getBalanceInBaseDecimals };
+  return { ...queryResult, balances: data, getBalance };
 };
 
 export { useBalances };
