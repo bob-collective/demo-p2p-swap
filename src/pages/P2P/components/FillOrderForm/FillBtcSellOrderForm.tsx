@@ -1,5 +1,7 @@
 import { useForm } from '@interlay/hooks';
-import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
+import { Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
+import { useEffect } from 'react';
+import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
@@ -9,7 +11,6 @@ import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
-import { useEffect } from 'react';
 
 type FillBTCSellOrderFormData = {
   inputValue: string;
@@ -121,9 +122,9 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
           </Card>
         </Flex>
       </Flex>
-      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
+      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
-      </CTA>
+      </AuthCTA>
     </form>
   );
 };

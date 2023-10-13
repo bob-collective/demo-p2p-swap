@@ -4,6 +4,7 @@ import { ContractType } from '../../../../constants';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { usePublicClient } from 'wagmi';
+import { AuthCTA } from '../../../../components/AuthCTA';
 
 type CancelAcceptedOrderModalProps = { order: AcceptedBtcOrder | undefined; refetchOrders: () => void } & Omit<
   ModalProps,
@@ -46,9 +47,9 @@ const CancelAcceptedOrderModal = ({
         <CTA size='large' fullWidth onPress={handleCancelOrder}>
           Back
         </CTA>
-        <CTA variant='secondary' size='large' fullWidth onPress={handleCancelOrder}>
+        <AuthCTA variant='secondary' size='large' fullWidth onPress={handleCancelOrder}>
           Cancel Order
-        </CTA>
+        </AuthCTA>
       </ModalFooter>
     </Modal>
   );
