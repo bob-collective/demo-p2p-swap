@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useContract } from '../useContract';
-import { Bitcoin, ContractType } from '../../constants';
-import { BtcSellOrder } from '../../types/orders';
-import { HexString } from '../../types';
-import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
-import { useAccount } from 'wagmi';
+import { useQuery } from '@tanstack/react-query';
 import { isAddressEqual } from 'viem';
+import { useAccount } from 'wagmi';
+import { Bitcoin, ContractType } from '../../constants';
+import { HexString } from '../../types';
+import { BtcSellOrder } from '../../types/orders';
+import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
+import { useContract } from '../useContract';
+import { REFETCH_INTERVAL } from '../../constants/query';
 
 const parseBtcSellOrder = (
   rawOrder: {
@@ -55,27 +56,27 @@ const parseBtcSellOrder = (
 
 const useGetActiveBtcSellOrders = () => {
   const { read: readBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
-
-  const [sellOrders, setSellOrders] = useState<Array<BtcSellOrder>>();
   const { address } = useAccount();
 
-  const getBtcBuyOrders = useCallback(async () => {
-    const [[rawOrders, ordersIds], [rawOrderAcceptances]] = await Promise.all([
-      readBtcMarketplace.getOpenBtcSellOrders(),
-      readBtcMarketplace.getOpenAcceptedBtcSellOrders()
-    ]);
-    const parsedOrders = rawOrders
-      .map((order, index) => parseBtcSellOrder(order, address, ordersIds[index], rawOrderAcceptances))
-      // Filter out empty orders that are not in pending state.
-      .filter((order) => order.availableLiquidity > 0 || order.deadline);
-    setSellOrders(parsedOrders);
-  }, [readBtcMarketplace, address]);
+  const queryResult = useQuery({
+    queryKey: ['active-btc-sell-orders', address],
+    enabled: !!readBtcMarketplace,
+    queryFn: async () => {
+      const [[rawOrders, ordersIds], [rawOrderAcceptances]] = await Promise.all([
+        readBtcMarketplace.getOpenBtcSellOrders(),
+        readBtcMarketplace.getOpenAcceptedBtcSellOrders()
+      ]);
+      return (
+        rawOrders
+          .map((order, index) => parseBtcSellOrder(order, address, ordersIds[index], rawOrderAcceptances))
+          // Filter out empty orders that are not in pending state.
+          .filter((order) => order.availableLiquidity > 0 || order.deadline)
+      );
+    },
+    refetchInterval: REFETCH_INTERVAL.MINUTE
+  });
 
-  useEffect(() => {
-    getBtcBuyOrders();
-  }, [getBtcBuyOrders]);
-
-  return { data: sellOrders, refetch: getBtcBuyOrders };
+  return queryResult;
 };
 
 export { useGetActiveBtcSellOrders };

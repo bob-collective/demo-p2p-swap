@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Bitcoin, ContractType } from '../../constants';
+
+import { isAddressEqual } from 'viem';
+import { useAccount } from 'wagmi';
 import { HexString } from '../../types';
 import { AcceptedBtcOrder } from '../../types/orders';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
-import { useContract } from '../useContract';
 import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
-import { useAccount } from 'wagmi';
-import { isAddressEqual } from 'viem';
+import { useContract } from '../useContract';
+import { REFETCH_INTERVAL } from '../../constants/query';
 
 const parseAcceptedBtcOrder = (
   rawOrder: {
@@ -71,30 +73,30 @@ const useGetAcceptedBtcOrders = () => {
   const { read: readBtcMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const { address } = useAccount();
 
-  const [acceptedBtcOrders, setBuyOrders] = useState<Array<AcceptedBtcOrder>>();
+  const queryResult = useQuery({
+    queryKey: ['accepted-btc-orders', address],
+    enabled: !!readBtcMarketplace,
+    queryFn: async () => {
+      const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds], [rawUnderlyingBuyOrders, underlyingBuyIds]] =
+        await Promise.all([
+          readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
+          readBtcMarketplace.getOpenAcceptedBtcSellOrders(),
+          readBtcMarketplace.getOpenBtcBuyOrders()
+        ]);
 
-  const getBtcBuyOrders = useCallback(async () => {
-    const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds], [rawUnderlyingBuyOrders, underlyingBuyIds]] =
-      await Promise.all([
-        readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
-        readBtcMarketplace.getOpenAcceptedBtcSellOrders(),
-        readBtcMarketplace.getOpenBtcBuyOrders()
-      ]);
+      const parsedBuyOrders = rawBuyOrders.map((order, index) =>
+        parseAcceptedBtcOrder(order, buyOrderIds[index], 'buy', address, rawUnderlyingBuyOrders, underlyingBuyIds)
+      );
+      const parsedSellOrders = rawSellOrders.map((order, index) =>
+        parseAcceptedBtcOrder(order, sellOrderIds[index], 'sell', address, rawUnderlyingBuyOrders, underlyingBuyIds)
+      );
 
-    const parsedBuyOrders = rawBuyOrders.map((order, index) =>
-      parseAcceptedBtcOrder(order, buyOrderIds[index], 'buy', address, rawUnderlyingBuyOrders, underlyingBuyIds)
-    );
-    const parsedSellOrders = rawSellOrders.map((order, index) =>
-      parseAcceptedBtcOrder(order, sellOrderIds[index], 'sell', address, rawUnderlyingBuyOrders, underlyingBuyIds)
-    );
-    setBuyOrders([...parsedBuyOrders, ...parsedSellOrders]);
-  }, [readBtcMarketplace, address]);
+      return [...parsedBuyOrders, ...parsedSellOrders];
+    },
+    refetchInterval: REFETCH_INTERVAL.MINUTE
+  });
 
-  useEffect(() => {
-    getBtcBuyOrders();
-  }, [getBtcBuyOrders]);
-
-  return { data: acceptedBtcOrders, refetch: getBtcBuyOrders };
+  return queryResult;
 };
 
 export { useGetAcceptedBtcOrders };

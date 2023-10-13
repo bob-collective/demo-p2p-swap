@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ContractType } from '../../constants';
-import { useContract } from '../useContract';
-import { HexString } from '../../types';
-import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
-import { Erc20Order } from '../../types/orders';
+import { useQuery } from '@tanstack/react-query';
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
+import { ContractType } from '../../constants';
+import { HexString } from '../../types';
+import { Erc20Order } from '../../types/orders';
+import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderPrice } from '../../utils/orders';
+import { useContract } from '../useContract';
+import { REFETCH_INTERVAL } from '../../constants/query';
 
 const parseErc20Order = (
   rawOrder: {
@@ -45,25 +46,22 @@ const parseErc20Order = (
 };
 
 const useGetActiveErc20Orders = () => {
-  const [activeOrders, setActiveOrders] = useState<Array<Erc20Order>>();
   const { read: readErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
-
   const { address } = useAccount();
 
-  const fetchErc20Orders = useCallback(async () => {
-    if (!readErc20Marketplace) return;
-    const [rawOrders, identifiers] = await readErc20Marketplace.getOpenOrders();
-    // !MEMO: Should use modified marketplace contract to return ID, this will start breaking when orders
-    // get cancelled / totally filled.
-    const orders = rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }, address));
-    setActiveOrders(orders);
-  }, [setActiveOrders, readErc20Marketplace, address]);
+  const queryResult = useQuery({
+    queryKey: ['active-erc20-orders', address],
+    enabled: !!readErc20Marketplace,
+    queryFn: async () => {
+      const [rawOrders, identifiers] = await readErc20Marketplace.getOpenOrders();
+      // !MEMO: Should use modified marketplace contract to return ID, this will start breaking when orders
+      // get cancelled / totally filled.
+      return rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }, address));
+    },
+    refetchInterval: REFETCH_INTERVAL.MINUTE
+  });
 
-  useEffect(() => {
-    fetchErc20Orders();
-  }, [fetchErc20Orders]);
-
-  return { data: activeOrders, refetch: fetchErc20Orders };
+  return queryResult;
 };
 
 export { useGetActiveErc20Orders };
