@@ -12,6 +12,8 @@ import {
   TextLink
 } from '@interlay/ui';
 import { usePublicClient } from 'wagmi';
+import QrCode from 'qrcode.react';
+
 import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useBtcTx } from '../../../../hooks/useBtcTx';
 import { useContract } from '../../../../hooks/useContract';
@@ -35,7 +37,7 @@ const CompleteAcceptedOrderModal = ({
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const publicClient = usePublicClient();
 
-  const { status, txId, confirmations, proofData } = useBtcTx(order?.bitcoinAddress);
+  const { status, txId, confirmations, proofData } = useBtcTx(order?.bitcoinAddress, order?.amountBtc);
 
   if (!order) {
     return null;
@@ -65,11 +67,12 @@ const CompleteAcceptedOrderModal = ({
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
-          <Flex gap='spacing2' direction='column'>
-            <P size='s'>
+        <P size='s'>
               1. Send <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong> to the
               following bitcoin address:
             </P>
+          <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
+
             <Card
               rounded='lg'
               variant='bordered'
@@ -80,10 +83,11 @@ const CompleteAcceptedOrderModal = ({
             >
               <P size='s'>{order.bitcoinAddress}</P>
             </Card>
+            <QrCode includeMargin value={`bitcoin:${order.bitcoinAddress}?amount=${toBaseAmount(order.amountBtc, Bitcoin.ticker)}`} />
           </Flex>
-          <P size='s'>2. Submit your transaction proof.</P>
+          <P size='s'>2. Submit your transaction proof by clicking on Complete order.</P>
           <P size='s'>
-            3. Once the order is complete you will receive{' '}
+            3. Once the order is completed you will receive{' '}
             <Strong color='secondary'>
               {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}
             </Strong>
@@ -103,7 +107,7 @@ const CompleteAcceptedOrderModal = ({
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>
                   {txId?.slice(0, 4)}...{txId?.slice(txId.length - 4)}
                 </TextLink>
-                ) with <Strong color='secondary'>{confirmations} / 6</Strong> confirmations.
+                ) with <Strong color='secondary'>{confirmations} / {REQUIRED_BITCOIN_CONFIRMATIONS}</Strong> confirmation.
               </P>
             </Flex>
           )}
