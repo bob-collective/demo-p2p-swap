@@ -1,8 +1,9 @@
 import { useForm } from '@interlay/hooks';
-import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
+import { Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
 import Big from 'big.js';
 import { Key, RefObject, useEffect, useState } from 'react';
+import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType, CurrencyTicker, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
@@ -185,9 +186,9 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
           </Card>
         </Flex>
       </Flex>
-      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
+      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
-      </CTA>
+      </AuthCTA>
     </form>
   );
 };

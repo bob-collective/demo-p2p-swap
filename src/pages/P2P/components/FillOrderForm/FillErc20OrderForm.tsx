@@ -1,7 +1,9 @@
 import { useForm } from '@interlay/hooks';
-import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
+import { Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
 import Big from 'big.js';
+import { useEffect } from 'react';
+import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
@@ -11,7 +13,6 @@ import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
-import { useEffect } from 'react';
 
 type FillErc20OrderFormData = {
   inputValue: string;
@@ -131,12 +132,12 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
           </Card>
         </Flex>
       </Flex>
-      <CTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
+      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
         {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
-      </CTA>
+      </AuthCTA>
     </form>
   );
 };
 
 export { FillErc20OrderForm };
-export type { FillErc20OrderFormProps, FillErc20OrderFormData };
+export type { FillErc20OrderFormData, FillErc20OrderFormProps };

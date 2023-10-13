@@ -1,19 +1,8 @@
-import {
-  CTA,
-  Card,
-  Flex,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalProps,
-  P,
-  Strong,
-  TextLink
-} from '@interlay/ui';
-import { usePublicClient } from 'wagmi';
+import { Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
 import QrCode from 'qrcode.react';
+import { usePublicClient } from 'wagmi';
 
+import { AuthCTA } from '../../../../components/AuthCTA';
 import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useBtcTx } from '../../../../hooks/useBtcTx';
 import { useContract } from '../../../../hooks/useContract';
@@ -67,12 +56,11 @@ const CompleteAcceptedOrderModal = ({
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
-        <P size='s'>
-              1. Send <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong> to the
-              following bitcoin address:
-            </P>
+          <P size='s'>
+            1. Send <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong> to the
+            following bitcoin address:
+          </P>
           <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
-
             <Card
               rounded='lg'
               variant='bordered'
@@ -83,7 +71,10 @@ const CompleteAcceptedOrderModal = ({
             >
               <P size='s'>{order.bitcoinAddress}</P>
             </Card>
-            <QrCode includeMargin value={`bitcoin:${order.bitcoinAddress}?amount=${toBaseAmount(order.amountBtc, Bitcoin.ticker)}`} />
+            <QrCode
+              includeMargin
+              value={`bitcoin:${order.bitcoinAddress}?amount=${toBaseAmount(order.amountBtc, Bitcoin.ticker)}`}
+            />
           </Flex>
           <P size='s'>2. Submit your transaction proof by clicking on Complete order.</P>
           <P size='s'>
@@ -107,16 +98,20 @@ const CompleteAcceptedOrderModal = ({
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>
                   {txId?.slice(0, 4)}...{txId?.slice(txId.length - 4)}
                 </TextLink>
-                ) with <Strong color='secondary'>{confirmations} / {REQUIRED_BITCOIN_CONFIRMATIONS}</Strong> confirmation.
+                ) with{' '}
+                <Strong color='secondary'>
+                  {confirmations} / {REQUIRED_BITCOIN_CONFIRMATIONS}
+                </Strong>{' '}
+                confirmation.
               </P>
             </Flex>
           )}
         </Card>
       </ModalBody>
       <ModalFooter direction='row'>
-        <CTA disabled={isSubmissionDisabled} variant='primary' size='large' fullWidth onPress={handleCompleteOrder}>
+        <AuthCTA disabled={isSubmissionDisabled} variant='primary' size='large' fullWidth onPress={handleCompleteOrder}>
           Complete order
-        </CTA>
+        </AuthCTA>
       </ModalFooter>
     </Modal>
   );

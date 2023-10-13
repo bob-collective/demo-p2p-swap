@@ -1,5 +1,6 @@
 import { useForm } from '@interlay/hooks';
-import { CTA, Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
+import { Card, Flex, P, Strong, TokenInput } from '@interlay/ui';
+import { AuthCTA } from '../../../../components/AuthCTA';
 import { BtcBuyOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -87,9 +88,9 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
           </Card>
         </Flex>
       </Flex>
-      <CTA disabled={isSubmitDisabled} loading={isLoading} size='large' type='submit'>
+      <AuthCTA disabled={isSubmitDisabled} loading={isLoading} size='large' type='submit'>
         Fill Order
-      </CTA>
+      </AuthCTA>
     </form>
   );
 };

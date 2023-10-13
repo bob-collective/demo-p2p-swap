@@ -6,6 +6,7 @@ import { isBtcOrder } from '../../../../utils/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { usePublicClient } from 'wagmi';
 import { useState } from 'react';
+import { AuthCTA } from '../../../../components/AuthCTA';
 
 type CancelOrderModalProps = { order: Order | undefined; refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -52,9 +53,9 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
         <CTA size='large' fullWidth onPress={onClose}>
           Back
         </CTA>
-        <CTA loading={isLoading} variant='secondary' size='large' fullWidth onPress={handleCloseOrder}>
+        <AuthCTA loading={isLoading} variant='secondary' size='large' fullWidth onPress={handleCloseOrder}>
           Cancel Order
-        </CTA>
+        </AuthCTA>
       </ModalFooter>
     </Modal>
   );
