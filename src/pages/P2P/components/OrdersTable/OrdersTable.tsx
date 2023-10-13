@@ -77,7 +77,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
     () =>
       orders
         ? orders.map((order) => {
-            const isPendingOrder = isBtcBuyOrder(order) && order.deadline !== undefined;
+            const isPendingOrder = isBtcOrder(order) && order.deadline !== undefined;
             return {
               id: `${order.offeringCurrency.ticker}-${order.askingCurrency.ticker}-${order.id.toString()}`,
               asset: (
