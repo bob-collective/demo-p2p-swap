@@ -63,27 +63,35 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */, amo
 
   useEffect(() => {
     const findBtcTx = async () => {
-      if (!receivingAddress || !amountBtc || txId) {
+      if (!receivingAddress || !amountBtc) {
         return;
       }
+
+      // Clear data on address or amount change
+      setTxId(undefined);
+      setConfirmations(0);
+      setProofData(undefined);
+      setStatus('NOT_FOUND');
+
       const txHistory = await fetchBtcNetwork(`/address/${receivingAddress}/txs`);
       // MEMO: For the POC we expect that any tx is valid. Receiving address should be empty
       // without any previous txs to make this work.
       // Therefore if TX is found, then we consider it payment tx.
-      const tx = txHistory[0];
+      const tx = txHistory && txHistory[0];
 
       if (tx && hasOutputWithValidAmount(tx.vout, amountBtc, receivingAddress)) {
         setStatus('IN_MEMPOOL');
         setTxId(tx.txid);
         clearInterval(txFetcher);
-      } else {
-        setStatus('NOT_FOUND');
       }
     };
 
+    findBtcTx();
+
     const txFetcher = setInterval(() => findBtcTx(), 1000);
+
     return () => clearInterval(txFetcher);
-  }, [receivingAddress, txId, amountBtc]);
+  }, [receivingAddress, amountBtc]);
 
   useEffect(() => {
     const fetchConfirmations = async () => {
