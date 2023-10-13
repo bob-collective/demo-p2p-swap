@@ -24,8 +24,24 @@ Note: we have seen instances of this failing. If this happens, the api can be ca
 
 #### Other supported tokens
 
-1. This can be done either by using the faucet button in the UI or by interacting with the smart contract in [Conduit](https://explorerl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/address/0xFeCC3F37038999Ede8e58A3c9E5B0E9a16e7d5bC)
+1. This can be done either by using the faucet button in the UI or by interacting with the smart contract in [Conduit](https://explorerl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/address/[address])
 
 ### Starting the project
 
 1. Run `pnpm dev`
+
+### Browser support
+
+This application is tested using:
+
+- Chrome
+- Brave
+- Firefox
+
+In the following environments:
+
+- Linux
+- MacOS
+- Windows
+
+It does not currently support any mobile wallets.
