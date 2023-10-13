@@ -1,2 +1,2 @@
-export type { FillOrderFormProps } from './FillOrderForm';
+export type { FillOrderFormProps, FillOrderFormData } from './FillOrderForm';
 export { FillOrderForm } from './FillOrderForm';

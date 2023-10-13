@@ -1,20 +1,16 @@
-import { useAccount, usePublicClient } from 'wagmi';
-import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { useCallback, useEffect, useState } from 'react';
-import { Erc20CurrencyTicker, Erc20Currencies, CurrencyTicker } from '../constants';
-import { isBitcoinTicker } from '../utils/currencies';
+import { useAccount, usePublicClient } from 'wagmi';
+import { Bitcoin, CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
+import { ERC20Abi } from '../contracts/abi/ERC20.abi';
+import { Amount } from '../utils/amount';
+import { isBitcoinTicker, toBaseAmount } from '../utils/currencies';
 
 type Balances = {
   [ticker in Erc20CurrencyTicker]: bigint;
 };
 
-const initialBalances = Object.keys(Erc20Currencies).reduce(
-  (result, ticker) => ({ ...result, [ticker]: undefined }),
-  {}
-) as Balances;
-
 const useBalances = () => {
-  const [balances, setBalances] = useState<Balances>(initialBalances);
+  const [balances, setBalances] = useState<Balances | undefined>(undefined);
   const publicClient = usePublicClient();
   const { address } = useAccount();
 
@@ -47,18 +43,29 @@ const useBalances = () => {
     // TODO: add transfer event listener and update balance on transfer in/out
   });
 
-  const getBalanceInBaseDecimals = useCallback(
+  const getBalance = useCallback(
     (ticker: CurrencyTicker) => {
-      if (isBitcoinTicker(ticker) || balances[ticker] === undefined) {
-        return 0;
+      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
+        return new Amount(Bitcoin, 0);
       }
 
-      return parseFloat((balances[ticker] / BigInt(10 ** Erc20Currencies[ticker].decimals)).toString());
+      return new Amount(currencies[ticker], Number(balances[ticker]));
     },
     [balances]
   );
 
-  return { balances, getBalanceInBaseDecimals };
+  const getBalanceInBaseDecimals = useCallback(
+    (ticker: CurrencyTicker) => {
+      if (isBitcoinTicker(ticker) || balances?.[ticker] === undefined) {
+        return 0;
+      }
+
+      return toBaseAmount(balances[ticker], Erc20Currencies[ticker].ticker);
+    },
+    [balances]
+  );
+
+  return { balances, getBalance, getBalanceInBaseDecimals };
 };
 
 export { useBalances };

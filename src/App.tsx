@@ -6,6 +6,7 @@ import { L2_PROJECT_ID, L2_CHAIN_CONFIG, config, L2_METADATA } from './connector
 import { P2P } from './pages/P2P';
 import { V0 } from './pages/V0';
 import { useEffect } from 'react';
+import './utils/yup.custom';
 
 const wagmiConfig = defaultWagmiConfig({ chains: [L2_CHAIN_CONFIG], projectId: L2_PROJECT_ID, metadata: L2_METADATA });
 

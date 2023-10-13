@@ -1,56 +1,73 @@
 import { useForm } from '@interlay/hooks';
 import { CTA, Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
-import * as yup from 'yup';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { BtcSellOrder } from '../../../../types/orders';
+import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
-import { isFormDisabled, isValidBTCAddress } from '../../../../utils/validation';
+import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
+import { isFormDisabled } from '../../../../utils/validation';
+import { useEffect } from 'react';
 
-type FillBTCSellOrderForm = {
-  input: string;
-  output: string;
+type FillBTCSellOrderFormData = {
+  inputValue: string;
+  outputValue: string;
   btcAddress: string;
 };
 
 type FillBtcSellOrderFormProps = {
   isLoading: boolean;
   order: BtcSellOrder;
-  onSubmit: (values: FillBTCSellOrderForm) => void;
+  onSubmit: (values: FillBTCSellOrderFormData) => void;
 };
 
 const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
-  const { getBalanceInBaseDecimals } = useBalances();
+  const { balances, getBalance } = useBalances();
 
-  const handleSubmit = (values: FillBTCSellOrderForm) => {
+  const handleSubmit = (values: FillBTCSellOrderFormData) => {
     wrapInErc20ApprovalTx(() => onSubmit?.(values));
   };
 
-  const outputAmount = toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker);
+  const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
-  const form = useForm<FillBTCSellOrderForm>({
-    initialValues: { input: (order.price * parseFloat(outputAmount)).toString(), output: outputAmount, btcAddress: '' },
-    validationSchema: yup.object().shape({
-      input: yup.string().required('Please enter amount'),
-      output: yup.string().required('Please enter amount'),
-      btcAddress: yup
-        .string()
-        .required('Please enter bitcoin address')
-        .test('btcAddress', (value, ctx) => {
-          if (value === undefined) {
-            return true;
-          }
+  const outputMaxAmount = new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig();
+  const inputMaxAmount = outputMaxAmount.mul(order.price);
 
-          const isValid = isValidBTCAddress(value || '');
+  const inputLimitAmount = inputBalance.toBig().gt(inputMaxAmount) ? inputMaxAmount : inputBalance.toBig();
 
-          return isValid ? true : ctx.createError({ message: 'Please enter a valid address' });
-        })
-    }),
+  const schemaParams: FillOrderSchemaParams = {
+    inputValue: {
+      maxAmount: inputLimitAmount
+    },
+    outputValue: {
+      maxAmount: outputMaxAmount
+    }
+  };
+
+  const form = useForm<FillBTCSellOrderFormData>({
+    initialValues: {
+      // TODO: set to "" when allowing partial fullfilments
+      inputValue: inputMaxAmount.toString(),
+      // TODO: set to "" when allowing partial fullfilments
+      outputValue: outputMaxAmount.toString(),
+      btcAddress: ''
+    },
+    validationSchema: fillOrderSchema(schemaParams, true),
     onSubmit: handleSubmit,
-    hideErrors: 'untouched'
+    // TODO: set to hideErrors: "untouced" when allowing partial fullfilments
+    hideErrors: {
+      btcAddress: 'untouched'
+    }
   });
+
+  useEffect(() => {
+    if (!balances) return;
+
+    form.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balances]);
 
   const {
     isLoading: isLoadingAllowance,
@@ -71,18 +88,19 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
         </Card>
         <TokenInput
           label='Pay with'
-          balance={getBalanceInBaseDecimals(Erc20CurrencyTicker[order.askingCurrency.ticker])}
-          isDisabled // TODO: remove after we start allowing partial fullfilments
+          balance={inputLimitAmount.toString()}
+          balanceLabel='Limit'
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
-          {...form.getTokenFieldProps('input')}
+          {...form.getTokenFieldProps('inputValue')}
         />
         <TokenInput
           label='You will Receive'
-          isDisabled
+          isReadOnly // TODO: remove after we start allowing partial fullfilments
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
-          {...form.getTokenFieldProps('output')}
+          {...form.getTokenFieldProps('outputValue')}
         />
         <Input
           label='Bitcoin Address'
@@ -111,3 +129,4 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
 };
 
 export { FillBtcSellOrderForm };
+export type { FillBTCSellOrderFormData };

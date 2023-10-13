@@ -49,7 +49,7 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
         </P>
       </ModalBody>
       <ModalFooter direction='row'>
-        <CTA size='large' fullWidth onPress={handleCloseOrder}>
+        <CTA size='large' fullWidth onPress={onClose}>
           Back
         </CTA>
         <CTA loading={isLoading} variant='secondary' size='large' fullWidth onPress={handleCloseOrder}>
