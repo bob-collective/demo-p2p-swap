@@ -46,14 +46,10 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
   };
 
   const inputBalance = isSellingBTC ? undefined : getBalance(tickers.inputTicker);
-  const outputBalance = isBuyingBTC ? undefined : getBalance(tickers.outputTicker);
 
   const schemaParams: AddOrderSchemaParams = {
-    input: {
+    inputValue: {
       maxAmount: inputBalance !== undefined ? inputBalance.toBig() : undefined
-    },
-    output: {
-      maxAmount: outputBalance !== undefined ? outputBalance.toBig() : undefined
     }
   };
 
@@ -142,7 +138,6 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
         <TokenInput
           type='selectable'
           label='You will Receive'
-          balance={outputBalance?.toBig().toString()}
           valueUSD={0}
           selectProps={mergeProps(
             {

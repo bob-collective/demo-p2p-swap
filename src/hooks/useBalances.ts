@@ -3,7 +3,7 @@ import { useAccount, usePublicClient } from 'wagmi';
 import { Bitcoin, CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { Amount } from '../utils/amount';
-import { isBitcoinTicker } from '../utils/currencies';
+import { isBitcoinTicker, toBaseAmount } from '../utils/currencies';
 
 type Balances = {
   [ticker in Erc20CurrencyTicker]: bigint;
@@ -60,7 +60,7 @@ const useBalances = () => {
         return 0;
       }
 
-      return parseFloat((balances[ticker] / BigInt(10 ** Erc20Currencies[ticker].decimals)).toString());
+      return toBaseAmount(balances[ticker], Erc20Currencies[ticker].ticker);
     },
     [balances]
   );

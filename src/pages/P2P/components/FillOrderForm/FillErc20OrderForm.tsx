@@ -60,7 +60,7 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
     },
     validationSchema: fillOrderSchema(schemaParams),
     onSubmit: handleSubmit,
-    hideErrors: false
+    hideErrors: 'untouched'
   });
 
   useEffect(() => {
@@ -71,9 +71,23 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
   }, [balances]);
 
   const handleInputChange = (value: string) => {
+    if (!form.touched.outputValue) {
+      form.setFieldTouched('outputValue', true);
+    }
+
     const calculated = new Big(value || 0).gt(0) ? new Big(value).div(order.price).toString() : '0';
 
     form.setFieldValue('outputValue', calculated, true);
+  };
+
+  const handleOutputChange = (value: string) => {
+    if (!form.touched.inputValue) {
+      form.setFieldTouched('inputValue', true);
+    }
+
+    const calculated = new Big(value || 0).gt(0) ? new Big(value).mul(order.price).toString() : '0';
+
+    form.setFieldValue('inputValue', calculated, true);
   };
 
   const isSubmitDisabled = isFormDisabled(form);
@@ -90,7 +104,7 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
         <TokenInput
           label='Pay with'
           balance={inputLimitAmount.toString()}
-          balanceLabel='Limit'
+          balanceLabel='Available'
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
           {...mergeProps(form.getTokenFieldProps('inputValue'), { onValueChange: handleInputChange })}
@@ -99,10 +113,9 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
           label='You will Receive'
           balance={outputMaxAmount.toString()}
           balanceLabel='Limit'
-          isDisabled
           valueUSD={0}
           ticker={order.offeringCurrency.ticker}
-          {...form.getTokenFieldProps('outputValue')}
+          {...mergeProps(form.getTokenFieldProps('outputValue'), { onValueChange: handleOutputChange })}
         />
         <Flex direction='column' gap='spacing2'>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
