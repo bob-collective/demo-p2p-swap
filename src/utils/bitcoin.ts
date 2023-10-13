@@ -28,4 +28,13 @@ const fetchBtcNetwork = async (path: `/${string}`) => {
   }
 };
 
-export { fetchBtcNetwork, getElectrsUrl, BITCOIN_NETWORK };
+const hasOutputWithValidAmount = (
+  vout: { scriptpubkey_address: string; value: number }[],
+  requiredBtcAmount: bigint,
+  requiredBtcAddress: string
+) =>
+  vout.some(
+    (output) => BigInt(output.value) === requiredBtcAmount && output.scriptpubkey_address === requiredBtcAddress
+  );
+
+export { fetchBtcNetwork, getElectrsUrl, hasOutputWithValidAmount, BITCOIN_NETWORK };

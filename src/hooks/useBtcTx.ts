@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HexString } from '../types';
 import { DefaultElectrsClient, getBitcoinTxProof, getBitcoinTxInfo } from '@gobob/bob-sdk';
-import { BITCOIN_NETWORK, fetchBtcNetwork } from '../utils/bitcoin';
+import { BITCOIN_NETWORK, fetchBtcNetwork, hasOutputWithValidAmount } from '../utils/bitcoin';
 import { addHexPrefix } from '../utils/encoding';
 
 type TxStatus = 'NOT_FOUND' | 'IN_MEMPOOL' | 'IN_BLOCK';
@@ -50,7 +50,7 @@ const fetchProofData = async (txId: string): Promise<ProofData> => {
 };
 
 // TODO: Refactor this hook to use SDK electrs client for everything.
-const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): UseBtcTxResult => {
+const useBtcTx = (receivingAddress?: string /* TODO add btc address type */, amountBtc?: bigint): UseBtcTxResult => {
   const [status, setStatus] = useState<TxStatus>('NOT_FOUND');
   const [txId, setTxId] = useState<HexString>();
   const [confirmations, setConfirmations] = useState<number>(0);
@@ -63,7 +63,7 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): Us
 
   useEffect(() => {
     const findBtcTx = async () => {
-      if (!receivingAddress || txId) {
+      if (!receivingAddress || !amountBtc || txId) {
         return;
       }
       const txHistory = await fetchBtcNetwork(`/address/${receivingAddress}/txs`);
@@ -71,10 +71,10 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): Us
       // without any previous txs to make this work.
       // Therefore if TX is found, then we consider it payment tx.
       const tx = txHistory[0];
-      if (tx) {
+
+      if (tx && hasOutputWithValidAmount(tx.vout, amountBtc, receivingAddress)) {
         setStatus('IN_MEMPOOL');
         setTxId(tx.txid);
-        getProofData(tx.txid);
         clearInterval(txFetcher);
       } else {
         setStatus('NOT_FOUND');
@@ -83,7 +83,7 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): Us
 
     const txFetcher = setInterval(() => findBtcTx(), 1000);
     return () => clearInterval(txFetcher);
-  }, [receivingAddress, txId, getProofData]);
+  }, [receivingAddress, txId, amountBtc]);
 
   useEffect(() => {
     const fetchConfirmations = async () => {
@@ -101,11 +101,14 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */): Us
       } else {
         setStatus('IN_MEMPOOL');
       }
+      if (!proofData) {
+        getProofData(txId);
+      }
     };
 
     const confimrationFetcher = setInterval(() => fetchConfirmations(), 1000);
     return () => clearInterval(confimrationFetcher);
-  }, [txId]);
+  }, [getProofData, proofData, txId]);
 
   return {
     status,
