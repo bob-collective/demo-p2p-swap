@@ -63,7 +63,7 @@ const useBtcTx = (receivingAddress?: string /* TODO add btc address type */, amo
 
   useEffect(() => {
     const findBtcTx = async () => {
-      if (!receivingAddress || !amountBtc || txId) {
+      if (!receivingAddress || !amountBtc) {
         return;
       }
       const txHistory = await fetchBtcNetwork(`/address/${receivingAddress}/txs`);
