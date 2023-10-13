@@ -33,7 +33,7 @@ const contracts = {
   },
   [ContractType.MINT_USDT]: {
     // TODO: switch to deployed contract address
-    address: '0x117680E8f787DB385A1965c46b36FAE0313Db4C4',
+    address: '0xE9c966b8cD2182f5946690813fEe78D0Da885ef4',
     abi: MintUsdtAbi
   }
 } as const;
