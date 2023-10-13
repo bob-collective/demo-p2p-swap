@@ -67,6 +67,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       } catch (e) {
         setLoading(false);
       }
+      setLoading(false);
     },
     [address, writeErc20Marketplace, writeBTCMarketplace, onClose, publicClient, refetchOrders]
   );

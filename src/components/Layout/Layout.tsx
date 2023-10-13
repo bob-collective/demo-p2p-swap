@@ -1,19 +1,13 @@
+import { Flex } from '@interlay/ui';
 import { HTMLAttributes } from 'react';
-import { theme } from '@interlay/theme';
+import { Header } from './Header';
+import { StyledMain } from './Layout.styles';
 
 const Layout = (props: HTMLAttributes<unknown>) => (
-  <main
-    style={{
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '100%',
-      padding: theme.spacing.spacing4,
-      maxWidth: theme.breakpoints.values.md,
-      display: 'flex',
-      flexDirection: 'column'
-    }}
-    {...props}
-  />
+  <Flex direction='column'>
+    <Header />
+    <StyledMain direction='column' {...props} />
+  </Flex>
 );
 
 export { Layout };
