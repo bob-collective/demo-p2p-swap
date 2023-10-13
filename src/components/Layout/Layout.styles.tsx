@@ -21,4 +21,8 @@ const StyledMain = styled(Flex)`
   }
 `;
 
-export { StyledHeader, StyledMain };
+const CTAWrapper = styled(Flex)`
+  gap: ${theme.spacing.spacing2};
+`;
+
+export { StyledHeader, StyledMain, CTAWrapper };
