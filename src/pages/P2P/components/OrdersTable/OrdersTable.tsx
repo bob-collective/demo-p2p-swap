@@ -4,7 +4,7 @@ import { ReactNode, useMemo, useState } from 'react';
 import { Order } from '../../.../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
-import { isBtcBuyOrder } from '../../../../utils/orders';
+import { isBtcOrder } from '../../../../utils/orders';
 import { CancelOrderModal } from '../CancelOrderModal';
 import { FillOrderModal } from '../FillOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
