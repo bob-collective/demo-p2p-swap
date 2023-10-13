@@ -5,6 +5,7 @@ import truncateEthAddress from 'truncate-eth-address';
 import { useAccount } from 'wagmi';
 import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
+import { EthFaucet } from '../EthFaucet';
 
 const Header = () => {
   const { open } = useWeb3Modal();
@@ -21,6 +22,7 @@ const Header = () => {
       </a>
       <CTAWrapper>
         <Faucet />
+        <EthFaucet />
         <CTA disabled={isConnecting} size='small' onPress={() => open()}>
           {address ? (
             <Flex elementType='span' gap='spacing2'>
