@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useBalances } from '../../hooks/useBalances';
+import { useAccount } from 'wagmi';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -15,6 +16,7 @@ const P2P = (): JSX.Element => {
   const titleId4 = 'titleId4';
 
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
+  const { address } = useAccount();
 
   // just to prefetch
   useBalances();
@@ -53,7 +55,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
               )}
             </>
-            {!!orders?.acceptedBtc.unowned?.length && (
+            {!!orders?.acceptedBtc.owned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -62,7 +64,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId2}
-                  orders={orders?.acceptedBtc.unowned}
+                  orders={orders?.acceptedBtc.owned.filter(order => order.btcSender === address)}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
@@ -85,7 +87,7 @@ const P2P = (): JSX.Element => {
                 />
               </>
             )}
-            {!!orders?.acceptedBtc.owned?.length && (
+            {!!orders?.acceptedBtc.unowned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -94,7 +96,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId4}
-                  orders={orders?.acceptedBtc.owned}
+                  orders={orders?.acceptedBtc.unowned.filter(order => order.btcReceiver === address)}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
