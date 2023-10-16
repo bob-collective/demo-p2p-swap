@@ -21,8 +21,12 @@ const Header = () => {
         />
       </a>
       <CTAWrapper>
-        <Faucet />
-        <EthFaucet />
+        {address && (
+          <>
+            <Faucet />
+            <EthFaucet />
+          </>
+        )}
         <CTA disabled={isConnecting} size='small' onPress={() => open()}>
           {address ? (
             <Flex elementType='span' gap='spacing2'>
