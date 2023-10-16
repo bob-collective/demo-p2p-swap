@@ -2,7 +2,7 @@ import { CTA, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P } from '
 import { useContract } from '../../../../hooks/useContract';
 import { ContractType } from '../../../../constants';
 import { Order } from '../../../../types/orders';
-import { isBtcOrder } from '../../../../utils/orders';
+import { isBtcBuyOrder, isBtcSellOrder } from '../../../../utils/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { usePublicClient } from 'wagmi';
 import { useState } from 'react';
@@ -24,13 +24,13 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
   }
 
   const handleCloseOrder = async () => {
-    const isBTCOrder = order ? isBtcOrder(order) : false;
-
     setLoading(true);
     try {
-      const hash = await (isBTCOrder
+      const hash = await (isBtcBuyOrder(order)
         ? writeBTCMarketplace.withdrawBtcBuyOrder([order.id])
-        : writeErc20Marketplace.withdrawErcErcOrder([order.id]));
+        : (isBtcSellOrder(order)
+          ? writeBTCMarketplace.withdrawBtcSellOrder([order.id])
+          : writeErc20Marketplace.withdrawErcErcOrder([order.id])));
       await publicClient.waitForTransactionReceipt({ hash });
       refetchOrders();
       onClose();
