@@ -80,6 +80,7 @@ const AcceptedOrdersTable = ({
         ? orders.map((order) => {
             const isBtcReceiver = address && isAddressEqual(order.btcReceiver, address);
             const isBtcSender = address && isAddressEqual(order.btcSender, address);
+
             return {
               id: `${order.type}-${order.acceptId.toString()}`,
               asset: (

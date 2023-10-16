@@ -7,7 +7,6 @@ import { formatUSD } from '../../../../utils/format';
 import { isBtcOrder } from '../../../../utils/orders';
 import { CancelOrderModal } from '../CancelOrderModal';
 import { FillOrderModal } from '../FillOrderModal';
-import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -76,44 +75,39 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
   const rows: OrdersTableRow[] = useMemo(
     () =>
       orders
-        ? orders.map((order) => {
-            const isPendingOrder = isBtcOrder(order) && order.deadline !== undefined;
-            return {
-              id: `${order.offeringCurrency.ticker}-${order.askingCurrency.ticker}-${order.id.toString()}`,
-              asset: (
-                <AssetCell
-                  name={order.offeringCurrency.ticker}
-                  tickers={[order.offeringCurrency.ticker, order.askingCurrency.ticker]}
-                />
-              ),
-              pricePerUnit: <AmountCell amount={order.price.toString()} ticker={order.askingCurrency.ticker} />,
-              availableToBuy: (
-                <AmountCell
-                  amount={toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker)}
-                  ticker={order.offeringCurrency.ticker}
-                />
-              ),
-              action: (
-                <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
-                  {isPendingOrder && <PendingOrderCTA showCta={false} deadline={order.deadline as Date} />}
-                  {order.isOwnerOfOrder ? (
-                    <CTA
-                      variant='secondary'
-                      onPress={() => handleOpenCancelOrderModal(order)}
-                      disabled={isPendingOrder} // MEM0: remove when implementing partial fulfillment.
-                      size='small'
-                    >
-                      Cancel order
-                    </CTA>
-                  ) : (
-                    <CTA onPress={() => handleOpenFillOrderModal(order)} disabled={isPendingOrder} size='small'>
-                      Fill Order
-                    </CTA>
-                  )}
-                </Flex>
-              )
-            };
-          })
+        ? orders
+            .filter((order) => !(isBtcOrder(order) && order.deadline !== undefined))
+            .map((order) => {
+              return {
+                id: `${order.offeringCurrency.ticker}-${order.askingCurrency.ticker}-${order.id.toString()}`,
+                asset: (
+                  <AssetCell
+                    name={order.offeringCurrency.ticker}
+                    tickers={[order.offeringCurrency.ticker, order.askingCurrency.ticker]}
+                  />
+                ),
+                pricePerUnit: <AmountCell amount={order.price.toString()} ticker={order.askingCurrency.ticker} />,
+                availableToBuy: (
+                  <AmountCell
+                    amount={toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker)}
+                    ticker={order.offeringCurrency.ticker}
+                  />
+                ),
+                action: (
+                  <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
+                    {order.isOwnerOfOrder ? (
+                      <CTA variant='secondary' onPress={() => handleOpenCancelOrderModal(order)} size='small'>
+                        Cancel order
+                      </CTA>
+                    ) : (
+                      <CTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
+                        Fill Order
+                      </CTA>
+                    )}
+                  </Flex>
+                )
+              };
+            })
         : [],
     [orders]
   );

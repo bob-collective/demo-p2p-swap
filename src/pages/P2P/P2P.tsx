@@ -18,10 +18,14 @@ const P2P = (): JSX.Element => {
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
   const { address } = useAccount();
 
+  console.log('orders.acceptedBtc.unowned', orders.acceptedBtc.unowned);
+
   // just to prefetch
   useBalances();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
+
+  console.log('orders.acceptedBtc.unowned', orders.acceptedBtc.unowned);
 
   return (
     <>
@@ -55,16 +59,20 @@ const P2P = (): JSX.Element => {
                 </Flex>
               )}
             </>
-            {!!orders?.acceptedBtc.owned?.length && (
+            {/* Only unowned BTC orders can be bought */}
+            {!!orders?.acceptedBtc.unowned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
                     Accepted BTC Orders
                   </H2>
                 </Flex>
+                {/* Show all orders in which the current user is either the buyer or the seller */}
                 <AcceptedOrdersTable
                   aria-labelledby={titleId2}
-                  orders={orders?.acceptedBtc.owned.filter(order => order.btcSender === address)}
+                  orders={orders.acceptedBtc.unowned.filter(
+                    (order) => order.btcReceiver === address || order.btcSender === address
+                  )}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
@@ -87,7 +95,8 @@ const P2P = (): JSX.Element => {
                 />
               </>
             )}
-            {!!orders?.acceptedBtc.unowned?.length && (
+            {/* Only owned BTC orders can be sold */}
+            {!!orders.acceptedBtc.owned?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -96,7 +105,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId4}
-                  orders={orders?.acceptedBtc.unowned.filter(order => order.btcReceiver === address)}
+                  orders={orders?.acceptedBtc.owned}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
