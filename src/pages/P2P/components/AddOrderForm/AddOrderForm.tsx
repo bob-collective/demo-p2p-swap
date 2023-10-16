@@ -174,7 +174,10 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             <P size='xs'>
               Price 1 {form.values.inputTicker} ={' '}
               <Strong>
-                {form.values.inputValue && new Big(form.values.inputValue || 0).gt(0) && !!form.values.outputValue
+                {form.values.inputValue &&
+                Number(form.values.inputValue) &&
+                new Big(form.values.inputValue || 0).gt(0) &&
+                !!form.values.outputValue
                   ? new Big(form.values.outputValue).div(form.values.inputValue).toString()
                   : 0}{' '}
                 {form.values.outputTicker}{' '}

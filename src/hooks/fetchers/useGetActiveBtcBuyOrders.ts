@@ -33,16 +33,10 @@ const parseBtcBuyOrder = (
 
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.offeringToken);
 
-  const price = calculateOrderPrice(
-    rawOrder.offeringAmount,
-    offeringCurrency.decimals,
-    rawOrder.amountBtc,
-    Bitcoin.decimals
-  );
+  const price = calculateOrderPrice(rawOrder.offeringAmount, offeringCurrency, rawOrder.amountBtc, Bitcoin);
 
   const acceptedOrderPrice =
-    acceptedOrder &&
-    calculateOrderPrice(acceptedOrder.ercAmount, offeringCurrency.decimals, acceptedOrder.amountBtc, Bitcoin.decimals);
+    acceptedOrder && calculateOrderPrice(acceptedOrder.ercAmount, offeringCurrency, acceptedOrder.amountBtc, Bitcoin);
 
   return {
     id,

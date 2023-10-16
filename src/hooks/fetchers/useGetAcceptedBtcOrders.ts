@@ -35,12 +35,7 @@ const parseAcceptedBtcOrder = (
 ): AcceptedBtcOrder => {
   const offeringCurrency = getErc20CurrencyFromContractAddress(rawOrder.ercToken);
 
-  const price = calculateOrderPrice(
-    rawOrder.ercAmount,
-    offeringCurrency.decimals,
-    rawOrder.amountBtc,
-    Bitcoin.decimals
-  );
+  const price = calculateOrderPrice(rawOrder.ercAmount, offeringCurrency, rawOrder.amountBtc, Bitcoin);
 
   const deadline = calculateOrderDeadline(rawOrder.acceptTime);
   const ownerAddress = type === 'buy' ? rawOrder.accepter : rawOrder.requester;

@@ -1,5 +1,7 @@
+import { Currency } from '../constants';
 import { BTC_ACCEPT_REQUEST_EXPIRATION_SECONDS } from '../constants/orders';
 import { Order, BtcOrder, BtcBuyOrder, BtcSellOrder, Erc20Order } from '../types/orders';
+import { Amount } from './amount';
 import { isBitcoinCurrency, isErc20Currency } from './currencies';
 
 const isErc20Order = (order: Order): order is Erc20Order =>
@@ -16,9 +18,15 @@ const calculateOrderDeadline = (acceptTime: bigint): Date =>
 
 const calculateOrderPrice = (
   offeringAmount: bigint,
-  offeringDecimals: number,
+  offeringCurrency: Currency,
   askingAmount: bigint,
-  askingDecimals: number
-) => Number(askingAmount) / 10 ** askingDecimals / (Number(offeringAmount) / 10 ** offeringDecimals);
+  askingCurrency: Currency
+) => {
+  const asking = new Amount(askingCurrency, Number(askingAmount)).toBig();
+
+  if (asking.lte(0)) return 0;
+
+  return asking.div(new Amount(offeringCurrency, Number(offeringAmount)).toBig()).toNumber();
+};
 
 export { isBtcBuyOrder, isBtcOrder, isBtcSellOrder, isErc20Order, calculateOrderDeadline, calculateOrderPrice };

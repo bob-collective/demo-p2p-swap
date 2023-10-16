@@ -26,12 +26,7 @@ const parseErc20Order = (
   const offeringCurrency = getErc20CurrencyFromContractAddress(offeringToken);
   const askingCurrency = getErc20CurrencyFromContractAddress(askingToken);
 
-  const price = calculateOrderPrice(
-    rawOrder.offeringAmount,
-    offeringCurrency.decimals,
-    rawOrder.askingAmount,
-    askingCurrency.decimals
-  );
+  const price = calculateOrderPrice(rawOrder.offeringAmount, offeringCurrency, rawOrder.askingAmount, askingCurrency);
 
   return {
     id,
