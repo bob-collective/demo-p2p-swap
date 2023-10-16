@@ -1,12 +1,15 @@
 import { theme } from '@interlay/theme';
 import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
-import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useBalances } from '../../hooks/useBalances';
 import { useAccount } from 'wagmi';
+import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 
 const P2P = (): JSX.Element => {
+  const [searchParams, setSearchParams] = useSearchParams(new URLSearchParams('market=buy'));
+
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
     isOpen: false
   });
@@ -23,6 +26,8 @@ const P2P = (): JSX.Element => {
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
+  const selectedTabKey = searchParams.get('market') || undefined;
+
   return (
     <>
       <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
@@ -34,7 +39,16 @@ const P2P = (): JSX.Element => {
             Add an order
           </CTA>
         </Flex>
-        <Tabs>
+        <Tabs
+          selectedKey={selectedTabKey}
+          onSelectionChange={(key) => {
+            setSearchParams(() => {
+              const newParams = new URLSearchParams();
+              newParams.set('market', key as string);
+              return newParams;
+            });
+          }}
+        >
           <TabsItem key='buy' title='Buy'>
             <>
               <Flex alignItems='center' justifyContent='space-between'>
@@ -64,7 +78,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId2}
-                  orders={orders?.acceptedBtc.owned.filter(order => order.btcSender === address)}
+                  orders={orders?.acceptedBtc.owned.filter((order) => order.btcSender === address)}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
@@ -96,7 +110,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId4}
-                  orders={orders?.acceptedBtc.unowned.filter(order => order.btcReceiver === address)}
+                  orders={orders?.acceptedBtc.unowned.filter((order) => order.btcReceiver === address)}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />

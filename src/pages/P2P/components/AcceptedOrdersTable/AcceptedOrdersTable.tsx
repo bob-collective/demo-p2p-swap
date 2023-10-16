@@ -10,6 +10,9 @@ import { isAddressEqual } from 'viem';
 import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
 import { CancelAcceptedOrderModal } from '../CancelAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
+import { useSearchParams } from 'react-router-dom';
+
+const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -61,9 +64,14 @@ const AcceptedOrdersTable = ({
   refetchAcceptedBtcOrders,
   ...props
 }: AcceptedOrdersTableProps): JSX.Element => {
-  const [isCompleteOrderModalOpen, setCompleteOrderModalOpen] = useState(false);
-  const [isCancelOrderModalOpen, setCancelOrderModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<AcceptedBtcOrder>();
+  const [searchParams] = useSearchParams();
+  const initialOrder = findOrder(orders || [], Number(searchParams.get('order')));
+
+  const [orderModal, setOrderModal] = useState<{ isOpen: boolean; type: 'fill' | 'cancel'; order?: AcceptedBtcOrder }>({
+    isOpen: !!initialOrder,
+    type: 'fill',
+    order: initialOrder
+  });
 
   const columns = [
     { name: 'Asset', id: AcceptedOrdersTableColumns.ASSET },
@@ -73,6 +81,13 @@ const AcceptedOrdersTable = ({
   ];
 
   const { address } = useAccount();
+
+  const handleOpenFillOrderModal = (order: AcceptedBtcOrder) => setOrderModal({ isOpen: true, type: 'fill', order });
+
+  const handleOpenCancelOrderModal = (order: AcceptedBtcOrder) =>
+    setOrderModal({ isOpen: true, type: 'cancel', order });
+
+  const handleCloseAnyOrderModal = () => setOrderModal((s) => ({ ...s, isOpen: false }));
 
   const rows: AcceptedOrdersTableRow[] = useMemo(
     () =>
@@ -97,21 +112,12 @@ const AcceptedOrdersTable = ({
                   {/* Add cancel order event */}
                   <PendingOrderCTA
                     deadline={order.deadline}
-                    onPress={() => {
-                      setSelectedOrder(order);
-                      setCancelOrderModalOpen(true);
-                    }}
+                    onPress={() => handleOpenCancelOrderModal(order)}
                     ctaText='Cancel Order'
                     showCta={!!isBtcReceiver}
                   />
                   {isBtcSender && (
-                    <CTA
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCompleteOrderModalOpen(true);
-                      }}
-                      size='small'
-                    >
+                    <CTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
                       Complete Order
                     </CTA>
                   )}
@@ -128,19 +134,24 @@ const AcceptedOrdersTable = ({
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>
-      <CompleteAcceptedOrderModal
-        isOpen={isCompleteOrderModalOpen}
-        order={selectedOrder}
-        onClose={() => setCompleteOrderModalOpen(false)}
-        refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        refetchOrders={refetchOrders}
-      />
-      <CancelAcceptedOrderModal
-        isOpen={isCancelOrderModalOpen}
-        refetchOrders={refetchOrders}
-        order={selectedOrder}
-        onClose={() => setCancelOrderModalOpen(false)}
-      />
+
+      {orderModal.order && (
+        <CompleteAcceptedOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'fill'}
+          onClose={handleCloseAnyOrderModal}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+          refetchOrders={refetchOrders}
+          order={orderModal.order}
+        />
+      )}
+      {orderModal.order && (
+        <CancelAcceptedOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'cancel'}
+          onClose={handleCloseAnyOrderModal}
+          order={orderModal.order}
+          refetchOrders={refetchOrders}
+        />
+      )}
     </div>
   );
 };

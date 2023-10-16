@@ -6,6 +6,7 @@ import { useContract } from '../../../../hooks/useContract';
 import { Order } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { FillOrderForm, FillOrderFormData } from '../FillOrderForm';
+import { useSearchParams } from 'react-router-dom';
 
 type Props = {
   order: Order;
@@ -25,6 +26,7 @@ const FillOrderModal = ({
   ...props
 }: FillOrderModalProps): JSX.Element => {
   const [isLoading, setLoading] = useState(false);
+  const [, setSearchParams] = useSearchParams();
 
   const publicClient = usePublicClient();
 
@@ -43,7 +45,15 @@ const FillOrderModal = ({
               order.totalAskingAmount
             ]);
             await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
+
             refetchAcceptedBtcOrders();
+
+            setSearchParams((params) => {
+              params.set('order', order.id.toString());
+              params.set('market', 'sell');
+              return params;
+            });
+
             break;
           }
           case 'sell-btc': {
