@@ -38,9 +38,9 @@ const parseAcceptedBtcOrder = (
   const price = calculateOrderPrice(rawOrder.ercAmount, offeringCurrency, rawOrder.amountBtc, Bitcoin);
 
   const deadline = calculateOrderDeadline(rawOrder.acceptTime);
-  const ownerAddress = type === 'buy' ? rawOrder.accepter : rawOrder.requester;
 
-  const isOwnerOfOrder = !!address && isAddressEqual(ownerAddress, address);
+  const isAcceptorOfOrder = !!address && isAddressEqual(rawOrder.accepter, address);
+  const isCreatorOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const underlyingBtcAddress = underlyingBuyOrders.find((_, index) => buyids[index] === rawOrder.orderId);
   const bitcoinAddress = rawOrder.bitcoinAddress || underlyingBtcAddress?.bitcoinAddress;
@@ -60,7 +60,8 @@ const parseAcceptedBtcOrder = (
     deadline,
     otherCurrencyAmount: rawOrder.ercAmount,
     bitcoinAddress: bitcoinAddress?.bitcoinAddress,
-    isOwnerOfOrder
+    isAcceptorOfOrder,
+    isCreatorOfOrder
   };
 };
 
