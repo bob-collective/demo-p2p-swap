@@ -84,7 +84,7 @@ const FillOrderModal = ({
   );
 
   return (
-    <Modal {...props} onClose={onClose}>
+    <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Fill Order</ModalHeader>
       <ModalBody>
         <FillOrderForm isLoading={isLoading} onSubmit={handleFillOrder} order={order} />

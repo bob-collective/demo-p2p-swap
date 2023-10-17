@@ -71,7 +71,7 @@ const CompleteAcceptedOrderModal = ({
   const isSubmissionDisabled = !confirmations || !proofData || confirmations < REQUIRED_BITCOIN_CONFIRMATIONS;
 
   return (
-    <Modal {...props} onClose={onClose}>
+    <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
