@@ -47,13 +47,20 @@ type Props = {
   orders: Array<Order> | undefined;
   refetchOrders: () => void;
   refetchAcceptedBtcOrders: () => void;
+  onFillBuyBtc?: (order: Order) => void;
 };
 
 type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 
 type OrdersTableProps = Props & InheritAttrs;
 
-const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props }: OrdersTableProps): JSX.Element => {
+const OrdersTable = ({
+  orders,
+  refetchOrders,
+  refetchAcceptedBtcOrders,
+  onFillBuyBtc,
+  ...props
+}: OrdersTableProps): JSX.Element => {
   const [orderModal, setOrderModal] = useState<{ isOpen: boolean; type: 'fill' | 'cancel'; order?: Order }>({
     isOpen: false,
     type: 'fill'
@@ -121,6 +128,7 @@ const OrdersTable = ({ orders, refetchOrders, refetchAcceptedBtcOrders, ...props
         <FillOrderModal
           isOpen={orderModal.isOpen && orderModal.type === 'fill'}
           onClose={handleCloseAnyOrderModal}
+          onFillBuyBtc={onFillBuyBtc}
           refetchOrders={refetchOrders}
           refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
           order={orderModal.order}

@@ -4,8 +4,14 @@ import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useBalances } from '../../hooks/useBalances';
+import { useSearchParams } from 'react-router-dom';
+import { AcceptedBtcOrder } from '../../types/orders';
+
+const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
 const P2P = (): JSX.Element => {
+  const [searchParams, setSearchParams] = useSearchParams(new URLSearchParams('market=buy'));
+
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
     isOpen: false
   });
@@ -21,7 +27,9 @@ const P2P = (): JSX.Element => {
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
+  const selectedTabKey = searchParams.get('market') || undefined;
 
+  const selectedAcceptedOrder = findOrder(orders.acceptedBtc.accepted || [], Number(searchParams.get('order')));
   return (
     <>
       <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
@@ -33,7 +41,16 @@ const P2P = (): JSX.Element => {
             Add an order
           </CTA>
         </Flex>
-        <Tabs>
+        <Tabs
+          selectedKey={selectedTabKey}
+          onSelectionChange={(key) => {
+            setSearchParams(() => {
+              const newParams = new URLSearchParams();
+              newParams.set('market', key as string);
+              return newParams;
+            });
+          }}
+        >
           <TabsItem key='buy' title='Buy'>
             <>
               <Flex alignItems='center' justifyContent='space-between'>
@@ -47,6 +64,13 @@ const P2P = (): JSX.Element => {
                   orders={orders?.unowned}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                  onFillBuyBtc={(order) => {
+                    setSearchParams((params) => {
+                      params.set('order', order.id.toString());
+                      params.set('market', 'buy');
+                      return params;
+                    });
+                  }}
                 />
               ) : (
                 <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
@@ -64,6 +88,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 {/* Show all orders in which the current user is either the buyer or the seller */}
                 <AcceptedOrdersTable
+                  selectedOrder={selectedAcceptedOrder}
                   aria-labelledby={titleId2}
                   orders={orders.acceptedBtc.accepted}
                   refetchOrders={refetch}
