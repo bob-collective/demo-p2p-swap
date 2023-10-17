@@ -1,5 +1,5 @@
 import { theme } from '@interlay/theme';
-import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
@@ -10,13 +10,14 @@ import { formatUSD } from '../../../../utils/format';
 import { CancelAcceptedOrderModal } from '../CancelAcceptedOrderModal';
 import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
+import { StyledCTA, StyledCard, StyledSpan } from './AcceptedOrdersTable.style';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
-    <Span size='s' weight='bold'>
+    <StyledSpan size='s' weight='bold'>
       {new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} {ticker}
-    </Span>
-    {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
+    </StyledSpan>
+    {valueUSD && <StyledSpan size='s'>{formatUSD(valueUSD)}</StyledSpan>}
   </Flex>
 );
 
@@ -116,9 +117,9 @@ const AcceptedOrdersTable = ({
                     showCta={!!isBtcReceiver}
                   />
                   {isBtcSender && (
-                    <CTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
+                    <StyledCTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
                       Complete Order
-                    </CTA>
+                    </StyledCTA>
                   )}
                 </Flex>
               )
@@ -130,9 +131,9 @@ const AcceptedOrdersTable = ({
 
   return (
     <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
-      <Card>
+      <StyledCard>
         <Table {...props} columns={columns} rows={rows} />
-      </Card>
+      </StyledCard>
       {orderModal.order && (
         <CompleteAcceptedOrderModal
           isOpen={orderModal.isOpen && orderModal.type === 'fill'}

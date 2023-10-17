@@ -1,5 +1,5 @@
 import { theme } from '@interlay/theme';
-import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { Order } from '../../.../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -7,15 +7,16 @@ import { formatUSD } from '../../../../utils/format';
 import { isBtcOrder } from '../../../../utils/orders';
 import { CancelOrderModal } from '../CancelOrderModal';
 import { FillOrderModal } from '../FillOrderModal';
+import { StyledCTA, StyledCard, StyledSpan } from './OrdersTable.style';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
-    <Span size='s' weight='bold'>
+    <StyledSpan size='s' weight='bold'>
       {!Number(amount)
         ? '—'
         : `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 18 }).format(Number(amount))} ${ticker}`}
-    </Span>
-    {valueUSD && <Span size='s'>{formatUSD(valueUSD)}</Span>}
+    </StyledSpan>
+    {valueUSD && <StyledSpan size='s'>{formatUSD(valueUSD)}</StyledSpan>}
   </Flex>
 );
 
@@ -103,13 +104,13 @@ const OrdersTable = ({
                 action: (
                   <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                     {order.isOwnerOfOrder ? (
-                      <CTA variant='secondary' onPress={() => handleOpenCancelOrderModal(order)} size='small'>
+                      <StyledCTA variant='secondary' onPress={() => handleOpenCancelOrderModal(order)} size='small'>
                         Cancel order
-                      </CTA>
+                      </StyledCTA>
                     ) : (
-                      <CTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
+                      <StyledCTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
                         Fill Order
-                      </CTA>
+                      </StyledCTA>
                     )}
                   </Flex>
                 )
@@ -121,9 +122,9 @@ const OrdersTable = ({
 
   return (
     <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
-      <Card>
+      <StyledCard>
         <Table {...props} columns={columns} rows={rows} />
-      </Card>
+      </StyledCard>
       {orderModal.order && (
         <FillOrderModal
           isOpen={orderModal.isOpen && orderModal.type === 'fill'}
