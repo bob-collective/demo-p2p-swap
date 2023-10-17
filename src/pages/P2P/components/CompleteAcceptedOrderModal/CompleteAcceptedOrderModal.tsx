@@ -9,6 +9,8 @@ import { useContract } from '../../../../hooks/useContract';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { StyledLoadingSpinner } from './CompleteAcceptedOrderModal.styles';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 type CompleteAcceptedOrderModalProps = {
   order: AcceptedBtcOrder | undefined;
@@ -23,8 +25,11 @@ const CompleteAcceptedOrderModal = ({
   order,
   ...props
 }: CompleteAcceptedOrderModalProps): JSX.Element | null => {
+  const [, setSearchParams] = useSearchParams();
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
   const publicClient = usePublicClient();
+
+  const [isLoading, setLoading] = useState(false);
 
   const { status, txId, confirmations, proofData } = useBtcTx(order?.bitcoinAddress, order?.amountBtc);
 
@@ -36,16 +41,30 @@ const CompleteAcceptedOrderModal = ({
     if (!proofData) {
       return;
     }
-    if (order.type === 'buy') {
-      const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, proofData.info, proofData.proof]);
-      await publicClient.waitForTransactionReceipt({ hash });
-    } else {
-      const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, proofData.info, proofData.proof]);
-      await publicClient.waitForTransactionReceipt({ hash });
+
+    setLoading(true);
+
+    try {
+      if (order.type === 'buy') {
+        const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, proofData.info, proofData.proof]);
+        await publicClient.waitForTransactionReceipt({ hash });
+      } else {
+        const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, proofData.info, proofData.proof]);
+        await publicClient.waitForTransactionReceipt({ hash });
+      }
+    } catch (e) {
+      setLoading(false);
     }
+
+    setLoading(false);
+
+    setSearchParams(() => {
+      return new URLSearchParams('market=buy');
+    });
 
     refetchAcceptedBtcOrders();
     refetchOrders();
+
     onClose();
   };
 
@@ -109,7 +128,14 @@ const CompleteAcceptedOrderModal = ({
         </Card>
       </ModalBody>
       <ModalFooter direction='row'>
-        <AuthCTA disabled={isSubmissionDisabled} variant='primary' size='large' fullWidth onPress={handleCompleteOrder}>
+        <AuthCTA
+          loading={isLoading}
+          disabled={isSubmissionDisabled}
+          variant='primary'
+          size='large'
+          fullWidth
+          onPress={handleCompleteOrder}
+        >
           Complete order
         </AuthCTA>
       </ModalFooter>
