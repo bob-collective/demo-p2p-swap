@@ -1,5 +1,6 @@
-import { CTA, Flex, Span } from '@interlay/ui';
+import { Flex, Span } from '@interlay/ui';
 import { useCountDown } from 'ahooks';
+import { StyledCTA } from '../OrdersTable/OrdersTable.style';
 
 type PendingOrderCTAProps = {
   deadline: Date;
@@ -15,9 +16,9 @@ const PendingOrderCTA = ({ deadline, showCta, ctaText, onPress }: PendingOrderCT
 
   if (number <= 0) {
     return showCta ? (
-      <CTA onPress={onPress} size='small' variant='secondary'>
+      <StyledCTA onPress={onPress} size='small' variant='secondary'>
         {ctaText}
-      </CTA>
+      </StyledCTA>
     ) : (
       <></>
     );
