@@ -44,7 +44,7 @@ const CancelAcceptedOrderModal = ({
   };
 
   return (
-    <Modal {...props} onClose={onClose}>
+    <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Cancel Order</ModalHeader>
       <ModalBody>
         <P>

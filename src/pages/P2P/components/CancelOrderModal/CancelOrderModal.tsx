@@ -28,9 +28,9 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
     try {
       const hash = await (isBtcBuyOrder(order)
         ? writeBTCMarketplace.withdrawBtcBuyOrder([order.id])
-        : (isBtcSellOrder(order)
-          ? writeBTCMarketplace.withdrawBtcSellOrder([order.id])
-          : writeErc20Marketplace.withdrawErcErcOrder([order.id])));
+        : isBtcSellOrder(order)
+        ? writeBTCMarketplace.withdrawBtcSellOrder([order.id])
+        : writeErc20Marketplace.withdrawErcErcOrder([order.id]));
       await publicClient.waitForTransactionReceipt({ hash });
       refetchOrders();
       onClose();
@@ -41,7 +41,7 @@ const CancelOrderModal = ({ onClose, refetchOrders, order, ...props }: CancelOrd
   };
 
   return (
-    <Modal {...props} onClose={onClose}>
+    <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Cancel Order</ModalHeader>
       <ModalBody>
         <P>

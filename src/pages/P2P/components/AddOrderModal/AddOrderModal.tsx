@@ -77,6 +77,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     <Modal
       {...props}
       onClose={onClose}
+      align='top'
       shouldCloseOnInteractOutside={(el) =>
         !offerModalRef.current?.contains(el) && !receiveModalRef.current?.contains(el)
       }
