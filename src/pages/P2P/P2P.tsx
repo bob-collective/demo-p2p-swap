@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useBalances } from '../../hooks/useBalances';
-import { useAccount } from 'wagmi';
 
 const P2P = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean; variant?: 'ERC20' | 'BTC' }>({
@@ -16,16 +15,12 @@ const P2P = (): JSX.Element => {
   const titleId4 = 'titleId4';
 
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
-  const { address } = useAccount();
-
-  console.log('orders.acceptedBtc.unowned', orders.acceptedBtc.unowned);
 
   // just to prefetch
   useBalances();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
-  console.log('orders.acceptedBtc.unowned', orders.acceptedBtc.unowned);
 
   return (
     <>
@@ -60,7 +55,7 @@ const P2P = (): JSX.Element => {
               )}
             </>
             {/* Only unowned BTC orders can be bought */}
-            {!!orders?.acceptedBtc.unowned?.length && (
+            {!!orders?.acceptedBtc.accepted?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -70,9 +65,7 @@ const P2P = (): JSX.Element => {
                 {/* Show all orders in which the current user is either the buyer or the seller */}
                 <AcceptedOrdersTable
                   aria-labelledby={titleId2}
-                  orders={orders.acceptedBtc.unowned.filter(
-                    (order) => order.btcReceiver === address || order.btcSender === address
-                  )}
+                  orders={orders.acceptedBtc.accepted}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
@@ -96,7 +89,7 @@ const P2P = (): JSX.Element => {
               </>
             )}
             {/* Only owned BTC orders can be sold */}
-            {!!orders.acceptedBtc.owned?.length && (
+            {!!orders.acceptedBtc.created?.length && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
@@ -105,7 +98,7 @@ const P2P = (): JSX.Element => {
                 </Flex>
                 <AcceptedOrdersTable
                   aria-labelledby={titleId4}
-                  orders={orders?.acceptedBtc.owned}
+                  orders={orders?.acceptedBtc.created}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />

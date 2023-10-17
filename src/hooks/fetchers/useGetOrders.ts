@@ -38,8 +38,8 @@ const useGetOrders = () => {
       owned: orders.filter((order) => order.isOwnerOfOrder),
       unowned: orders.filter((order) => !order.isOwnerOfOrder),
       acceptedBtc: {
-        owned: acceptedBtcOrders?.filter((order) => order.isOwnerOfOrder),
-        unowned: acceptedBtcOrders?.filter((order) => !order.isOwnerOfOrder)
+        created: acceptedBtcOrders?.filter((order) => order.isCreatorOfOrder),
+        accepted: acceptedBtcOrders?.filter((order) => order.isAcceptorOfOrder)
       }
     };
   }, [erc20Orders, btcBuyOrders, btcSellOrders, acceptedBtcOrders]);
