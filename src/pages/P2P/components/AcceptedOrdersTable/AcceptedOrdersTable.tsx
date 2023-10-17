@@ -1,14 +1,14 @@
-import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { theme } from '@interlay/theme';
-import { ReactNode, useMemo, useState } from 'react';
+import { CTA, Card, Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { isAddressEqual } from 'viem';
+import { useAccount } from 'wagmi';
+import { Bitcoin } from '../../../../constants';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
-import { Bitcoin } from '../../../../constants';
-import { useAccount } from 'wagmi';
-import { isAddressEqual } from 'viem';
-import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
 import { CancelAcceptedOrderModal } from '../CancelAcceptedOrderModal';
+import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
@@ -44,8 +44,8 @@ type AcceptedOrdersTableRow = {
   [AcceptedOrdersTableColumns.ACTION]: ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
+  selectedOrder?: AcceptedBtcOrder;
   orders: Array<AcceptedBtcOrder> | undefined;
   refetchOrders: () => void;
   refetchAcceptedBtcOrders: () => void;
@@ -56,14 +56,20 @@ type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 type AcceptedOrdersTableProps = Props & InheritAttrs;
 
 const AcceptedOrdersTable = ({
+  selectedOrder,
   orders,
   refetchOrders,
   refetchAcceptedBtcOrders,
   ...props
 }: AcceptedOrdersTableProps): JSX.Element => {
-  const [isCompleteOrderModalOpen, setCompleteOrderModalOpen] = useState(false);
-  const [isCancelOrderModalOpen, setCancelOrderModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<AcceptedBtcOrder>();
+  const [orderModal, setOrderModal] = useState<{ isOpen: boolean; type: 'fill' | 'cancel'; order?: AcceptedBtcOrder }>({
+    isOpen: false,
+    type: 'fill'
+  });
+
+  useEffect(() => {
+    setOrderModal((s) => ({ ...s, isOpen: !!selectedOrder, order: selectedOrder }));
+  }, [selectedOrder]);
 
   const columns = [
     { name: 'Asset', id: AcceptedOrdersTableColumns.ASSET },
@@ -73,6 +79,13 @@ const AcceptedOrdersTable = ({
   ];
 
   const { address } = useAccount();
+
+  const handleOpenFillOrderModal = (order: AcceptedBtcOrder) => setOrderModal({ isOpen: true, type: 'fill', order });
+
+  const handleOpenCancelOrderModal = (order: AcceptedBtcOrder) =>
+    setOrderModal({ isOpen: true, type: 'cancel', order });
+
+  const handleCloseAnyOrderModal = () => setOrderModal((s) => ({ ...s, isOpen: false }));
 
   const rows: AcceptedOrdersTableRow[] = useMemo(
     () =>
@@ -98,21 +111,12 @@ const AcceptedOrdersTable = ({
                   {/* Add cancel order event */}
                   <PendingOrderCTA
                     deadline={order.deadline}
-                    onPress={() => {
-                      setSelectedOrder(order);
-                      setCancelOrderModalOpen(true);
-                    }}
+                    onPress={() => handleOpenCancelOrderModal(order)}
                     ctaText='Cancel Order'
                     showCta={!!isBtcReceiver}
                   />
                   {isBtcSender && (
-                    <CTA
-                      onPress={() => {
-                        setSelectedOrder(order);
-                        setCompleteOrderModalOpen(true);
-                      }}
-                      size='small'
-                    >
+                    <CTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
                       Complete Order
                     </CTA>
                   )}
@@ -129,19 +133,23 @@ const AcceptedOrdersTable = ({
       <Card>
         <Table {...props} columns={columns} rows={rows} />
       </Card>
-      <CompleteAcceptedOrderModal
-        isOpen={isCompleteOrderModalOpen}
-        order={selectedOrder}
-        onClose={() => setCompleteOrderModalOpen(false)}
-        refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-        refetchOrders={refetchOrders}
-      />
-      <CancelAcceptedOrderModal
-        isOpen={isCancelOrderModalOpen}
-        refetchOrders={refetchOrders}
-        order={selectedOrder}
-        onClose={() => setCancelOrderModalOpen(false)}
-      />
+      {orderModal.order && (
+        <CompleteAcceptedOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'fill'}
+          onClose={handleCloseAnyOrderModal}
+          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+          refetchOrders={refetchOrders}
+          order={orderModal.order}
+        />
+      )}
+      {orderModal.order && (
+        <CancelAcceptedOrderModal
+          isOpen={orderModal.isOpen && orderModal.type === 'cancel'}
+          onClose={handleCloseAnyOrderModal}
+          order={orderModal.order}
+          refetchOrders={refetchOrders}
+        />
+      )}
     </div>
   );
 };

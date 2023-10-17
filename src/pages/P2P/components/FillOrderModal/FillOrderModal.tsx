@@ -11,6 +11,7 @@ type Props = {
   order: Order;
   refetchOrders: () => void;
   refetchAcceptedBtcOrders: () => void;
+  onFillBuyBtc?: (order: Order) => void;
 };
 
 type InheritAttrs = Omit<ModalProps, 'children'>;
@@ -21,6 +22,7 @@ const FillOrderModal = ({
   order,
   refetchOrders,
   refetchAcceptedBtcOrders,
+  onFillBuyBtc,
   onClose,
   ...props
 }: FillOrderModalProps): JSX.Element => {
@@ -43,7 +45,11 @@ const FillOrderModal = ({
               order.totalAskingAmount
             ]);
             await publicClient.waitForTransactionReceipt({ hash: acceptBuyOrderTxHash });
+
             refetchAcceptedBtcOrders();
+
+            onFillBuyBtc?.(order);
+
             break;
           }
           case 'sell-btc': {
