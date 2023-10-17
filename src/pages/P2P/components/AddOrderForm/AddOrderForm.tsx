@@ -176,6 +176,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
               <Strong>
                 {form.values.inputValue &&
                 Number(form.values.inputValue) &&
+                Number(form.values.outputValue) &&
                 new Big(form.values.inputValue || 0).gt(0) &&
                 !!form.values.outputValue
                   ? new Big(form.values.outputValue).div(form.values.inputValue).toString()
