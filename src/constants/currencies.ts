@@ -36,8 +36,8 @@ const Erc20Currencies: {
   [Erc20CurrencyTicker.ZBTC]: {
     ticker: Erc20CurrencyTicker.ZBTC,
     name: 'zBTC',
-    decimals: 18,
-    address: '0xd6cd079ee8bc26b5000a5e1ea8d434c840e3434b'
+    decimals: 8,
+    address: '0x4f01078121e90915F9f1448DE4b3C2515B5e2F3B'
   },
   [Erc20CurrencyTicker.USDT]: {
     ticker: Erc20CurrencyTicker.USDT,
