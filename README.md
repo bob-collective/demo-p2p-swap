@@ -2,6 +2,9 @@
 
 This application demonstrates how BOB is leveraged to build a peer-to-peer (P2P) swap application that allows two parties to swap ERC20 tokens and BTC without using a custodian.
 
+A live version of this demo can be found at:
+[https://demo.gobob.xyz](https://demo.gobob.xyz)
+
 Full documentation can be found at:
 [https://docs.gobob.xyz/docs/build/examples/btc_swap/](https://docs.gobob.xyz/docs/build/examples/btc_swap/)
 
