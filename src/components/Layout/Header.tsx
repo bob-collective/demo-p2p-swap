@@ -27,7 +27,7 @@ const Header = () => {
             <EthFaucet />
           </>
         )}
-        <CTA disabled={isConnecting} size='small' onPress={() => open()}>
+        <CTA disabled={isConnecting} size='small' onClick={() => open()}>
           {address ? (
             <Flex elementType='span' gap='spacing2'>
               <Jazzicon diameter={20} seed={jsNumberForAddress(address)} />
