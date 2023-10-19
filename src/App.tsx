@@ -5,6 +5,7 @@ import { L2_CHAIN_CONFIG, L2_METADATA, L2_PROJECT_ID, config } from './connector
 import { P2P } from './pages/P2P';
 import { V0 } from './pages/V0';
 import './utils/yup.custom';
+import { AddressProofing } from './pages/AddressProofing';
 
 const wagmiConfig = defaultWagmiConfig({ chains: [L2_CHAIN_CONFIG], projectId: L2_PROJECT_ID, metadata: L2_METADATA });
 
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route element={<P2P />} path='/' />
           <Route element={<V0 />} path='v0/' />
+          <Route element={<AddressProofing />} path='AddressProofing/' />
         </Routes>
       </BrowserRouter>
     </Layout>

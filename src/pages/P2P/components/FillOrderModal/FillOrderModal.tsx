@@ -80,7 +80,16 @@ const FillOrderModal = ({
       onClose();
       refetchOrders();
     },
-    [order, onClose, refetchOrders, writeBtcMarketplace, publicClient, refetchAcceptedBtcOrders, writeErc20Marketplace]
+    [
+      onClose,
+      refetchOrders,
+      writeBtcMarketplace,
+      order,
+      publicClient,
+      refetchAcceptedBtcOrders,
+      onFillBuyBtc,
+      writeErc20Marketplace
+    ]
   );
 
   return (
