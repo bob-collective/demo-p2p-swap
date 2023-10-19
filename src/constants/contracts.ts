@@ -5,6 +5,7 @@ import { FaucetAbi } from '../contracts/abi/Faucet.abi';
 import { HexString } from '../types';
 import { Erc20Currencies, Erc20CurrencyTicker } from './currencies';
 import { OwnershipAbi } from '../contracts/abi/Ownership.abi';
+import { PingAbi } from '../contracts/abi/Ping.abi';
 
 // TODO: Figure out how we can reuse the ERC20Currency enum
 //       here without need to re-define currencies again.
@@ -14,7 +15,8 @@ enum ContractType {
   ERC20_MARKETPLACE = 'ERC20_MARKETPLACE',
   BTC_MARKETPLACE = 'BTC_MARKETPLACE',
   FAUCET = 'FAUCET',
-  OWNERSHIP = 'OWNERSHIP'
+  OWNERSHIP = 'OWNERSHIP',
+  PING = 'PING'
 }
 
 // Contracts config with contract address and ABI
@@ -39,8 +41,12 @@ const contracts = {
     abi: FaucetAbi
   },
   [ContractType.OWNERSHIP]: {
-    address: '0x7aCC555dC75b384461B492078bB3599cDbEe62e0',
+    address: '0x5Fa5CFD2f75963e7c94e973Dd5a93b8F999A2215',
     abi: OwnershipAbi
+  },
+  [ContractType.PING]: {
+    address: '0x1C8274044929c73a0808d1D7d0fC2Fb2D51A880c',
+    abi: PingAbi
   }
 } as const;
 

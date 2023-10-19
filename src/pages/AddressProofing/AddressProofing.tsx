@@ -12,18 +12,46 @@ const AddressProofing = (): JSX.Element => {
   const [claimedAddress, setClaimedAddress] = useState<string>();
 
   const { address } = useAccount();
-  const { read } = useContract(ContractType.OWNERSHIP);
+  const { read: readOwnership } = useContract(ContractType.OWNERSHIP);
+  const { write: writePing, read: readPing } = useContract(ContractType.PING);
+
+  console.log(writePing, readPing);
+
+  // const ping = async () => {
+  //   await writePing.postMessage(['pong']);
+  // };
+
+  // if (claimedAddress) {
+  //   ping();
+  // }
+
+  useEffect(() => {
+    const getMessages = async () => {
+      if (!address) return;
+
+      const end = await readPing.id();
+
+      for (let i = 0; i < end; i++) {
+        const poster = await readPing.posters([BigInt(i)]);
+        console.log('posters', i, poster);
+        console.log('posters', i, await readOwnership.ownedAddress([poster]));
+        console.log('messages', i, await readPing.messages([BigInt(i)])); // might need to convert i to bigint
+      }
+    };
+
+    getMessages();
+  }, [address, claimedAddress, readOwnership, readPing]);
 
   useEffect(() => {
     if (!address) return;
 
     const logClaimedAddress = async () => {
-      const claimedAddress = await read.ownedAddress([address]);
+      const claimedAddress = await readOwnership.ownedAddress([address]);
       setClaimedAddress(claimedAddress);
     };
 
     logClaimedAddress();
-  }, [address, read]);
+  }, [address, readOwnership]);
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
