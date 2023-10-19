@@ -9,6 +9,7 @@ const AddressProofing = (): JSX.Element => {
   const [isAddNewOrderModal, setAddNewOrderModal] = useState<{ isOpen: boolean }>({
     isOpen: false
   });
+  const [claimedAddress, setClaimedAddress] = useState<string>();
 
   const { address } = useAccount();
   const { read } = useContract(ContractType.OWNERSHIP);
@@ -18,7 +19,7 @@ const AddressProofing = (): JSX.Element => {
 
     const logClaimedAddress = async () => {
       const claimedAddress = await read.ownedAddress([address]);
-      console.log(claimedAddress);
+      setClaimedAddress(claimedAddress);
     };
 
     logClaimedAddress();
@@ -30,11 +31,13 @@ const AddressProofing = (): JSX.Element => {
     <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
       <Flex alignItems='center' justifyContent='space-between'>
         <H1 size='xl2' id='address-proofing'>
-          Address Proofing
+          {claimedAddress ? `Claimed BTC Address: ${claimedAddress}` : 'Claim Address '}
         </H1>
-        <CTA onPress={() => setAddNewOrderModal({ isOpen: true })} size='small'>
-          Claim Address
-        </CTA>
+        {!claimedAddress && (
+          <CTA onPress={() => setAddNewOrderModal({ isOpen: true })} size='small'>
+            Claim Address
+          </CTA>
+        )}
       </Flex>
       <ClaimAddressModal isOpen={isAddNewOrderModal.isOpen} onClose={handleCloseNewOrderModal} />
     </Flex>
