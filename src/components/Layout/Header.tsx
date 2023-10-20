@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi';
 import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
 import { EthFaucet } from '../EthFaucet';
+import { Badge } from '../Badge';
 
 const Header = () => {
   const { open } = useWeb3Modal();
@@ -13,13 +14,16 @@ const Header = () => {
 
   return (
     <StyledHeader elementType='header' alignItems='center' justifyContent='space-between'>
-      <a href='/' aria-label='navigate to home page'>
-        <img
-          src='https://uploads-ssl.webflow.com/64e85c2f3609488b3ed725f4/64ede4ad095a0a3801df095f_BobLogo.svg'
-          width='137'
-          alt='logo'
-        />
-      </a>
+      <Flex>
+        <a href='/' aria-label='navigate to home page'>
+          <img
+            src='https://uploads-ssl.webflow.com/64e85c2f3609488b3ed725f4/64ede4ad095a0a3801df095f_BobLogo.svg'
+            width='137'
+            alt='logo'
+          />
+        </a>
+        <Badge />
+      </Flex>
       <CTAWrapper>
         {address && (
           <>
