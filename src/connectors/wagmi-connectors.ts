@@ -43,4 +43,4 @@ const config = createConfig({
   webSocketPublicClient
 });
 
-export { L2_CHAIN_CONFIG, L2_METADATA, L2_PROJECT_ID, config };
+export { L2_CHAIN_CONFIG, L2_METADATA, L2_PROJECT_ID, config, publicClient };
