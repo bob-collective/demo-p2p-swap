@@ -1,0 +1,1 @@
+export { AddressProofing } from './AddressProofing';
