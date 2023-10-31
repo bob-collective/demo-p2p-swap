@@ -159,7 +159,7 @@ const V0 = (): JSX.Element => {
           Recipient address
           <input placeholder='0x...' onChange={handleTransferRecipientChange} value={transferRecipient || ''} />
         </label>
-        <label>Estimated tx fee: {txFeeEstimate || 0} BOB</label>
+        <label>Estimated tx fee: {txFeeEstimate || 0} ETH</label>
         <button type='submit'>Send 1 zBTC</button>
       </form>
       <br />
