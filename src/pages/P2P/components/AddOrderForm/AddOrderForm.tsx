@@ -186,7 +186,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             </P>
           </Card>
           <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
-            <P size='xs'>Tx Fees 0 BOB ({formatUSD(0)})</P>
+            <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
       </Flex>
