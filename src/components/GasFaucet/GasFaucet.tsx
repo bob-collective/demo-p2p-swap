@@ -2,7 +2,7 @@ import { CTA } from '@interlay/ui';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 
-const EthFaucet = () => {
+const GasFaucet = () => {
   const [isLoading, setLoading] = useState(false);
 
   const { address } = useAccount();
@@ -24,9 +24,9 @@ const EthFaucet = () => {
 
   return (
     <CTA loading={isLoading} onPress={() => handleCallFaucet()} size='small'>
-      Get ETH
+      Get Gas
     </CTA>
   );
 };
 
-export { EthFaucet };
+export { GasFaucet };

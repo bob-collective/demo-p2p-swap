@@ -24,7 +24,7 @@ const Faucet = () => {
 
   return (
     <CTA loading={isLoading} onPress={() => handleCallFaucet()} size='small'>
-      Get tokens
+      Get Tokens
     </CTA>
   );
 };
