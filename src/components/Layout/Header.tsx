@@ -5,7 +5,7 @@ import truncateEthAddress from 'truncate-eth-address';
 import { useAccount } from 'wagmi';
 import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
-import { EthFaucet } from '../EthFaucet';
+import { GasFaucet } from '../GasFaucet';
 import { Badge } from '../Badge';
 
 const Header = () => {
@@ -28,7 +28,7 @@ const Header = () => {
         {address && (
           <>
             <Faucet />
-            <EthFaucet />
+            <GasFaucet />
           </>
         )}
         <CTA disabled={isConnecting} size='small' onClick={() => open()}>
