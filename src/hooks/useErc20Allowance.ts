@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { ContractType, Erc20CurrencyTicker, UINT_256_MAX, contracts } from '../constants';
 import { useAccount, usePublicClient } from 'wagmi';
 import { useContract } from './useContract';
+import { useContract2 } from './useContract2';
 
 // Helper hook to check erc20 allowance and provide wrapper that handles allowance;
 const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) => {
@@ -21,7 +22,7 @@ const useErc20Allowance = (contract: ContractType, ticker: Erc20CurrencyTicker) 
 
   const { address } = useAccount();
 
-  const { read: readErc20Contract, write: writeErc20Contract } = useContract(contractType);
+  const { read: readErc20Contract, write: writeErc20Contract } = useContract2(contractType);
 
   const fetchAllowance = useCallback(async () => {
     if (readErc20Contract && address) {

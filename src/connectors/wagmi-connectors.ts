@@ -1,5 +1,4 @@
 import { Chain, configureChains, createConfig } from 'wagmi';
-
 import { publicProvider } from 'wagmi/providers/public';
 import { L2_BLOCK_EXPLORER, L2_CHAIN_ID, L2_MULTICALL3_ADDRESS, L2_RPC_URL, L2_WSS_URL } from '../config';
 

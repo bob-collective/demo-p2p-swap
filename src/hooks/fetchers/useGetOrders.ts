@@ -15,10 +15,26 @@ const useGetOrders = () => {
     }
   });
 
-  const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
-  const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
-  const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
-  const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
+  const {
+    data: erc20Orders,
+    refetch: refetchActiveErc20Orders,
+    isLoading: isLoadingActiveErc20Orders
+  } = useGetActiveErc20Orders();
+  const {
+    data: btcBuyOrders,
+    refetch: refetchBtcBuyOrders,
+    isLoading: isLoadingBtcBuyOrders
+  } = useGetActiveBtcBuyOrders();
+  const {
+    data: btcSellOrders,
+    refetch: refetchBtcSellOrders,
+    isLoading: isLoadingBtcSellOrders
+  } = useGetActiveBtcSellOrders();
+  const {
+    data: acceptedBtcOrders,
+    refetch: refetchAcceptedBtcOrders,
+    isLoading: isLoadingAcceptedBtcOrders
+  } = useGetAcceptedBtcOrders();
 
   const refetch = useCallback(() => {
     refetchActiveErc20Orders();
@@ -44,8 +60,12 @@ const useGetOrders = () => {
     };
   }, [erc20Orders, btcBuyOrders, btcSellOrders, acceptedBtcOrders]);
 
+  const isLoading =
+    isLoadingActiveErc20Orders || isLoadingBtcBuyOrders || isLoadingBtcSellOrders || isLoadingAcceptedBtcOrders;
+
   return {
     data,
+    isLoading,
     refetch,
     refetchActiveErc20Orders,
     refetchBtcBuyOrders,

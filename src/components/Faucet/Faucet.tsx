@@ -13,7 +13,7 @@ const Faucet = () => {
   const handleCallFaucet = async () => {
     setLoading(true);
     try {
-      const tx = await write.mint();
+      const tx = await write('mint');
       await publicClient.waitForTransactionReceipt({ hash: tx });
     } catch (e) {
       window.alert(`Minting failed: ${e}`);

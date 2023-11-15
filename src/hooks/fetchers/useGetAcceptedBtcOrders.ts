@@ -73,11 +73,13 @@ const useGetAcceptedBtcOrders = () => {
     queryKey: ['accepted-btc-orders', address],
     enabled: !!readBtcMarketplace,
     queryFn: async () => {
+      if (!readBtcMarketplace) return [];
+
       const [[rawBuyOrders, buyOrderIds], [rawSellOrders, sellOrderIds], [rawUnderlyingBuyOrders, underlyingBuyIds]] =
         await Promise.all([
-          readBtcMarketplace.getOpenAcceptedBtcBuyOrders(),
-          readBtcMarketplace.getOpenAcceptedBtcSellOrders(),
-          readBtcMarketplace.getOpenBtcBuyOrders()
+          readBtcMarketplace('getOpenAcceptedBtcBuyOrders'),
+          readBtcMarketplace('getOpenAcceptedBtcSellOrders'),
+          readBtcMarketplace('getOpenBtcBuyOrders')
         ]);
 
       const parsedBuyOrders = rawBuyOrders.map((order, index) =>

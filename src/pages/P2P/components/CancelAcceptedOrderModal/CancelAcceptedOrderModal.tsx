@@ -31,8 +31,8 @@ const CancelAcceptedOrderModal = ({
 
     try {
       const hash = await (isBuyOrder
-        ? writeBtcMarketplace.cancelAcceptedBtcBuyOrder([order.acceptId])
-        : writeBtcMarketplace.cancelAcceptedBtcSellOrder([order.acceptId]));
+        ? writeBtcMarketplace('cancelAcceptedBtcBuyOrder', [order.acceptId])
+        : writeBtcMarketplace('cancelAcceptedBtcSellOrder', [order.acceptId]));
       await publicClient.waitForTransactionReceipt({ hash });
     } catch (e) {
       setLoading(false);
