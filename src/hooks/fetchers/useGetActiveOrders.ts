@@ -48,7 +48,9 @@ const useGetActiveErc20Orders = () => {
     queryKey: ['active-erc20-orders', address],
     enabled: !!readErc20Marketplace,
     queryFn: async () => {
-      const [rawOrders, identifiers] = await readErc20Marketplace.getOpenOrders();
+      if (!readErc20Marketplace) return [];
+      const [rawOrders = [], identifiers] = await readErc20Marketplace('getOpenOrders');
+
       // !MEMO: Should use modified marketplace contract to return ID, this will start breaking when orders
       // get cancelled / totally filled.
       return rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }, address));

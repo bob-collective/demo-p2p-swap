@@ -7,10 +7,12 @@ import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
 import { GasFaucet } from '../GasFaucet';
 import { Badge } from '../Badge';
+import { useGetActiveErc20Orders } from '../../hooks/fetchers/useGetActiveOrders';
 
 const Header = () => {
   const { open } = useWeb3Modal();
   const { address, isConnecting } = useAccount();
+  const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
 
   return (
     <StyledHeader elementType='header' alignItems='center' justifyContent='space-between'>

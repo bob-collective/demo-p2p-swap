@@ -60,8 +60,10 @@ const useGetActiveBtcBuyOrders = () => {
     queryKey: ['active-btc-buy-orders', address],
     enabled: !!readBtcMarketplace,
     queryFn: async () => {
-      const [rawOrders, ordersIds] = await readBtcMarketplace.getOpenBtcBuyOrders();
-      const [rawOrderAcceptances] = await readBtcMarketplace.getOpenAcceptedBtcBuyOrders();
+      if (!readBtcMarketplace) return [];
+
+      const [rawOrders, ordersIds] = await readBtcMarketplace('getOpenBtcBuyOrders');
+      const [rawOrderAcceptances] = await readBtcMarketplace('getOpenAcceptedBtcBuyOrders');
       return (
         rawOrders
           .map((order, index) => parseBtcBuyOrder(order, address, ordersIds[index], rawOrderAcceptances))

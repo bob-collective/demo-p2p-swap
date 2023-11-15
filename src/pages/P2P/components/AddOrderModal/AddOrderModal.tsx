@@ -41,20 +41,20 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
         if (isBitcoinCurrency(outputCurrency)) {
           if (!btcAddress) return;
           const bitcoinAddress = { bitcoinAddress: btcAddress };
-          tx = await writeBTCMarketplace.placeBtcBuyOrder([
+          tx = await writeBTCMarketplace('placeBtcBuyOrder', [
             outputAtomicAmount,
             bitcoinAddress,
             (inputCurrency as Erc20Currency).address,
             inputAtomicAmount
           ]);
         } else if (isBitcoinCurrency(inputCurrency)) {
-          tx = await writeBTCMarketplace.placeBtcSellOrder([
+          tx = await writeBTCMarketplace('placeBtcSellOrder', [
             inputAtomicAmount,
             (outputCurrency as Erc20Currency).address,
             outputAtomicAmount
           ]);
         } else {
-          tx = await writeErc20Marketplace.placeErcErcOrder([
+          tx = await writeErc20Marketplace('placeErcErcOrder', [
             inputCurrency.address,
             inputAtomicAmount,
             outputCurrency.address,

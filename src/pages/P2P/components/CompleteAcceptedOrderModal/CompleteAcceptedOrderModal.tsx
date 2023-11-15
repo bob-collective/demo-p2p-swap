@@ -46,10 +46,10 @@ const CompleteAcceptedOrderModal = ({
 
     try {
       if (order.type === 'buy') {
-        const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, proofData.info, proofData.proof]);
+        const hash = await writeBTCMarketplace('proofBtcBuyOrder', [order.acceptId, proofData.info, proofData.proof]);
         await publicClient.waitForTransactionReceipt({ hash });
       } else {
-        const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, proofData.info, proofData.proof]);
+        const hash = await writeBTCMarketplace('proofBtcSellOrder', [order.acceptId, proofData.info, proofData.proof]);
         await publicClient.waitForTransactionReceipt({ hash });
       }
     } catch (e) {

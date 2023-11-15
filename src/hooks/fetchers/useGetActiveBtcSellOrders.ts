@@ -56,9 +56,11 @@ const useGetActiveBtcSellOrders = () => {
     queryKey: ['active-btc-sell-orders', address],
     enabled: !!readBtcMarketplace,
     queryFn: async () => {
+      if (!readBtcMarketplace) return [];
+
       const [[rawOrders, ordersIds], [rawOrderAcceptances]] = await Promise.all([
-        readBtcMarketplace.getOpenBtcSellOrders(),
-        readBtcMarketplace.getOpenAcceptedBtcSellOrders()
+        readBtcMarketplace('getOpenBtcSellOrders'),
+        readBtcMarketplace('getOpenAcceptedBtcSellOrders')
       ]);
       return (
         rawOrders

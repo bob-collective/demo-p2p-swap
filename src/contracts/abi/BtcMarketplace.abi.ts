@@ -1,5 +1,13 @@
 export const BtcMarketplaceAbi = [
   {
+    type: 'constructor',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { type: 'address', name: '_relay', internalType: 'contract IRelay' },
+      { type: 'address', name: 'erc2771Forwarder', internalType: 'address' }
+    ]
+  },
+  {
     type: 'event',
     name: 'acceptBtcBuyOrderEvent',
     inputs: [
@@ -304,6 +312,20 @@ export const BtcMarketplaceAbi = [
     ],
     name: 'getOpenBtcSellOrders',
     inputs: []
+  },
+  {
+    type: 'function',
+    stateMutability: 'view',
+    outputs: [{ type: 'address', name: 'forwarder', internalType: 'address' }],
+    name: 'getTrustedForwarder',
+    inputs: []
+  },
+  {
+    type: 'function',
+    stateMutability: 'view',
+    outputs: [{ type: 'bool', name: '', internalType: 'bool' }],
+    name: 'isTrustedForwarder',
+    inputs: [{ type: 'address', name: 'forwarder', internalType: 'address' }]
   },
   {
     type: 'function',

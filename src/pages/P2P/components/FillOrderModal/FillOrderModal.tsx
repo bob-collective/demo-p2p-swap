@@ -40,7 +40,7 @@ const FillOrderModal = ({
       try {
         switch (data.type) {
           case 'buy-btc': {
-            const acceptBuyOrderTxHash = await writeBtcMarketplace.acceptBtcBuyOrder([
+            const acceptBuyOrderTxHash = await writeBtcMarketplace('acceptBtcBuyOrder', [
               order.id,
               order.totalAskingAmount
             ]);
@@ -54,7 +54,7 @@ const FillOrderModal = ({
           }
           case 'sell-btc': {
             const btcAddress = { bitcoinAddress: data.values.btcAddress };
-            const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
+            const acceptBtcSellOrderTxHash = await writeBtcMarketplace('acceptBtcSellOrder', [
               order.id,
               btcAddress,
               order.availableLiquidity
@@ -66,7 +66,7 @@ const FillOrderModal = ({
           case 'erc20': {
             const inputAtomicAmount = new Amount(order.askingCurrency, data.values.inputValue, true).toAtomic();
 
-            const hash = await writeErc20Marketplace.acceptErcErcOrder([order.id, inputAtomicAmount]);
+            const hash = await writeErc20Marketplace('acceptErcErcOrder', [order.id, inputAtomicAmount]);
             await publicClient.waitForTransactionReceipt({ hash });
             break;
           }

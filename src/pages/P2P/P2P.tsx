@@ -1,5 +1,5 @@
 import { theme } from '@interlay/theme';
-import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
+import { CTA, Flex, H1, H2, LoadingSpinner, P, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
@@ -20,7 +20,7 @@ const P2P = (): JSX.Element => {
   const titleId3 = 'titleId3';
   const titleId4 = 'titleId4';
 
-  const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
+  const { data: orders, refetch, refetchAcceptedBtcOrders, isLoading } = useGetOrders();
 
   // just to prefetch
   useBalances();
@@ -72,9 +72,13 @@ const P2P = (): JSX.Element => {
                     });
                   }}
                 />
-              ) : (
+              ) : isLoading ? (
                 <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
                   <LoadingSpinner color='secondary' variant='indeterminate' diameter={36} thickness={4} />
+                </Flex>
+              ) : (
+                <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
+                  <P>No active orders</P>
                 </Flex>
               )}
             </>

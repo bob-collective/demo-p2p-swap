@@ -189,10 +189,16 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
+        <AuthCTA
+          fullWidth
+          loading={isLoading || isLoadingAllowance}
+          disabled={isSubmitDisabled}
+          size='large'
+          type='submit'
+        >
+          {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
+        </AuthCTA>
       </Flex>
-      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-        {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
-      </AuthCTA>
     </form>
   );
 };
