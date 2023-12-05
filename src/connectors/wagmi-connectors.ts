@@ -18,8 +18,8 @@ const L2_CHAIN_CONFIG = {
   network: 'BOB-L2-Demo',
   nativeCurrency: {
     decimals: 18,
-    name: 'Bob',
-    symbol: 'BOB'
+    name: 'Ethereum',
+    symbol: 'ETH'
   },
   rpcUrls: {
     public: { http: [L2_RPC_URL], webSocket: [L2_WSS_URL] },
