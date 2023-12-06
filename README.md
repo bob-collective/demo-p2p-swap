@@ -20,11 +20,11 @@
 2. From the L2 Faucet section in [Conduit](https://app.conduit.xyz/published/view/fluffy-bob-7mjgi9pmtg), enter your address and click the 'Claim' button.
 
 Note: we have seen instances of this failing. If this happens, the api can be called from a terminal:
-`curl -XPOST -i https://faucetl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/drip/0x4062e44077b1e58C3D630a0e4e632fF81868e448`
+`curl -XPOST -i https://faucetl2-puff-bob-jznbxtoq7h.t.conduit.xyz/drip/0x4062e44077b1e58C3D630a0e4e632fF81868e448`
 
 #### Other supported tokens
 
-1. This can be done either by using the faucet button in the UI or by interacting with the smart contract in [Conduit](https://explorerl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/address/[address])
+1. This can be done either by using the faucet button in the UI or by interacting with the smart contract in [Conduit](https://explorerl2-puff-bob-jznbxtoq7h.t.conduit.xyz/address/[address])
 
 ### Starting the project
 
