@@ -43,7 +43,7 @@ const Erc20Currencies: {
     ticker: Erc20CurrencyTicker.USDT,
     name: 'Tether USD',
     decimals: 6,
-    address: '0x3c252953224948E441aAfdE7b391685201ccd3bC'
+    address: '0x27c3321E40f039d10D5FF831F528C9CEAE601B1d'
   }
 };
 
