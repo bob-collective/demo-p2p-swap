@@ -39,7 +39,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<P2P />} path='/' />
-          <Route element={<V0 />} path='v0/' />
         </Routes>
       </BrowserRouter>
     </Layout>
