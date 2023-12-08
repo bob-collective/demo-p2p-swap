@@ -1,31 +1,12 @@
-import { CTA } from '@interlay/ui';
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { CTALink } from '@interlay/ui';
+
+const FAUCET_URL = 'https://faucetlink.to/sepolia';
 
 const GasFaucet = () => {
-  const [isLoading, setLoading] = useState(false);
-
-  const { address } = useAccount();
-
-  const faucetEndpoint = `https://faucetl2-puff-bob-jznbxtoq7h.t.conduit.xyz/drip/${address}`;
-
-  const handleCallFaucet = async () => {
-    setLoading(true);
-    try {
-      await fetch(faucetEndpoint, {
-        method: 'POST'
-      });
-    } catch (e) {
-      console.log(`ETH faucet failed: ${e}`);
-      setLoading(false);
-    }
-    setLoading(false);
-  };
-
   return (
-    <CTA loading={isLoading} onPress={() => handleCallFaucet()} size='small'>
-      Get Gas
-    </CTA>
+    <CTALink external icon href={FAUCET_URL} size='small'>
+      ETH Faucet
+    </CTALink>
   );
 };
 
