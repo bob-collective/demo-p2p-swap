@@ -7,10 +7,9 @@
 1. Install [pnpm](https://pnpm.io/installation)
 2. Run `pnpm install`
 
-### Connecting Metamask
+### Connecting MetaMask
 
-1. Go to [Conduit](https://app.conduit.xyz/published/view/puff-bob-jznbxtoq7h).
-2. Click the 'Add to wallet button.'
+This can be done from the application using the 'Connect Wallet' button, or by going to [Conduit](https://app.conduit.xyz/published/view/puff-bob-jznbxtoq7h) and clicking the 'Add to wallet button.'
 
 ### Funding your account
 
