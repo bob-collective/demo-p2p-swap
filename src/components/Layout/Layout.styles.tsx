@@ -21,8 +21,18 @@ const StyledMain = styled(Flex)`
   }
 `;
 
+const StyledFooter = styled(Flex)`
+  padding: 0 ${theme.spacing.spacing4};
+
+  @media ${theme.breakpoints.up('md')} {
+    padding: 0 ${theme.spacing.spacing12};
+  }
+
+  min-height: 55px;
+`;
+
 const CTAWrapper = styled(Flex)`
   gap: ${theme.spacing.spacing2};
 `;
 
-export { StyledHeader, StyledMain, CTAWrapper };
+export { StyledFooter, StyledHeader, StyledMain, CTAWrapper };

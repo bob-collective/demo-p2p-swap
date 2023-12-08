@@ -1,12 +1,12 @@
-import { CTA, Flex, Span } from '@interlay/ui';
+import { CTA, CTALink, Flex, Span } from '@interlay/ui';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
 import truncateEthAddress from 'truncate-eth-address';
 import { useAccount } from 'wagmi';
 import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
-import { GasFaucet } from '../GasFaucet';
 import { Badge } from '../Badge';
+import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 
 const Header = () => {
   const { open } = useWeb3Modal();
@@ -28,7 +28,12 @@ const Header = () => {
         {address && (
           <>
             <Faucet />
-            <GasFaucet />
+            <CTALink external icon href={FAUCET_URL} size='small'>
+              ETH Faucet
+            </CTALink>
+            <CTALink external icon href={SUPERBRIDGE_URL} size='small'>
+              Superbridge
+            </CTALink>
           </>
         )}
         <CTA disabled={isConnecting} size='small' onClick={() => open()}>
