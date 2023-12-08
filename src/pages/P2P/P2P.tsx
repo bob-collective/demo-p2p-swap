@@ -34,7 +34,7 @@ const P2P = (): JSX.Element => {
   return (
     <>
       <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
-        {/* TODO: Replace info banner with accordion */}
+        {/* TODO: Replace info banner with FAQ accordion */}
         <Alert status='warning'>
           To fund your account you will need to get Sepolia ETH from a{' '}
           <a href={FAUCET_URL} rel='external' target='_blank'>
