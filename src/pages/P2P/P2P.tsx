@@ -1,11 +1,12 @@
 import { theme } from '@interlay/theme';
-import { CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
+import { Alert, CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { useBalances } from '../../hooks/useBalances';
 import { useSearchParams } from 'react-router-dom';
 import { AcceptedBtcOrder } from '../../types/orders';
+import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -33,6 +34,17 @@ const P2P = (): JSX.Element => {
   return (
     <>
       <Flex flex={1} direction='column' gap='spacing6' justifyContent='center'>
+        <Alert status='warning'>
+          To fund your account you will need to get Sepolia ETH from a{' '}
+          <a href={FAUCET_URL} rel='external' target='_blank'>
+            testnet faucet
+          </a>{' '}
+          and transfer it to the BOB network using{' '}
+          <a href={SUPERBRIDGE_URL} rel='external' target='_blank'>
+            Superbridge
+          </a>
+          .
+        </Alert>
         <Flex alignItems='center' justifyContent='space-between'>
           <H1 size='xl2' id={titleId}>
             BTC Marketplace

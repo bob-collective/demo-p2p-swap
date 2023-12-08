@@ -6,9 +6,7 @@ import { useAccount } from 'wagmi';
 import { CTAWrapper, StyledHeader } from './Layout.styles';
 import { Faucet } from '../Faucet';
 import { Badge } from '../Badge';
-
-const FAUCET_URL = 'https://faucetlink.to/sepolia';
-const SUPERBRIDGE_URL = 'https://puff-bob-jznbxtoq7h.testnets.superbridge.app/';
+import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 
 const Header = () => {
   const { open } = useWeb3Modal();
