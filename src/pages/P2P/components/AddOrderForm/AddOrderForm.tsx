@@ -29,8 +29,8 @@ type AddOrderFormProps = {
 
 const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: AddOrderFormProps): JSX.Element => {
   const [tickers, setTickers] = useState<{ inputTicker: CurrencyTicker; outputTicker: CurrencyTicker }>({
-    inputTicker: Erc20CurrencyTicker.ZBTC,
-    outputTicker: Erc20CurrencyTicker.USDT
+    inputTicker: Erc20CurrencyTicker.WBTC,
+    outputTicker: Erc20CurrencyTicker.USDC
   });
 
   const isSellingBTC = tickers.inputTicker === 'BTC';
@@ -133,8 +133,8 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             {
               modalProps: { ref: offerModalRef },
               items: [
-                { value: 'ZBTC', balance: getBalance(Erc20CurrencyTicker.ZBTC).toBig().toNumber(), balanceUSD: 0 },
-                { value: 'USDT', balance: getBalance(Erc20CurrencyTicker.USDT).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'WBTC', balance: getBalance(Erc20CurrencyTicker.WBTC).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'USDC', balance: getBalance(Erc20CurrencyTicker.USDC).toBig().toNumber(), balanceUSD: 0 },
                 { value: 'BTC', balance: '—', balanceUSD: 0 }
               ],
               onSelectionChange: (key: Key) => handleInputTickerChange(key as Erc20CurrencyTicker)
@@ -151,8 +151,8 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             {
               modalProps: { ref: receiveModalRef },
               items: [
-                { value: 'ZBTC', balance: getBalance(Erc20CurrencyTicker.ZBTC).toBig().toNumber(), balanceUSD: 0 },
-                { value: 'USDT', balance: getBalance(Erc20CurrencyTicker.USDT).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'WBTC', balance: getBalance(Erc20CurrencyTicker.WBTC).toBig().toNumber(), balanceUSD: 0 },
+                { value: 'USDC', balance: getBalance(Erc20CurrencyTicker.USDC).toBig().toNumber(), balanceUSD: 0 },
                 { value: 'BTC', balance: '—', balanceUSD: 0 }
               ],
               onSelectionChange: (key: Key) => handleOutputTickerChange(key as Erc20CurrencyTicker)

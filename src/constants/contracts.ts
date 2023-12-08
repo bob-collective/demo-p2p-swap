@@ -8,8 +8,8 @@ import { Erc20Currencies, Erc20CurrencyTicker } from './currencies';
 // TODO: Figure out how we can reuse the ERC20Currency enum
 //       here without need to re-define currencies again.
 enum ContractType {
-  ZBTC = 'ZBTC',
-  USDT = 'USDT',
+  WBTC = 'WBTC',
+  USDC = 'USDC',
   ERC20_MARKETPLACE = 'ERC20_MARKETPLACE',
   BTC_MARKETPLACE = 'BTC_MARKETPLACE',
   FAUCET = 'FAUCET'
@@ -24,16 +24,15 @@ const contracts = {
     {} as { [ticker in Erc20CurrencyTicker]: { abi: typeof ERC20Abi; address: HexString } }
   ),
   [ContractType.ERC20_MARKETPLACE]: {
-    address: '0x79922D5e77202d44df6886aDD602200b70634Db5',
+    address: '0xCAA747B48d3b504df85475aa181d10d1329aF983',
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x0dB82Bc7CA64fA7f782F09ad7986fed75D42d461',
+    address: '0x0cfd830a59e94b6957609fFd85CcDD742C521F34',
     abi: BtcMarketplaceAbi
   },
   [ContractType.FAUCET]: {
-    // TODO: switch to deployed contract address
-    address: '0x5451f7e2458CEa3e088c6976A7d40f443655C0A0',
+    address: '0x7884560F14c62E0a83420F17832988cC1a775df1',
     abi: FaucetAbi
   }
 } as const;

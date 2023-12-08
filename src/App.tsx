@@ -5,7 +5,6 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { Layout } from './components';
 import { L2_CHAIN_CONFIG, L2_METADATA, L2_PROJECT_ID, config, publicClient } from './connectors/wagmi-connectors';
 import { P2P } from './pages/P2P';
-import { V0 } from './pages/V0';
 import './utils/yup.custom';
 
 import { InjectedConnector } from 'wagmi/connectors/injected';
@@ -39,7 +38,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<P2P />} path='/' />
-          <Route element={<V0 />} path='v0/' />
         </Routes>
       </BrowserRouter>
     </Layout>

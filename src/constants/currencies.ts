@@ -1,8 +1,8 @@
 import { HexString } from '../types';
 
 enum Erc20CurrencyTicker {
-  ZBTC = 'ZBTC',
-  USDT = 'USDT'
+  WBTC = 'WBTC',
+  USDC = 'USDC'
 }
 
 type CurrencyTicker = keyof typeof Erc20CurrencyTicker | BitcoinTicker;
@@ -33,17 +33,17 @@ type Currency = Erc20Currency | BitcoinCurrency;
 const Erc20Currencies: {
   [ticker in Erc20CurrencyTicker]: Erc20Currency;
 } = {
-  [Erc20CurrencyTicker.ZBTC]: {
-    ticker: Erc20CurrencyTicker.ZBTC,
-    name: 'zBTC',
+  [Erc20CurrencyTicker.WBTC]: {
+    ticker: Erc20CurrencyTicker.WBTC,
+    name: 'wBTC',
     decimals: 8,
-    address: '0x4f01078121e90915F9f1448DE4b3C2515B5e2F3B'
+    address: '0x2868d708e442A6a940670d26100036d426F1e16b'
   },
-  [Erc20CurrencyTicker.USDT]: {
-    ticker: Erc20CurrencyTicker.USDT,
-    name: 'Tether USD',
+  [Erc20CurrencyTicker.USDC]: {
+    ticker: Erc20CurrencyTicker.USDC,
+    name: 'USDC',
     decimals: 6,
-    address: '0x3c252953224948E441aAfdE7b391685201ccd3bC'
+    address: '0x27c3321E40f039d10D5FF831F528C9CEAE601B1d'
   }
 };
 

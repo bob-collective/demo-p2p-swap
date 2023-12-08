@@ -7,7 +7,7 @@ const GasFaucet = () => {
 
   const { address } = useAccount();
 
-  const faucetEndpoint = `https://faucetl2-fluffy-bob-7mjgi9pmtg.t.conduit.xyz/drip/${address}`;
+  const faucetEndpoint = `https://faucetl2-puff-bob-jznbxtoq7h.t.conduit.xyz/drip/${address}`;
 
   const handleCallFaucet = async () => {
     setLoading(true);

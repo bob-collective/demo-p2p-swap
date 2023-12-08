@@ -51,7 +51,9 @@ const useGetActiveErc20Orders = () => {
       const [rawOrders, identifiers] = await readErc20Marketplace.getOpenOrders();
       // !MEMO: Should use modified marketplace contract to return ID, this will start breaking when orders
       // get cancelled / totally filled.
-      return rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }, address));
+      return rawOrders
+        ? rawOrders.map((order, index) => parseErc20Order({ ...order, id: identifiers[index] }, address))
+        : [];
     },
     refetchInterval: REFETCH_INTERVAL.MINUTE
   });
