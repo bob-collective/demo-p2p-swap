@@ -8,7 +8,7 @@ import { useBtcTx } from '../../../../hooks/useBtcTx';
 import { useContract } from '../../../../hooks/useContract';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
-import { StyledLoadingSpinner } from './CompleteAcceptedOrderModal.styles';
+import { StyledSpinner } from './CompleteAcceptedOrderModal.styles';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -106,12 +106,12 @@ const CompleteAcceptedOrderModal = ({
         <Card variant='bordered' background='secondary' alignItems='center' justifyContent='center'>
           {status === 'NOT_FOUND' ? (
             <Flex gap='spacing2'>
-              <StyledLoadingSpinner variant='indeterminate' diameter={18} thickness={2} />
+              <StyledSpinner thickness={2} />
               <P size='s'>Waiting for bitcoin transaction to be made...</P>
             </Flex>
           ) : (
             <Flex alignItems='center' gap='spacing2'>
-              {isSubmissionDisabled && <StyledLoadingSpinner variant='indeterminate' diameter={18} thickness={2} />}
+              {isSubmissionDisabled && <StyledSpinner thickness={2} />}
               <P size='s'>
                 Bitcoin transaction found (
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>
