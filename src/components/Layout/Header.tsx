@@ -1,18 +1,24 @@
-import { CTA, CTALink, Flex, Span } from '@interlay/ui';
+import { CTALink, Flex } from '@interlay/ui';
 import { useState } from 'react';
-import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
-import truncateEthAddress from 'truncate-eth-address';
 import { useAccount, useConnect } from 'wagmi';
 import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
+import { useAccount as useSatsAccount } from '../../lib/sats-wagmi';
 import { Badge } from '../Badge';
 import { ConnectWalletModal } from '../ConnectWalletModal';
+import { Icons } from '../ConnectWalletModal/ConnectWalletModal';
 import { Faucet } from '../Faucet';
-import { CTAWrapper, StyledHeader } from './Layout.styles';
-
+import { CTAWrapper, StyledConnectedCTA, StyledHeader, StyledWallets } from './Layout.styles';
 const Header = () => {
   const { address } = useAccount();
   const [isOpen, setOpen] = useState(false);
-  const { connectors, connect, pendingConnector } = useConnect();
+  const { pendingConnector } = useConnect();
+  const { connector } = useAccount();
+  const { connector: btcConnector } = useSatsAccount();
+
+  const hasSomeWalletConnected = !!connector || !!btcConnector;
+
+  const EthereumWallet = connector ? Icons[connector.name] : undefined;
+  const BTCWallet = btcConnector ? Icons[btcConnector.name] : undefined;
 
   return (
     <>
@@ -27,7 +33,7 @@ const Header = () => {
           </a>
           <Badge />
         </Flex>
-        <CTAWrapper>
+        <CTAWrapper alignItems='center'>
           {address && (
             <>
               <Faucet />
@@ -39,20 +45,21 @@ const Header = () => {
               </CTALink>
             </>
           )}
-          <CTA loading={!!pendingConnector} size='small' onClick={() => setOpen(true)}>
+          <StyledConnectedCTA loading={!!pendingConnector} onClick={() => setOpen(true)}>
             {pendingConnector ? (
               'Authorize Wallet'
-            ) : address ? (
+            ) : hasSomeWalletConnected ? (
               <Flex elementType='span' gap='spacing2'>
-                <Jazzicon diameter={20} seed={jsNumberForAddress(address)} />
-                <Span style={{ color: 'inherit' }} size='s' color='tertiary'>
-                  {truncateEthAddress(address)}
-                </Span>
+                <StyledWallets alignItems='center'>
+                  {EthereumWallet && <EthereumWallet size='s' />}
+                  {BTCWallet && <BTCWallet size='s' />}
+                </StyledWallets>
+                Wallet
               </Flex>
             ) : (
               'Connect Wallet'
             )}
-          </CTA>
+          </StyledConnectedCTA>
         </CTAWrapper>
       </StyledHeader>
       <ConnectWalletModal isOpen={isOpen} onClose={() => setOpen(false)} />
