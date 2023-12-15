@@ -6,6 +6,7 @@ import { useContract } from '../../../../hooks/useContract';
 import { Order } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { FillOrderForm, FillOrderFormData } from '../FillOrderForm';
+import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 
 type Props = {
   order: Order;
@@ -53,7 +54,7 @@ const FillOrderModal = ({
             break;
           }
           case 'sell-btc': {
-            const btcAddress = { bitcoinAddress: data.values.btcAddress };
+            const btcAddress = { scriptPubKey: getScriptPubKeyFromAddress(data.values.btcAddress) };
             const acceptBtcSellOrderTxHash = await writeBtcMarketplace.acceptBtcSellOrder([
               order.id,
               btcAddress,

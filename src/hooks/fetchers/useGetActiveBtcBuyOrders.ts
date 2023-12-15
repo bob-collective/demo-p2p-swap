@@ -8,12 +8,13 @@ import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
 import { useContract } from '../useContract';
 import { REFETCH_INTERVAL } from '../../constants/query';
+import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
 
 const parseBtcBuyOrder = (
   rawOrder: {
     amountBtc: bigint;
     bitcoinAddress: {
-      bitcoinAddress: string;
+      scriptPubKey: HexString;
     };
     offeringToken: HexString;
     offeringAmount: bigint;
@@ -40,7 +41,7 @@ const parseBtcBuyOrder = (
 
   return {
     id,
-    bitcoinAddress: rawOrder.bitcoinAddress.bitcoinAddress.toString(), // TODO: change when contract is updated to handle real address
+    bitcoinAddress: getAddressFromScriptPubKey(rawOrder.bitcoinAddress.scriptPubKey),
     price: price || acceptedOrderPrice || 0,
     offeringCurrency,
     askingCurrency: Bitcoin,

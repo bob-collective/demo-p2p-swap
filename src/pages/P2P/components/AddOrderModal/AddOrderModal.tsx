@@ -9,6 +9,7 @@ import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
 import { AddOrdinalOrderForm } from '../AddOrdinalOrderForm';
+import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -42,7 +43,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
         if (isBitcoinCurrency(outputCurrency)) {
           if (!btcAddress) return;
-          const bitcoinAddress = { bitcoinAddress: btcAddress };
+          const bitcoinAddress = { scriptPubKey: getScriptPubKeyFromAddress(btcAddress) };
           tx = await writeBTCMarketplace.placeBtcBuyOrder([
             outputAtomicAmount,
             bitcoinAddress,

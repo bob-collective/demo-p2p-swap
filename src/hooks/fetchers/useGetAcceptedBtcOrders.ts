@@ -9,6 +9,7 @@ import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderDeadline, calculateOrderPrice } from '../../utils/orders';
 import { useContract } from '../useContract';
 import { REFETCH_INTERVAL } from '../../constants/query';
+import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
 
 const parseAcceptedBtcOrder = (
   rawOrder: {
@@ -20,7 +21,7 @@ const parseAcceptedBtcOrder = (
     accepter: HexString;
     requester: HexString;
     bitcoinAddress?: {
-      bitcoinAddress: string;
+      scriptPubKey: HexString;
     };
   },
   id: bigint,
@@ -28,7 +29,7 @@ const parseAcceptedBtcOrder = (
   address: HexString | undefined,
   underlyingBuyOrders: readonly {
     bitcoinAddress: {
-      bitcoinAddress: string;
+      scriptPubKey: HexString;
     };
   }[],
   buyids: readonly bigint[]
@@ -44,7 +45,7 @@ const parseAcceptedBtcOrder = (
 
   const underlyingBtcAddress = underlyingBuyOrders.find((_, index) => buyids[index] === rawOrder.orderId);
   const bitcoinAddress = rawOrder.bitcoinAddress || underlyingBtcAddress?.bitcoinAddress;
-  if (!bitcoinAddress?.bitcoinAddress) {
+  if (!bitcoinAddress?.scriptPubKey) {
     throw new Error('Bitcoin address not found');
   }
 
@@ -59,7 +60,7 @@ const parseAcceptedBtcOrder = (
     btcSender: type === 'buy' ? rawOrder.accepter : rawOrder.requester,
     deadline,
     otherCurrencyAmount: rawOrder.ercAmount,
-    bitcoinAddress: bitcoinAddress?.bitcoinAddress,
+    bitcoinAddress: getAddressFromScriptPubKey(bitcoinAddress.scriptPubKey),
     isAcceptorOfOrder,
     isCreatorOfOrder
   };

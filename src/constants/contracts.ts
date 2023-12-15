@@ -4,6 +4,7 @@ import { Erc20MarketplaceAbi } from '../contracts/abi/Marketplace.abi';
 import { FaucetAbi } from '../contracts/abi/Faucet.abi';
 import { HexString } from '../types';
 import { Erc20Currencies, Erc20CurrencyTicker } from './currencies';
+import { OrdMarketplaceAbi } from '../contracts/abi/OrdMarketplace.abi';
 
 // TODO: Figure out how we can reuse the ERC20Currency enum
 //       here without need to re-define currencies again.
@@ -12,6 +13,7 @@ enum ContractType {
   USDC = 'USDC',
   ERC20_MARKETPLACE = 'ERC20_MARKETPLACE',
   BTC_MARKETPLACE = 'BTC_MARKETPLACE',
+  ORD_MARKETPLACE = 'ORD_MARKETPLACE',
   FAUCET = 'FAUCET'
 }
 
@@ -30,6 +32,10 @@ const contracts = {
   [ContractType.BTC_MARKETPLACE]: {
     address: '0x0cfd830a59e94b6957609fFd85CcDD742C521F34',
     abi: BtcMarketplaceAbi
+  },
+  [ContractType.ORD_MARKETPLACE]: {
+    address: '0x4BaB7Be6b379F774D02C6D595406129736939833',
+    abi: OrdMarketplaceAbi
   },
   [ContractType.FAUCET]: {
     address: '0x7884560F14c62E0a83420F17832988cC1a775df1',
