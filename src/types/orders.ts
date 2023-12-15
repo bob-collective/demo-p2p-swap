@@ -46,13 +46,15 @@ interface AcceptedBtcOrder {
   isCreatorOfOrder: boolean;
 }
 
+type Utxo = { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
 interface OrdinalOrder {
-  orderId: number;
+  orderId: bigint;
   ordinalId: string;
-  utxo: string;
+  utxo: Utxo;
   askingCurrency: Currency;
   totalAskingAmount: bigint;
-  sellerAddress: HexString;
+  deadline: Date | undefined;
+  isOwnerOfOrder: boolean;
 }
 
 interface AcceptedOrdinalOrder {

@@ -50,7 +50,7 @@ const parseAcceptedOrdinalOrder = (
   };
 };
 
-const useGetAcceptedBtcOrders = () => {
+const useGetAcceptedOrdinalOrders = () => {
   const { read: readOrdinalMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
   const { address } = useAccount();
 
@@ -68,4 +68,4 @@ const useGetAcceptedBtcOrders = () => {
   return queryResult;
 };
 
-export { useGetAcceptedBtcOrders };
+export { useGetAcceptedOrdinalOrders };
