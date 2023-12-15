@@ -31,19 +31,16 @@ export const addOrderSchema = (params: AddOrderSchemaParams) => {
 
 export type AddOrdinalOrderSchemaParams = {
   inputValue?: Partial<MinAmountValidationParams>;
-  ownedInscriptions: string[];
+  // ownedInscriptions: string[];
 };
 
 export const addOrdinalOrderSchema = (params: AddOrdinalOrderSchemaParams) => {
   return yup.object().shape({
     ticker: yup.string().required(),
-    inscriptionId: yup
-      .string()
-      .required()
-      .min(65)
-      .test('is-owned-inscription', 'Please enter a inscription ID that you own', (value) =>
-        params.ownedInscriptions.includes(value || '')
-      ),
+    inscriptionId: yup.string().required().min(65),
+    // .test('is-owned-inscription', 'Please enter a inscription ID that you own', (value) =>
+    //   params.ownedInscriptions.includes(value || '')
+    // ),
     amount: yup
       .string()
       .requiredAmount('receive')

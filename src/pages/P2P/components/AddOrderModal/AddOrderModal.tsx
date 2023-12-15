@@ -4,12 +4,14 @@ import { useAccount, usePublicClient } from 'wagmi';
 import { ContractType, Erc20Currency, currencies } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
 import { Amount } from '../../../../utils/amount';
-import { isBitcoinCurrency } from '../../../../utils/currencies';
+import { isBitcoinCurrency, isErc20Currency } from '../../../../utils/currencies';
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
-import { AddOrdinalOrderForm } from '../AddOrdinalOrderForm';
+import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrderForm';
 import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
+import { HexString } from '../../../../types';
+import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -19,6 +21,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
+  const { write: writeOrdMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
 
   const publicClient = usePublicClient();
   const { address } = useAccount();
@@ -76,6 +79,30 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     [address, writeErc20Marketplace, writeBTCMarketplace, onClose, publicClient, refetchOrders]
   );
 
+  const ordClient = useOrdinalsAPI();
+
+  const handleAddOrdinalOrder = async (data: AddOrdinalOrderFormData) => {
+    if (!ordClient) {
+      throw new Error('TODO');
+    }
+    const askingCurrency = currencies[data.ticker];
+    if (!isErc20Currency(askingCurrency)) {
+      throw new Error('TODO');
+    }
+
+    // TODO: need to parse
+    const inscriptionData = await ordClient.getInscriptionFromId(data.inscriptionId);
+    // TODO: check that data are of correct types
+    const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
+
+    const tx = writeOrdMarketplace.placeOrdinalSellOrder([
+      { ordinalID: data.inscriptionId as HexString },
+      utxo,
+      askingCurrency.address,
+      askingAmount
+    ]);
+  };
+
   return (
     <Modal
       {...props}
@@ -104,8 +131,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
               <AddOrdinalOrderForm
                 overlappingModalRef={receiveModalRef}
                 isLoading={isLoading}
-                // TODO: implement
-                onSubmit={console.log}
+                onSubmit={handleAddOrdinalOrder}
               />
             </StyledWrapper>
           </TabsItem>

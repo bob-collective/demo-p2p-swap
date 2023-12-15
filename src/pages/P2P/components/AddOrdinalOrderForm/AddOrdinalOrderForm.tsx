@@ -8,6 +8,7 @@ import { useBalances } from '../../../../hooks/useBalances';
 import { formatUSD } from '../../../../utils/format';
 import { AddOrdinalOrderSchemaParams, addOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
+import { Inscription } from '../../../../components';
 
 type AddOrdinalOrderFormData = {
   amount: string;
@@ -31,8 +32,7 @@ const AddOrdinalOrderForm = ({ isLoading, overlappingModalRef, onSubmit }: AddOr
   };
 
   const schemaParams: AddOrdinalOrderSchemaParams = {
-    inputValue: {},
-    ownedInscriptions: ['c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0']
+    inputValue: {}
   };
 
   const form = useForm<AddOrdinalOrderFormData>({
@@ -69,14 +69,7 @@ const AddOrdinalOrderForm = ({ isLoading, overlappingModalRef, onSubmit }: AddOr
         />
 
         {!form.errors.inscriptionId && form.values.inscriptionId ? (
-          <iframe
-            src={`https://testnet.ordinals.com/preview/${form.values.inscriptionId}`}
-            sandbox='allow-scripts'
-            scrolling='no'
-            loading='lazy'
-            allow=''
-            height={200}
-          ></iframe>
+          <Inscription id={form.values.inscriptionId} height={200}></Inscription>
         ) : (
           <Card
             style={{ height: 200 }}

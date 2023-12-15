@@ -51,7 +51,7 @@ interface OrdinalOrder {
   id: bigint;
   ordinalId: string;
   utxo: Utxo;
-  askingCurrency: Currency;
+  askingCurrency: Erc20Currency;
   totalAskingAmount: bigint;
   deadline: Date | undefined;
   isOwnerOfOrder: boolean;
@@ -60,8 +60,9 @@ interface OrdinalOrder {
 interface AcceptedOrdinalOrder {
   orderId: bigint;
   acceptId: bigint;
+  ordinalId: string;
   deadline: Date;
-  askingCurrency: Currency;
+  askingCurrency: Erc20Currency;
   totalAskingAmount: bigint;
   buyerBitcoinAddress: string;
   isAcceptorOfOrder: boolean;
@@ -73,12 +74,12 @@ type BtcOrder = BtcBuyOrder | BtcSellOrder;
 type Order = BtcOrder | Erc20Order;
 
 export type {
-  Order,
-  Erc20Order,
   AcceptedBtcOrder,
+  AcceptedOrdinalOrder,
   BtcBuyOrder,
-  BtcSellOrder,
   BtcOrder,
-  OrdinalOrder,
-  AcceptedOrdinalOrder
+  BtcSellOrder,
+  Erc20Order,
+  Order,
+  OrdinalOrder
 };

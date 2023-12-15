@@ -5,37 +5,37 @@ import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
-import { BtcSellOrder } from '../../../../types/orders';
+import { useAccount } from '../../../../lib/sats-wagmi';
+import { OrdinalOrder } from '../../../../types/orders';
+import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
-import { Amount } from '../../../../utils/amount';
-import { useAccount } from '../../../../lib/sats-wagmi';
 
-type FillBTCSellOrderFormData = {
+type FillOrdinalSellOrderFormData = {
   amount: string;
   btcAddress: string;
 };
 
-type FillBtcSellOrderFormProps = {
+type FillOrdinalSellOrderFormProps = {
   isLoading: boolean;
-  order: BtcSellOrder;
-  onSubmit: (values: FillBTCSellOrderFormData) => void;
+  order: OrdinalOrder;
+  onSubmit: (values: FillOrdinalSellOrderFormData) => void;
 };
 
-const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
+const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSellOrderFormProps): JSX.Element => {
   const { balances, getBalance } = useBalances();
 
   const { address: btcAddress } = useAccount();
 
-  const handleSubmit = (values: FillBTCSellOrderFormData) => {
+  const handleSubmit = (values: FillOrdinalSellOrderFormData) => {
     wrapInErc20ApprovalTx(() => onSubmit?.(values));
   };
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
-  const form = useForm<FillBTCSellOrderFormData>({
+  const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
       amount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
       btcAddress: btcAddress || ''
@@ -69,12 +69,6 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
   return (
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
-        <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
-          <P size='xs'>
-            Remaining available: {toBaseAmount(order.availableLiquidity, order.offeringCurrency.ticker)}{' '}
-            {order.offeringCurrency.ticker}
-          </P>
-        </Card>
         <TokenInput
           label='Pay with'
           isReadOnly
@@ -110,5 +104,5 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
   );
 };
 
-export { FillBtcSellOrderForm };
-export type { FillBTCSellOrderFormData };
+export { FillOrdinalSellOrderForm };
+export type { FillOrdinalSellOrderFormData };

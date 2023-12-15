@@ -7,6 +7,8 @@ import { useBalances } from '../../hooks/useBalances';
 import { useSearchParams } from 'react-router-dom';
 import { AcceptedBtcOrder } from '../../types/orders';
 import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
+import { useGetActiveOrdinalOrders } from '../../hooks/fetchers/useGetActiveOrdinalOrders';
+import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -22,6 +24,7 @@ const P2P = (): JSX.Element => {
   const titleId4 = 'titleId4';
 
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
+  const { data: activeOrdinalOrders, refetch: refetchActiveOrdinalOrders } = useGetActiveOrdinalOrders();
 
   // just to prefetch
   useBalances();
@@ -65,32 +68,37 @@ const P2P = (): JSX.Element => {
           }}
         >
           <TabsItem key='buy' title='Buy'>
-            <>
-              <Flex alignItems='center' justifyContent='space-between'>
-                <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
-                  Buy
-                </H2>
+            <Flex alignItems='center' justifyContent='space-between'>
+              <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
+                Buy
+              </H2>
+            </Flex>
+            {orders?.unowned.length ? (
+              <OrdersTable
+                aria-labelledby={titleId}
+                orders={orders?.unowned}
+                refetchOrders={refetch}
+                refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                onFillBuyBtc={(order) => {
+                  setSearchParams((params) => {
+                    params.set('order', order.id.toString());
+                    params.set('market', 'buy');
+                    return params;
+                  });
+                }}
+              />
+            ) : (
+              <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
+                <Spinner color='secondary' />
               </Flex>
-              {orders?.unowned.length ? (
-                <OrdersTable
-                  aria-labelledby={titleId}
-                  orders={orders?.unowned}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                  onFillBuyBtc={(order) => {
-                    setSearchParams((params) => {
-                      params.set('order', order.id.toString());
-                      params.set('market', 'buy');
-                      return params;
-                    });
-                  }}
-                />
-              ) : (
-                <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
-                  <Spinner color='secondary' />
-                </Flex>
-              )}
-            </>
+            )}
+            {activeOrdinalOrders && (
+              <OrdinalOrdersTable
+                aria-labelledby={titleId}
+                orders={activeOrdinalOrders}
+                refetchActiveOrdinalOrders={refetchActiveOrdinalOrders}
+              />
+            )}
             {/* Only unowned BTC orders can be bought */}
             {!!orders?.acceptedBtc.accepted?.length && (
               <>
