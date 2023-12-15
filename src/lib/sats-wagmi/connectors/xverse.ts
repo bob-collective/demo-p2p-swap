@@ -12,13 +12,9 @@ const payload = {
 class XVerseConnector extends SatsConnector {
   id = 'xverse';
   name = 'XVerse';
-  ready = true;
-  address: Address | undefined;
 
   constructor() {
     super();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // this.ready = !!(window as any).XverseProviders;
   }
 
   async connect(): Promise<void> {
@@ -34,18 +30,11 @@ class XVerseConnector extends SatsConnector {
     });
   }
 
-  async disconnect(): Promise<void> {
-    this.address = undefined;
-  }
+  isReady(): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.ready = !!(window as any).XverseProviders;
 
-  async getAccount(): Promise<Address> {
-    return this.address as any;
-  }
-
-  async isAuthorized(): Promise<boolean> {
-    const address = await this.getAccount();
-
-    return !!address;
+    return this.ready;
   }
 }
 

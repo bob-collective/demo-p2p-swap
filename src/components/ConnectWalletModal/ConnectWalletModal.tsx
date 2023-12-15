@@ -3,7 +3,16 @@ import { Flex, List, ListItem, Modal, ModalBody, ModalHeader, ModalProps, P, Tab
 import { useCallback } from 'react';
 import truncateEthAddress from 'truncate-eth-address';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { CoinbaseWallet, Ledger, Metamask, TrustWallet, WalletConnect, XVerse } from '../../assets/svg';
+import {
+  CoinbaseWallet,
+  LeatherWallet,
+  Ledger,
+  Metamask,
+  TrustWallet,
+  UnisatWallet,
+  WalletConnect,
+  XVerse
+} from '../../assets/svg';
 import { StyledConnectedWallet, StyledDisconnectCTA } from './ConnectWalletModal.style';
 import {
   useConnect as useSatsConnect,
@@ -25,7 +34,9 @@ const Icons: Record<string, typeof Metamask> = {
   WalletConnectLegacy: WalletConnect,
   'Coinbase Wallet': CoinbaseWallet,
   Ledger: Ledger,
-  XVerse: XVerse
+  XVerse: XVerse,
+  Leather: LeatherWallet,
+  Unisat: UnisatWallet
 };
 type ConnectWalletModalProps = Omit<ModalProps, 'children'>;
 
@@ -167,7 +178,8 @@ const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalPro
               selectedKeys={connector ? [connector.id] : []}
               selectionMode='multiple'
               selectionBehavior='replace'
-              onSelectionChange={handleSelect}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onSelectionChange={handleSelect as any}
               marginTop='spacing4'
             >
               {connectors.map((connector) => {
@@ -189,7 +201,8 @@ const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalPro
               selectionBehavior='replace'
               variant='secondary'
               selectedKeys={btcWalletConnector ? [btcWalletConnector.id] : []}
-              onSelectionChange={handleBtcWalletSelect}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onSelectionChange={handleBtcWalletSelect as any}
               marginTop='spacing4'
             >
               {satsConnectors.map((connector) => {

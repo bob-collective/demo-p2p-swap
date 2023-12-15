@@ -6,7 +6,7 @@ const useDisconnect = () => {
 
   const { error, isError, isIdle, isLoading, isSuccess, mutate, mutateAsync, reset, status, variables } = useMutation({
     mutationKey: ['disconnect'],
-    mutationFn: () => {
+    mutationFn: async () => {
       setConnector(undefined);
     }
   });

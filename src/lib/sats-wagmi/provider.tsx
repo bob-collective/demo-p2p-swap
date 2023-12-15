@@ -1,5 +1,5 @@
 import { FC, ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { XVerseConnector } from './connectors';
+import { LeatherConnector, UnisatConnector, XVerseConnector } from './connectors';
 import { SatsConnector } from './connectors/base';
 
 type SatsConfigData = {
@@ -38,9 +38,15 @@ const SatsWagmiConfig: FC<SatsWagmiConfigProps> = ({ children }) => {
 
       const xverse = new XVerseConnector();
 
-      if (xverse.ready) {
-        readyConnectors.push(xverse);
-      }
+      readyConnectors.push(xverse);
+
+      const leather = new LeatherConnector();
+
+      readyConnectors.push(leather);
+
+      const unisat = new UnisatConnector();
+
+      readyConnectors.push(unisat);
 
       setConnectors(readyConnectors);
     };

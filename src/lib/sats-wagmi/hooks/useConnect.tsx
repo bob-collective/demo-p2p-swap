@@ -12,6 +12,11 @@ const useConnect = () => {
         if (!connector) {
           throw new Error('invalid connector id');
         }
+
+        if (!connector.isReady()) {
+          alert('Wallet not installed');
+        }
+
         setConnector(connector);
         return connector.connect();
       }

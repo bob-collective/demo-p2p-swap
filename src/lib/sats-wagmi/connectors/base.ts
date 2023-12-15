@@ -8,15 +8,27 @@ abstract class SatsConnector {
   /** Connector name */
   abstract readonly name: string;
   /** Whether connector is usable */
-  abstract readonly ready: boolean;
-  abstract readonly address: Address | undefined;
+  ready: boolean = false;
+
+  address: Address | undefined = '';
+
   abstract connect(): Promise<void>;
-  abstract disconnect(): Promise<void>;
-  abstract getAccount(): Promise<Address>;
-  abstract isAuthorized(): Promise<boolean>;
-  //   protected abstract onAccountsChanged(accounts: Address[]): void;
-  //   protected abstract onNetworkChanged(network: Network): void;
-  //   protected abstract onDisconnect(error: Error): void;
+
+  disconnect() {
+    this.address = undefined;
+  }
+
+  getAccount(): Address | undefined {
+    return this.address;
+  }
+
+  isAuthorized(): boolean {
+    const address = this.getAccount();
+
+    return !!address;
+  }
+
+  abstract isReady(): boolean;
 }
 
 export { SatsConnector };
