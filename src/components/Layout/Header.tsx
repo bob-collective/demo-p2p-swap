@@ -5,9 +5,10 @@ import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 import { useAccount as useSatsAccount } from '../../lib/sats-wagmi';
 import { Badge } from '../Badge';
 import { ConnectWalletModal } from '../ConnectWalletModal';
-import { Icons } from '../ConnectWalletModal/ConnectWalletModal';
 import { Faucet } from '../Faucet';
+import { WalletIcon } from '../WalletIcon';
 import { CTAWrapper, StyledConnectedCTA, StyledHeader, StyledWallets } from './Layout.styles';
+
 const Header = () => {
   const { address } = useAccount();
   const [isOpen, setOpen] = useState(false);
@@ -16,9 +17,6 @@ const Header = () => {
   const { connector: btcConnector } = useSatsAccount();
 
   const hasSomeWalletConnected = !!connector || !!btcConnector;
-
-  const EthereumWallet = connector ? Icons[connector.name] : undefined;
-  const BTCWallet = btcConnector ? Icons[btcConnector.name] : undefined;
 
   return (
     <>
@@ -51,8 +49,8 @@ const Header = () => {
             ) : hasSomeWalletConnected ? (
               <Flex elementType='span' gap='spacing2'>
                 <StyledWallets alignItems='center'>
-                  {EthereumWallet && <EthereumWallet size='s' />}
-                  {BTCWallet && <BTCWallet size='s' />}
+                  {connector && <WalletIcon name={connector.name} size='s' />}
+                  {btcConnector && <WalletIcon name={btcConnector.name} size='s' />}
                 </StyledWallets>
                 Wallet
               </Flex>
