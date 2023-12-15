@@ -79,7 +79,7 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
     wrapInErc20ApprovalTx
   } = useErc20Allowance(ContractType.BTC_MARKETPLACE, order.askingCurrency.ticker);
 
-  const isSubmitDisabled = isFormDisabled(form);
+  const isSubmitDisabled = btcAddress ? !!form.errors.inputValue : isFormDisabled(form);
 
   return (
     <form onSubmit={form.handleSubmit}>

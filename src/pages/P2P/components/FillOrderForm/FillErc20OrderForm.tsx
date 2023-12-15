@@ -131,10 +131,10 @@ const FillErc20OrderForm = ({ isLoading, order, onSubmit }: FillErc20OrderFormPr
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
+        <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
+          {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
+        </AuthCTA>
       </Flex>
-      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-        {isAskingCurrencyTransferApproved ? 'Fill Order' : 'Approve & Fill Order'}
-      </AuthCTA>
     </form>
   );
 };
