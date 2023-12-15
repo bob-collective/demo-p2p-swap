@@ -23,8 +23,6 @@ const wagmiConfig = createConfig({
   publicClient
 });
 
-// const wagmiConfig = createConfig({ chains: [, projectId: L2_PROJECT_ID, metadata: L2_METADATA });
-
 createWeb3Modal({
   defaultChain: L2_CHAIN_CONFIG,
   wagmiConfig: wagmiConfig,
