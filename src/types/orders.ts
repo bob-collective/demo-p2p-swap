@@ -56,27 +56,27 @@ interface OrdinalOrder {
 }
 
 interface AcceptedOrdinalOrder {
-  orderId: number;
-  acceptId: number;
+  orderId: bigint;
+  acceptId: bigint;
   deadline: Date;
-  sellerAddress: HexString;
-  buyerAddress: HexString;
-  buyerBitcoinAddress: 
-}
-
-
-struct AcceptedOrdinalSellOrder {
-  uint256 orderId;
-  BitcoinAddress bitcoinAddress;
-  address ercToken;
-  uint256 ercAmount;
-  address requester;
-  address acceptor;
-  uint256 acceptTime;
+  askingCurrency: Currency;
+  totalAskingAmount: bigint;
+  buyerBitcoinAddress: string;
+  isAcceptorOfOrder: boolean;
+  isCreatorOfOrder: boolean;
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
-type Order = BtcOrder | Erc20Order;
+type Order = BtcOrder | Erc20Order | OrdinalOrder;
 
-export type { Order, Erc20Order, AcceptedBtcOrder, BtcBuyOrder, BtcSellOrder, BtcOrder };
+export type {
+  Order,
+  Erc20Order,
+  AcceptedBtcOrder,
+  BtcBuyOrder,
+  BtcSellOrder,
+  BtcOrder,
+  OrdinalOrder,
+  AcceptedOrdinalOrder
+};
