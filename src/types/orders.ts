@@ -46,6 +46,35 @@ interface AcceptedBtcOrder {
   isCreatorOfOrder: boolean;
 }
 
+interface OrdinalOrder {
+  orderId: number;
+  ordinalId: string;
+  utxo: string;
+  askingCurrency: Currency;
+  totalAskingAmount: bigint;
+  sellerAddress: HexString;
+}
+
+interface AcceptedOrdinalOrder {
+  orderId: number;
+  acceptId: number;
+  deadline: Date;
+  sellerAddress: HexString;
+  buyerAddress: HexString;
+  buyerBitcoinAddress: 
+}
+
+
+struct AcceptedOrdinalSellOrder {
+  uint256 orderId;
+  BitcoinAddress bitcoinAddress;
+  address ercToken;
+  uint256 ercAmount;
+  address requester;
+  address acceptor;
+  uint256 acceptTime;
+}
+
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
 type Order = BtcOrder | Erc20Order;
