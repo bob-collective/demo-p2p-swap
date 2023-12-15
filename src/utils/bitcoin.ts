@@ -1,6 +1,24 @@
 import { REGTEST_ESPLORA_BASE_PATH, MAINNET_ESPLORA_BASE_PATH, TESTNET_ESPLORA_BASE_PATH } from '@gobob/bob-sdk';
+import { address as bitcoinAddressUtils, networks } from 'bitcoinjs-lib/';
+import { HexString } from '../types';
+import { addHexPrefix } from './encoding';
 
 const BITCOIN_NETWORK = import.meta.env.VITE_BITCOIN_NETWORK as string;
+
+const getBitcoinLibNetwork = () => {
+  if (BITCOIN_NETWORK === 'testnet') {
+    return networks.testnet;
+  }
+  if (BITCOIN_NETWORK === 'regtest') {
+    return networks.regtest;
+  }
+  if (BITCOIN_NETWORK === 'mainnet') {
+    return networks.bitcoin;
+  }
+  throw new Error(
+    `Invalid bitcoin network configured: ${BITCOIN_NETWORK}. Valid values are: testnet | regtest | mainnet.`
+  );
+};
 
 const getElectrsUrl = () => {
   if (BITCOIN_NETWORK === 'testnet') {
@@ -37,4 +55,23 @@ const hasOutputWithValidAmount = (
     (output) => BigInt(output.value) === requiredBtcAmount && output.scriptpubkey_address === requiredBtcAddress
   );
 
-export { fetchBtcNetwork, getElectrsUrl, hasOutputWithValidAmount, BITCOIN_NETWORK };
+const getAddressFromScriptPubKey = (scriptPubKey: HexString): string => {
+  const network = getBitcoinLibNetwork();
+  const hexData = scriptPubKey.slice(2); // Strips 0x prefix
+  return bitcoinAddressUtils.fromOutputScript(Buffer.from(hexData, 'hex'), network);
+};
+
+const getScriptPubKeyFromAddress = (address: string): HexString => {
+  const network = getBitcoinLibNetwork();
+  const hexScriptPubKey = bitcoinAddressUtils.toOutputScript(address, network);
+  return addHexPrefix(hexScriptPubKey.toString('hex'));
+};
+
+export {
+  fetchBtcNetwork,
+  getElectrsUrl,
+  hasOutputWithValidAmount,
+  BITCOIN_NETWORK,
+  getAddressFromScriptPubKey,
+  getScriptPubKeyFromAddress
+};

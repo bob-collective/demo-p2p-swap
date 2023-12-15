@@ -1,5 +1,10 @@
 export const BtcMarketplaceAbi = [
   {
+    type: 'constructor',
+    stateMutability: 'nonpayable',
+    inputs: [{ type: 'address', name: '_relay', internalType: 'contract IRelay' }]
+  },
+  {
     type: 'event',
     name: 'acceptBtcBuyOrderEvent',
     inputs: [
@@ -22,7 +27,7 @@ export const BtcMarketplaceAbi = [
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
         indexed: false,
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'uint256', name: 'amountBtc', internalType: 'uint256', indexed: false },
       { type: 'uint256', name: 'ercAmount', internalType: 'uint256', indexed: false },
@@ -52,7 +57,7 @@ export const BtcMarketplaceAbi = [
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
         indexed: false,
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'address', name: 'sellingToken', internalType: 'address', indexed: false },
       { type: 'uint256', name: 'saleAmount', internalType: 'uint256', indexed: false }
@@ -122,7 +127,7 @@ export const BtcMarketplaceAbi = [
         type: 'tuple',
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'uint256', name: 'amountBtc', internalType: 'uint256' }
     ]
@@ -151,7 +156,7 @@ export const BtcMarketplaceAbi = [
         type: 'tuple',
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'uint256', name: 'amountBtc', internalType: 'uint256' },
       { type: 'address', name: 'ercToken', internalType: 'address' },
@@ -172,7 +177,7 @@ export const BtcMarketplaceAbi = [
         type: 'tuple',
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'address', name: 'offeringToken', internalType: 'address' },
       { type: 'uint256', name: 'offeringAmount', internalType: 'uint256' },
@@ -244,7 +249,7 @@ export const BtcMarketplaceAbi = [
             type: 'tuple',
             name: 'bitcoinAddress',
             internalType: 'struct BtcMarketPlace.BitcoinAddress',
-            components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+            components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
           },
           { type: 'uint256', name: 'amountBtc', internalType: 'uint256' },
           { type: 'address', name: 'ercToken', internalType: 'address' },
@@ -273,7 +278,7 @@ export const BtcMarketplaceAbi = [
             type: 'tuple',
             name: 'bitcoinAddress',
             internalType: 'struct BtcMarketPlace.BitcoinAddress',
-            components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+            components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
           },
           { type: 'address', name: 'offeringToken', internalType: 'address' },
           { type: 'uint256', name: 'offeringAmount', internalType: 'uint256' },
@@ -316,7 +321,7 @@ export const BtcMarketplaceAbi = [
         type: 'tuple',
         name: 'bitcoinAddress',
         internalType: 'struct BtcMarketPlace.BitcoinAddress',
-        components: [{ type: 'string', name: 'bitcoinAddress', internalType: 'string' }]
+        components: [{ type: 'bytes', name: 'scriptPubKey', internalType: 'bytes' }]
       },
       { type: 'address', name: 'sellingToken', internalType: 'address' },
       { type: 'uint256', name: 'saleAmount', internalType: 'uint256' }

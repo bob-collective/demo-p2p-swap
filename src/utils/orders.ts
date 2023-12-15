@@ -5,11 +5,16 @@ import { Amount } from './amount';
 import { isBitcoinCurrency, isErc20Currency } from './currencies';
 
 const isErc20Order = (order: Order): order is Erc20Order =>
-  isErc20Currency(order.askingCurrency) && isErc20Currency(order.offeringCurrency);
+  isErc20Currency(order.askingCurrency) &&
+  (order as Erc20Order)?.offeringCurrency &&
+  isErc20Currency((order as Erc20Order).offeringCurrency);
 
 const isBtcBuyOrder = (order: Order): order is BtcBuyOrder => isBitcoinCurrency(order.askingCurrency);
 
-const isBtcSellOrder = (order: Order): order is BtcSellOrder => isBitcoinCurrency(order.offeringCurrency);
+const isBtcSellOrder = (order: Order): order is BtcSellOrder =>
+  (order as Erc20Order)?.offeringCurrency &&
+  isBitcoinCurrency((order as Erc20Order).offeringCurrency) &&
+  isErc20Currency((order as Erc20Order).offeringCurrency);
 
 const isBtcOrder = (order: Order): order is BtcOrder => isBtcBuyOrder(order) || isBtcSellOrder(order);
 
