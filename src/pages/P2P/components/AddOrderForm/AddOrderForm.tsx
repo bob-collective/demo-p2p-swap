@@ -123,7 +123,6 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
   return (
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
-        <P size='s'>Input the details and values of your order's assets</P>
         <TokenInput
           type='selectable'
           label='Offer'
@@ -189,10 +188,16 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
+        <AuthCTA
+          fullWidth
+          loading={isLoading || isLoadingAllowance}
+          disabled={isSubmitDisabled}
+          size='large'
+          type='submit'
+        >
+          {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
+        </AuthCTA>
       </Flex>
-      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-        {isSellingBTC || inputErc20TransferApproved ? 'Place Order' : 'Approve & Place Order'}
-      </AuthCTA>
     </form>
   );
 };

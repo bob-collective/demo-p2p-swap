@@ -70,15 +70,34 @@ const CompleteAcceptedOrderModal = ({
 
   const isSubmissionDisabled = !confirmations || !proofData || confirmations < REQUIRED_BITCOIN_CONFIRMATIONS;
 
+  const isOrdinal = true;
+
   return (
     <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
           <P size='s'>
-            1. Send <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong> to the
-            following bitcoin address:
+            1. Send{' '}
+            {isOrdinal ? (
+              'the following inscription'
+            ) : (
+              <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong>
+            )}
+            to the following bitcoin address:
           </P>
+          <Flex direction='column' gap='spacing2'>
+            <P size='s'>Inscription</P>
+            <iframe
+              src={`https://testnet.ordinals.com/preview/${'c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0'}`}
+              sandbox='allow-scripts'
+              scrolling='no'
+              loading='lazy'
+              allow=''
+              height={200}
+            />
+            <P size='s'>c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0</P>
+          </Flex>
           <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
             <Card
               rounded='lg'

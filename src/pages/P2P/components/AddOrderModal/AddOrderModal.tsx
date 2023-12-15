@@ -1,4 +1,4 @@
-import { Modal, ModalBody, ModalHeader, ModalProps } from '@interlay/ui';
+import { Modal, ModalBody, ModalHeader, ModalProps, P, TabsItem } from '@interlay/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ContractType, Erc20Currency, currencies } from '../../../../constants';
@@ -7,6 +7,8 @@ import { Amount } from '../../../../utils/amount';
 import { isBitcoinCurrency } from '../../../../utils/currencies';
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
+import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
+import { AddOrdinalOrderForm } from '../AddOrdinalOrderForm';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -83,13 +85,30 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       }
     >
       <ModalHeader>New Order</ModalHeader>
-      <ModalBody>
-        <AddOrderForm
-          isLoading={isLoading}
-          offerModalRef={offerModalRef}
-          receiveModalRef={receiveModalRef}
-          onSubmit={handleAddOrder}
-        />
+      <ModalBody gap='spacing4'>
+        <P size='s'>Input the details and values of your order's assets</P>
+        <StyledTabs size='large' fullWidth>
+          <TabsItem key='deposit' title='Token'>
+            <StyledWrapper>
+              <AddOrderForm
+                isLoading={isLoading}
+                offerModalRef={offerModalRef}
+                receiveModalRef={receiveModalRef}
+                onSubmit={handleAddOrder}
+              />
+            </StyledWrapper>
+          </TabsItem>
+          <TabsItem key='withdraw' title='Ordinals'>
+            <StyledWrapper>
+              <AddOrdinalOrderForm
+                overlappingModalRef={receiveModalRef}
+                isLoading={isLoading}
+                // TODO: implement
+                onSubmit={console.log}
+              />
+            </StyledWrapper>
+          </TabsItem>
+        </StyledTabs>
       </ModalBody>
     </Modal>
   );
