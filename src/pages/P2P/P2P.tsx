@@ -1,5 +1,5 @@
 import { theme } from '@interlay/theme';
-import { Alert, CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
+import { Alert, CTA, Flex, H1, H2, Spinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
@@ -87,7 +87,7 @@ const P2P = (): JSX.Element => {
                 />
               ) : (
                 <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
-                  <LoadingSpinner color='secondary' variant='indeterminate' diameter={36} thickness={4} />
+                  <Spinner color='secondary' />
                 </Flex>
               )}
             </>
