@@ -87,10 +87,10 @@ const FillBtcBuyOrderForm = ({ isLoading, order, onSubmit }: FillBtcBuyOrderForm
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
+        <AuthCTA fullWidth disabled={isSubmitDisabled} loading={isLoading} size='large' type='submit'>
+          Fill Order
+        </AuthCTA>
       </Flex>
-      <AuthCTA disabled={isSubmitDisabled} loading={isLoading} size='large' type='submit'>
-        Fill Order
-      </AuthCTA>
     </form>
   );
 };

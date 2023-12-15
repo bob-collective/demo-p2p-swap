@@ -1,8 +1,8 @@
 import { CTALink, Flex } from '@interlay/ui';
-import { useState } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 import { useAccount as useSatsAccount } from '../../lib/sats-wagmi';
+import { useConnectWalletModal } from '../../providers/ConnectWalletContext';
 import { Badge } from '../Badge';
 import { ConnectWalletModal } from '../ConnectWalletModal';
 import { Faucet } from '../Faucet';
@@ -11,10 +11,10 @@ import { CTAWrapper, StyledConnectedCTA, StyledHeader, StyledWallets } from './L
 
 const Header = () => {
   const { address } = useAccount();
-  const [isOpen, setOpen] = useState(false);
   const { pendingConnector } = useConnect();
   const { connector } = useAccount();
   const { connector: btcConnector } = useSatsAccount();
+  const { isOpen, setOpen } = useConnectWalletModal();
 
   const hasSomeWalletConnected = !!connector || !!btcConnector;
 

@@ -1,21 +1,20 @@
 import { useForm } from '@interlay/hooks';
-import { Card, Flex, Input, P, Strong, TokenInput } from '@interlay/ui';
+import { Card, Flex, Input, P, TokenInput } from '@interlay/ui';
 import { useEffect } from 'react';
 import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { BtcSellOrder } from '../../../../types/orders';
-import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
-import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
+import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
+import { Amount } from '../../../../utils/amount';
 import { useAccount } from '../../../../lib/sats-wagmi';
 
 type FillBTCSellOrderFormData = {
-  inputValue: string;
-  outputValue: string;
+  amount: string;
   btcAddress: string;
 };
 
@@ -36,29 +35,12 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
-  const outputMaxAmount = new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig();
-  const inputMaxAmount = outputMaxAmount.mul(order.price);
-
-  const inputLimitAmount = inputBalance.toBig().gt(inputMaxAmount) ? inputMaxAmount : inputBalance.toBig();
-
-  const schemaParams: FillOrderSchemaParams = {
-    inputValue: {
-      maxAmount: inputLimitAmount
-    },
-    outputValue: {
-      maxAmount: outputMaxAmount
-    }
-  };
-
   const form = useForm<FillBTCSellOrderFormData>({
     initialValues: {
-      // TODO: set to "" when allowing partial fullfilments
-      inputValue: inputMaxAmount.toString(),
-      // TODO: set to "" when allowing partial fullfilments
-      outputValue: outputMaxAmount.toString(),
+      amount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
       btcAddress: btcAddress || ''
     },
-    validationSchema: fillOrderSchema(schemaParams, true),
+    validationSchema: fillOrdinalOrderSchema(),
     onSubmit: handleSubmit,
     // TODO: set to hideErrors: "untouced" when allowing partial fullfilments
     hideErrors: {
@@ -79,7 +61,10 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
     wrapInErc20ApprovalTx
   } = useErc20Allowance(ContractType.BTC_MARKETPLACE, order.askingCurrency.ticker);
 
-  const isSubmitDisabled = isFormDisabled(form);
+  const hasEnoughtFunds = inputBalance
+    .toBig()
+    .lt(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
+  const isSubmitDisabled = isFormDisabled(form) || !hasEnoughtFunds;
 
   return (
     <form onSubmit={form.handleSubmit}>
@@ -92,47 +77,33 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
         </Card>
         <TokenInput
           label='Pay with'
-          balance={inputLimitAmount.toString()}
-          balanceLabel='Limit'
-          isReadOnly // TODO: remove after we start allowing partial fullfilments
+          isReadOnly
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
-          {...form.getTokenFieldProps('inputValue')}
+          {...form.getTokenFieldProps('amount')}
         />
-        <TokenInput
-          label='You will Receive'
-          isReadOnly // TODO: remove after we start allowing partial fullfilments
-          valueUSD={0}
-          ticker={order.offeringCurrency.ticker}
-          {...form.getTokenFieldProps('outputValue')}
-        />
+        <Flex direction='column' gap='spacing2'>
+          <P size='s'>You will Receive</P>
+          <iframe
+            src={`https://testnet.ordinals.com/preview/${'c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0'}`}
+            sandbox='allow-scripts'
+            scrolling='no'
+            loading='lazy'
+            allow=''
+            height={200}
+          />
+        </Flex>
         <Input
           label='Bitcoin Address'
           placeholder='Enter your bitcoin address'
           isReadOnly={!!btcAddress}
           {...form.getTokenFieldProps('btcAddress')}
         />
-        <Flex direction='column' gap='spacing2'>
-          <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
-            <P size='xs'>
-              Price 1 {order.offeringCurrency.ticker} ={' '}
-              <Strong>
-                {order.price} {order.askingCurrency.ticker}{' '}
-              </Strong>
-            </P>
-          </Card>
-          <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
-            <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
-          </Card>
-        </Flex>
-        <AuthCTA
-          fullWidth
-          loading={isLoading || isLoadingAllowance}
-          disabled={isSubmitDisabled}
-          size='large'
-          type='submit'
-        >
-          {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
+        <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
+          <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
+        </Card>
+        <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
+          {hasEnoughtFunds ? `${!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order` : 'Insufficient Balance'}
         </AuthCTA>
       </Flex>
     </form>
