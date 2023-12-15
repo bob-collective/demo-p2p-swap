@@ -39,7 +39,7 @@ const parseOrdinalOrder = (
   const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.sellToken);
 
   return {
-    orderId: id,
+    id,
     askingCurrency: askingCurrency,
     totalAskingAmount: rawOrder.sellAmount,
     deadline: acceptedOrder?.acceptTime ? calculateOrderDeadline(acceptedOrder.acceptTime) : undefined,

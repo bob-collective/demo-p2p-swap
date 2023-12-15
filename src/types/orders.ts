@@ -48,7 +48,7 @@ interface AcceptedBtcOrder {
 
 type Utxo = { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
 interface OrdinalOrder {
-  orderId: bigint;
+  id: bigint;
   ordinalId: string;
   utxo: Utxo;
   askingCurrency: Currency;
@@ -70,7 +70,7 @@ interface AcceptedOrdinalOrder {
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
-type Order = BtcOrder | Erc20Order | OrdinalOrder;
+type Order = BtcOrder | Erc20Order;
 
 export type {
   Order,
