@@ -11,6 +11,7 @@ import { formatUSD } from '../../../../utils/format';
 import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
 import { Amount } from '../../../../utils/amount';
+import { useAccount } from '../../../../lib/sats-wagmi';
 
 type FillBTCSellOrderFormData = {
   amount: string;
@@ -26,6 +27,8 @@ type FillBtcSellOrderFormProps = {
 const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
   const { balances, getBalance } = useBalances();
 
+  const { address: btcAddress } = useAccount();
+
   const handleSubmit = (values: FillBTCSellOrderFormData) => {
     wrapInErc20ApprovalTx(() => onSubmit?.(values));
   };
@@ -35,7 +38,7 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
   const form = useForm<FillBTCSellOrderFormData>({
     initialValues: {
       amount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
-      btcAddress: ''
+      btcAddress: btcAddress || ''
     },
     validationSchema: fillOrdinalOrderSchema(),
     onSubmit: handleSubmit,
@@ -93,6 +96,7 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
         <Input
           label='Bitcoin Address'
           placeholder='Enter your bitcoin address'
+          isReadOnly={!!btcAddress}
           {...form.getTokenFieldProps('btcAddress')}
         />
         <Card rounded='lg' variant='bordered' shadowed={false} padding='spacing3' background='tertiary'>
