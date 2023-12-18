@@ -60,7 +60,7 @@ interface OrdinalOrder {
 interface AcceptedOrdinalOrder {
   orderId: bigint;
   acceptId: bigint;
-  ordinalId: HexString;
+  ordinalId: { txId: HexString; index: number };
   deadline: Date;
   askingCurrency: Erc20Currency;
   totalAskingAmount: bigint;

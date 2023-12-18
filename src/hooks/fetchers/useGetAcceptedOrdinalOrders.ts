@@ -13,9 +13,7 @@ import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
 
 const parseAcceptedOrdinalOrder = (
   rawOrder: {
-    ordinalID: {
-      ordinalID: `0x${string}`;
-    };
+    ordinalID: { txId: `0x${string}`; index: number };
     sellToken: `0x${string}`;
     sellAmount: bigint;
     utxo: { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
@@ -50,7 +48,7 @@ const parseAcceptedOrdinalOrder = (
   return {
     acceptId: id,
     orderId: rawAcceptedOrder.orderId,
-    ordinalId: rawOrder.ordinalID.ordinalID,
+    ordinalId: rawOrder.ordinalID,
     deadline,
     askingCurrency,
     totalAskingAmount: rawAcceptedOrder.ercAmount,

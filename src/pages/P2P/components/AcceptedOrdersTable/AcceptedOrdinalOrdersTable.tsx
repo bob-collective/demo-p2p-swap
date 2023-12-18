@@ -119,7 +119,7 @@ const AcceptedOrdinalOrdersTable = ({
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId)}</StyledSpan>,
+              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId.txId)}</StyledSpan>,
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {/* Add cancel order event */}
@@ -139,7 +139,7 @@ const AcceptedOrdinalOrdersTable = ({
             };
           })
         : [],
-    [address, orders]
+    [orders]
   );
 
   return (
