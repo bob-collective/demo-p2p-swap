@@ -80,7 +80,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           {...form.getTokenFieldProps('amount')}
         />
         <Flex direction='column' gap='spacing2'>
-          <P size='s'>You will Receive</P>
+          <P size='xs'>You will Receive</P>
           <iframe
             src={`https://testnet.ordinals.com/preview/${ordinalId}`}
             sandbox='allow-scripts'

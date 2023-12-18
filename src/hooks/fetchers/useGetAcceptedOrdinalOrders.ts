@@ -13,6 +13,15 @@ import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
 
 const parseAcceptedOrdinalOrder = (
   rawOrder: {
+    ordinalID: {
+      ordinalID: `0x${string}`;
+    };
+    sellToken: `0x${string}`;
+    sellAmount: bigint;
+    utxo: { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
+    requester: `0x${string}`;
+  },
+  rawAcceptedOrder: {
     orderId: bigint;
     bitcoinAddress: {
       scriptPubKey: HexString;
@@ -26,24 +35,25 @@ const parseAcceptedOrdinalOrder = (
   id: bigint,
   address: HexString | undefined
 ): AcceptedOrdinalOrder => {
-  const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.ercToken);
+  const askingCurrency = getErc20CurrencyFromContractAddress(rawAcceptedOrder.ercToken);
 
-  const deadline = calculateOrderDeadline(rawOrder.acceptTime);
+  const deadline = calculateOrderDeadline(rawAcceptedOrder.acceptTime);
 
-  const isAcceptorOfOrder = !!address && isAddressEqual(rawOrder.acceptor, address);
-  const isCreatorOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
+  const isAcceptorOfOrder = !!address && isAddressEqual(rawAcceptedOrder.acceptor, address);
+  const isCreatorOfOrder = !!address && isAddressEqual(rawAcceptedOrder.requester, address);
 
-  const bitcoinAddress = rawOrder.bitcoinAddress;
+  const bitcoinAddress = rawAcceptedOrder.bitcoinAddress;
   if (!bitcoinAddress?.scriptPubKey) {
     throw new Error('Bitcoin address not found');
   }
 
   return {
     acceptId: id,
-    orderId: rawOrder.orderId,
+    orderId: rawAcceptedOrder.orderId,
+    ordinalId: rawOrder.ordinalID.ordinalID,
     deadline,
     askingCurrency,
-    totalAskingAmount: rawOrder.ercAmount,
+    totalAskingAmount: rawAcceptedOrder.ercAmount,
     buyerBitcoinAddress: getAddressFromScriptPubKey(bitcoinAddress.scriptPubKey),
     isAcceptorOfOrder,
     isCreatorOfOrder
@@ -58,9 +68,16 @@ const useGetAcceptedOrdinalOrders = () => {
     queryKey: ['accepted-ordinal-orders', address],
     enabled: !!readOrdinalMarketplace,
     queryFn: async () => {
-      const [rawAcceptedOrdOrders, acceptIds] = await readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders();
+      const [[rawOrders, ordersIds], [rawOrderAcceptances, acceptIds]] = await Promise.all([
+        readOrdinalMarketplace.getOpenOrdinalSellOrders(),
+        readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders()
+      ]);
 
-      return rawAcceptedOrdOrders.map((order, index) => parseAcceptedOrdinalOrder(order, acceptIds[index], address));
+      return rawOrderAcceptances.map((order, index) => {
+        const orderId = ordersIds.find((id) => id === order.orderId) as bigint;
+
+        return parseAcceptedOrdinalOrder(rawOrders[Number(orderId)], order, acceptIds[index], address);
+      });
     },
     refetchInterval: REFETCH_INTERVAL.MINUTE
   });

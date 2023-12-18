@@ -9,6 +9,8 @@ import { AcceptedBtcOrder } from '../../types/orders';
 import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
 import { useGetActiveOrdinalOrders } from '../../hooks/fetchers/useGetActiveOrdinalOrders';
 import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
+import { useGetAcceptedOrdinalOrders } from '../../hooks/fetchers/useGetAcceptedOrdinalOrders';
+import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -25,6 +27,7 @@ const P2P = (): JSX.Element => {
 
   const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
   const { data: activeOrdinalOrders, refetch: refetchActiveOrdinalOrders } = useGetActiveOrdinalOrders();
+  const { data: acceptedOrdinalOrders, refetch: refetchAcceptedOrdinalOrders } = useGetAcceptedOrdinalOrders();
 
   // just to prefetch
   useBalances();
@@ -116,6 +119,13 @@ const P2P = (): JSX.Element => {
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
                 />
               </>
+            )}
+            {!!acceptedOrdinalOrders?.length && (
+              <AcceptedOrdinalOrdersTable
+                aria-labelledby={titleId}
+                orders={acceptedOrdinalOrders}
+                refetchOrders={refetchAcceptedOrdinalOrders}
+              />
             )}
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
