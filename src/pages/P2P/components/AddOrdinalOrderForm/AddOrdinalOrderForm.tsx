@@ -1,14 +1,15 @@
 import { useForm } from '@interlay/hooks';
-import { Card, Flex, Input, P, TokenInput } from '@interlay/ui';
+import { Card, Flex, Input, Item, P, Select, Span, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
 import { Key, RefObject, useEffect, useState } from 'react';
+import { Inscription } from '../../../../components';
 import { AuthCTA } from '../../../../components/AuthCTA';
 import { CurrencyTicker, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { formatUSD } from '../../../../utils/format';
 import { AddOrdinalOrderSchemaParams, addOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
-import { Inscription } from '../../../../components';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 
 type AddOrdinalOrderFormData = {
   amount: string;
@@ -67,7 +68,6 @@ const AddOrdinalOrderForm = ({ isLoading, overlappingModalRef, onSubmit }: AddOr
           placeholder='Enter your inscription ID'
           {...form.getFieldProps('inscriptionId')}
         />
-
         {!form.errors.inscriptionId && form.values.inscriptionId ? (
           <Inscription id={form.values.inscriptionId} height={200}></Inscription>
         ) : (
@@ -81,6 +81,29 @@ const AddOrdinalOrderForm = ({ isLoading, overlappingModalRef, onSubmit }: AddOr
             <P size='s'>Waiting for inscription ID...</P>
           </Card>
         )}
+        {/* <InscriptionList /> */}
+        <Select<{ id: string }>
+          type='modal'
+          modalProps={{ title: 'Inscriptions', ref: overlappingModalRef }}
+          renderValue={(el) => <Span>{truncateInscriptionId(el.value?.id || '')}</Span>}
+          items={[
+            { id: 'ca4c20f7db1f49e39ab59c8857e52841f94ca7a9ee2c7fea5d8aa09f10ad8dafi0' },
+            { id: 'ca4c20f7db1f49e39ab59c8857e52841f94ca7a9ee2c7fea5d8aa09f10ad8dafi0' },
+            { id: 'ca4c20f7db1f49e39ab59c8857e52841f94ca7a9ee2c7fea5d8aa09f10ad8dafi0' },
+            { id: 'ca4c20f7db1f49e39ab59c8857e52841f94ca7a9ee2c7fea5d8aa09f10ad8dafi0' },
+            { id: 'ca4c20f7db1f49e39ab59c8857e52841f94ca7a9ee2c7fea5d8aa09f10ad8dafi0' }
+          ]}
+          {...form.getSelectFieldProps('inscriptionId')}
+        >
+          {({ id }: { id: string }) => (
+            <Item key={id} textValue={id}>
+              <Flex direction='column' flex={1} justifyContent='center' alignItems='center' gap='spacing2'>
+                <Inscription style={{ pointerEvents: 'none' }} id={id} height={200}></Inscription>
+                <P size='xs'>{truncateInscriptionId(id)}</P>
+              </Flex>
+            </Item>
+          )}
+        </Select>
         <TokenInput
           type='selectable'
           label='You will Receive'

@@ -4,7 +4,7 @@ import { ContractType } from '../../constants';
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
 import { HexString } from '../../types';
-import { AcceptedOrdinalOrder } from '../../types/orders';
+import { AcceptedOrdinalOrder, Utxo } from '../../types/orders';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderDeadline } from '../../utils/orders';
 import { useContract } from '../useContract';
@@ -16,7 +16,7 @@ const parseAcceptedOrdinalOrder = (
     ordinalID: { txId: `0x${string}`; index: number };
     sellToken: `0x${string}`;
     sellAmount: bigint;
-    utxo: { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
+    utxo: Utxo;
     requester: `0x${string}`;
   },
   rawAcceptedOrder: {
@@ -54,7 +54,8 @@ const parseAcceptedOrdinalOrder = (
     totalAskingAmount: rawAcceptedOrder.ercAmount,
     buyerBitcoinAddress: getAddressFromScriptPubKey(bitcoinAddress.scriptPubKey),
     isAcceptorOfOrder,
-    isCreatorOfOrder
+    isCreatorOfOrder,
+    utxo: rawOrder.utxo
   };
 };
 

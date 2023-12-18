@@ -31,7 +31,7 @@ const FillOrdinalOrderModal = ({
   const handleFillOrder = useCallback(
     async (data: FillOrdinalSellOrderFormData) => {
       setLoading(true);
-      console.log(order);
+
       try {
         const btcAddress = { scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress) };
         const orderId = order.id;
@@ -39,7 +39,6 @@ const FillOrdinalOrderModal = ({
         const txHash = await writeOrdMarketplace.acceptOrdinalSellOrder([orderId, btcAddress]);
         await publicClient.waitForTransactionReceipt({ hash: txHash });
       } catch (e) {
-        console.log(e);
         return setLoading(false);
       }
 

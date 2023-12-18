@@ -37,7 +37,10 @@ export type AddOrdinalOrderSchemaParams = {
 export const addOrdinalOrderSchema = (params: AddOrdinalOrderSchemaParams) => {
   return yup.object().shape({
     ticker: yup.string().required(),
-    inscriptionId: yup.string().required().min(65),
+    inscriptionId: yup
+      .string()
+      .required('Please enter inscription ID')
+      .min(65, 'Please enter a inscription ID over 65 characters'),
     // .test('is-owned-inscription', 'Please enter a inscription ID that you own', (value) =>
     //   params.ownedInscriptions.includes(value || '')
     // ),

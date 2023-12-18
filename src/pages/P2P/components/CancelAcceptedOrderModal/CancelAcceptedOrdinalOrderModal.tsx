@@ -7,6 +7,7 @@ import { useContract } from '../../../../hooks/useContract';
 import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Inscription } from '../../../../components';
 import { ordinalIdToString } from '../../../../utils/format';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 
 type CancelOrdinalAcceptedOrderModalProps = {
   order: AcceptedOrdinalOrder | undefined;
@@ -45,8 +46,10 @@ const CancelOrdinalAcceptedOrderModal = ({
     <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Cancel Order</ModalHeader>
       <ModalBody gap='spacing4'>
-        <P>
-          Cancelling market order #{order.acceptId.toString()} of inscription {ordinalIdToString(order.ordinalId)}
+        <P size='s'>Cancelling market order #{order.acceptId.toString()} of inscription the following inscription</P>
+        <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
+        <P size='s' align='center'>
+          {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
         </P>
         <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
       </ModalBody>

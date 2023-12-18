@@ -105,28 +105,36 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       };
     };
 
-    const inscriptionId = parseInscriptionId(data.inscriptionId);
-    const inscriptionData = await ordClient.getInscriptionFromId(inscriptionId);
+    setLoading(true);
 
-    const utxo = {
-      txHash: addHexPrefix(inscriptionData.satpoint.outpoint.txid),
-      txOutputIndex: inscriptionData.satpoint.outpoint.vout,
-      txOutputValue: BigInt(inscriptionData.output_value || 0) // TODO: Check why the output value can be null and how to handle that case
-    };
+    try {
+      const inscriptionId = parseInscriptionId(data.inscriptionId);
+      const inscriptionData = await ordClient.getInscriptionFromId(inscriptionId);
 
-    // TODO: check that form data are of correct types
-    const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
+      const utxo = {
+        txHash: addHexPrefix(inscriptionData.satpoint.outpoint.txid),
+        txOutputIndex: inscriptionData.satpoint.outpoint.vout,
+        txOutputValue: BigInt(inscriptionData.output_value || 0) // TODO: Check why the output value can be null and how to handle that case
+      };
 
-    const tx = await writeOrdMarketplace.placeOrdinalSellOrder([
-      { txId: addHexPrefix(inscriptionId.txid), index: inscriptionId.index },
-      utxo,
-      askingCurrency.address,
-      askingAmount
-    ]);
+      // TODO: check that form data are of correct types
+      const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
 
-    await publicClient.waitForTransactionReceipt({ hash: tx });
+      const tx = await writeOrdMarketplace.placeOrdinalSellOrder([
+        { txId: addHexPrefix(inscriptionId.txid), index: inscriptionId.index },
+        utxo,
+        askingCurrency.address,
+        askingAmount
+      ]);
+
+      await publicClient.waitForTransactionReceipt({ hash: tx });
+    } catch (e) {
+      setLoading(false);
+    }
+
     refetchOrders();
     onClose();
+    setLoading(false);
   };
 
   return (

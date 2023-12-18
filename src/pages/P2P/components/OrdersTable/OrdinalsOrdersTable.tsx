@@ -91,34 +91,34 @@ const OrdinalOrdersTable = ({ orders, refetchOrders, ...props }: OrdinalOrdersTa
   const rows: OrdinalOrdersTableRow[] = useMemo(
     () =>
       orders
-        ? orders
-            .filter(({ deadline }) => !deadline)
-            .map((order) => {
-              return {
-                id: `${order.ordinalId}-${order.askingCurrency.ticker}-${order.id.toString()}`,
-                asset: <OrdinalCell />,
-                price: (
-                  <AmountCell
-                    amount={new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig().toString()}
-                    ticker={order.askingCurrency.ticker}
-                  />
-                ),
-                inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>,
-                action: (
-                  <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
-                    {order.isOwnerOfOrder ? (
-                      <StyledCTA variant='secondary' onPress={() => handleOpenCancelOrderModal(order)} size='small'>
-                        Cancel order
-                      </StyledCTA>
-                    ) : (
-                      <StyledCTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
-                        Fill Order
-                      </StyledCTA>
-                    )}
-                  </Flex>
-                )
-              };
-            })
+        ? orders.map((order) => {
+            return {
+              id: `${order.ordinalId}-${order.askingCurrency.ticker}-${order.id.toString()}`,
+              asset: <OrdinalCell />,
+              price: (
+                <AmountCell
+                  amount={new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig().toString()}
+                  ticker={order.askingCurrency.ticker}
+                />
+              ),
+              inscriptionId: (
+                <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>
+              ),
+              action: (
+                <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
+                  {order.isOwnerOfOrder ? (
+                    <StyledCTA variant='secondary' onPress={() => handleOpenCancelOrderModal(order)} size='small'>
+                      Cancel order
+                    </StyledCTA>
+                  ) : (
+                    <StyledCTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
+                      Fill Order
+                    </StyledCTA>
+                  )}
+                </Flex>
+              )
+            };
+          })
         : [],
     [orders]
   );

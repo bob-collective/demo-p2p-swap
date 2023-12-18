@@ -4,11 +4,16 @@ import QrCode from 'qrcode.react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AuthCTA } from '../../../../components/AuthCTA';
-import { Bitcoin, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
-import { useBtcTx } from '../../../../hooks/useBtcTx';
+import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { StyledSpinner } from './CompleteAcceptedOrderModal.styles';
+import { usePublicClient } from 'wagmi';
+import { useContract } from '../../../../hooks/useContract';
+import { truncateInscriptionId } from '../../../../utils/truncate';
+import { ordinalIdToString } from '../../../../utils/format';
+import { useOrdinalTx } from '../../../../hooks/useOrdinalTx';
+import { Inscription } from '../../../../components';
 
 type CompleteAcceptedOrdinalOrderModalProps = {
   order: AcceptedOrdinalOrder | undefined;
@@ -22,12 +27,12 @@ const CompleteAcceptedOrdinalOrderModal = ({
   ...props
 }: CompleteAcceptedOrdinalOrderModalProps): JSX.Element | null => {
   const [, setSearchParams] = useSearchParams();
-  // const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
-  // const publicClient = usePublicClient();
+  const { write: writeOrdinalMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
+  const publicClient = usePublicClient();
 
   const [isLoading, setLoading] = useState(false);
 
-  const { status, txId, confirmations, proofData } = useBtcTx(order?.buyerBitcoinAddress, 0n);
+  const { status, txId, confirmations, proofData } = useOrdinalTx(order?.buyerBitcoinAddress, order?.utxo);
 
   if (!order) {
     return null;
@@ -40,7 +45,13 @@ const CompleteAcceptedOrdinalOrderModal = ({
 
     setLoading(true);
     try {
-      // TODO: add
+      console.log(proofData.proof);
+      const txHash = await writeOrdinalMarketplace.proofOrdinalSellOrder([
+        order.acceptId,
+        proofData.info,
+        proofData.proof
+      ]);
+      await publicClient.waitForTransactionReceipt({ hash: txHash });
     } catch (e) {
       setLoading(false);
     }
@@ -65,16 +76,17 @@ const CompleteAcceptedOrdinalOrderModal = ({
         <Flex gap='spacing3' direction='column'>
           <P size='s'>1. Send the following inscription to the following bitcoin address:</P>
           <Flex direction='column' gap='spacing2'>
-            <P size='s'>Inscription</P>
-            <iframe
-              src={`https://testnet.ordinals.com/preview/${'c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0'}`}
-              sandbox='allow-scripts'
-              scrolling='no'
-              loading='lazy'
-              allow=''
-              height={200}
-            />
-            <P size='s'>c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0</P>
+            <Inscription height={200} id={ordinalIdToString(order.ordinalId)} />
+            <Flex justifyContent='center'>
+              <TextLink
+                external
+                icon
+                href={`https://testnet.ordinals.com/inscription/${ordinalIdToString(order.ordinalId)}`}
+                size='s'
+              >
+                {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
+              </TextLink>
+            </Flex>
           </Flex>
           <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
             <Card
@@ -102,7 +114,7 @@ const CompleteAcceptedOrdinalOrderModal = ({
         </Flex>
         <Card variant='bordered' background='secondary' alignItems='center' justifyContent='center'>
           {status === 'NOT_FOUND' ? (
-            <Flex gap='spacing2'>
+            <Flex gap='spacing2' alignItems='center'>
               <StyledSpinner thickness={2} />
               <P size='s'>Waiting for bitcoin transaction to be made...</P>
             </Flex>

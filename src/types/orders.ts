@@ -47,6 +47,7 @@ interface AcceptedBtcOrder {
 }
 
 type Utxo = { txHash: HexString; txOutputIndex: number; txOutputValue: bigint };
+
 interface OrdinalOrder {
   id: bigint;
   ordinalId: { txId: HexString; index: number };
@@ -67,6 +68,7 @@ interface AcceptedOrdinalOrder {
   buyerBitcoinAddress: string;
   isAcceptorOfOrder: boolean;
   isCreatorOfOrder: boolean;
+  utxo: Utxo;
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
@@ -81,5 +83,6 @@ export type {
   BtcSellOrder,
   Erc20Order,
   Order,
-  OrdinalOrder
+  OrdinalOrder,
+  Utxo
 };

@@ -1,15 +1,14 @@
 import { theme } from '@interlay/theme';
 import { Flex, Span, Table, TableProps } from '@interlay/ui';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { formatUSD, ordinalIdToString } from '../../../../utils/format';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 import { CancelOrdinalAcceptedOrderModal } from '../CancelAcceptedOrderModal';
 import { CompleteAcceptedOrdinalOrderModal } from '../CompleteAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 import { StyledCTA, StyledCard, StyledSpan } from './AcceptedOrdersTable.style';
-import { truncateInscriptionId } from '../../../../utils/truncate';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -96,8 +95,6 @@ const AcceptedOrdinalOrdersTable = ({
     { name: '', id: AcceptedOrdinalOrdersTableColumns.ACTION }
   ];
 
-  const { address } = useAccount();
-
   const handleOpenFillOrderModal = (order: AcceptedOrdinalOrder) =>
     setOrderModal({ isOpen: true, type: 'fill', order });
 
@@ -119,7 +116,9 @@ const AcceptedOrdinalOrdersTable = ({
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>,
+              inscriptionId: (
+                <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>
+              ),
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {/* Add cancel order event */}
@@ -139,7 +138,7 @@ const AcceptedOrdinalOrdersTable = ({
             };
           })
         : [],
-    [address, orders]
+    [orders]
   );
 
   return (

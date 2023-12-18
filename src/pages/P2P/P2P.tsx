@@ -99,7 +99,8 @@ const P2P = (): JSX.Element => {
                 <Spinner color='secondary' />
               </Flex>
             )}
-            {orders.ordinal.unowned.length && (
+            a{' '}
+            {!!orders.ordinal.unowned.length && (
               <OrdinalOrdersTable
                 aria-labelledby={titleId}
                 orders={orders.ordinal.unowned}
