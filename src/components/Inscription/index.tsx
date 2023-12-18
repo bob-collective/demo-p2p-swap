@@ -1,2 +1,2 @@
-export { WalletIcon } from './WalletIcon';
-export type { WalletIconProps } from './WalletIcon';
+export { Inscription } from './Inscription';
+export type { InscriptionProps } from './Inscription';

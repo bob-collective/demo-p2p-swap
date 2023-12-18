@@ -159,6 +159,7 @@ const P2P = (): JSX.Element => {
         refetchOrders={() => {
           refetch();
           refetchAcceptedBtcOrders();
+          refetchActiveOrdinalOrders();
         }}
       />
     </>

@@ -12,6 +12,8 @@ import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrder
 import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 import { HexString } from '../../../../types';
 import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
+import { InscriptionId } from '../../../../hooks/ordinalsApi';
+import { addHexPrefix } from '../../../../utils/encoding';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
@@ -90,17 +92,40 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       throw new Error('TODO');
     }
 
-    // TODO: need to parse
-    const inscriptionData = await ordClient.getInscriptionFromId(data.inscriptionId);
-    // TODO: check that data are of correct types
+    const parseInscriptionId = (id: string): InscriptionId => {
+      if (id.length < 65) {
+        throw new Error("Incorrect inscription id length.");
+      }
+
+      const txid = id.slice(0, 64);
+      const index = parseInt(id.slice(65));
+
+      return {
+        txid,
+        index
+      }
+    }
+    
+    const inscriptionId = parseInscriptionId(data.inscriptionId);
+    const inscriptionData = await ordClient.getInscriptionFromId(inscriptionId);
+  
+    const utxo = {
+      txHash: addHexPrefix(inscriptionData.satpoint.outpoint.txid),
+      txOutputIndex: inscriptionData.satpoint.outpoint.vout,
+      txOutputValue: BigInt(inscriptionData.output_value || 0) // TODO: Check why the output value can be null and how to handle that case
+    }
+
+    // TODO: check that form data are of correct types
     const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
 
-    const tx = writeOrdMarketplace.placeOrdinalSellOrder([
-      { ordinalID: data.inscriptionId as HexString },
+    const tx = await writeOrdMarketplace.placeOrdinalSellOrder([
+      { ordinalID: addHexPrefix(inscriptionId.txid) },
       utxo,
       askingCurrency.address,
       askingAmount
     ]);
+
+    await publicClient.waitForTransactionReceipt({ hash: tx });
   };
 
   return (
