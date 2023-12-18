@@ -2,13 +2,14 @@ import { theme } from '@interlay/theme';
 import { Flex, Span, Table, TableProps } from '@interlay/ui';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { AcceptedBtcOrder, AcceptedOrdinalOrder } from '../../../../types/orders';
+import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { formatUSD } from '../../../../utils/format';
-import { CancelAcceptedOrderModal, CancelOrdinalAcceptedOrderModal } from '../CancelAcceptedOrderModal';
-import { CompleteAcceptedOrderModal } from '../CompleteAcceptedOrderModal';
+import { CancelOrdinalAcceptedOrderModal } from '../CancelAcceptedOrderModal';
+import { CompleteAcceptedOrdinalOrderModal } from '../CompleteAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
 import { StyledCTA, StyledCard, StyledSpan } from './AcceptedOrdersTable.style';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -63,7 +64,6 @@ type Props = {
   selectedOrder?: AcceptedOrdinalOrder;
   orders: Array<AcceptedOrdinalOrder> | undefined;
   refetchOrders: () => void;
-  refetchAcceptedBtcOrders: () => void;
 };
 
 type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
@@ -74,7 +74,6 @@ const AcceptedOrdinalOrdersTable = ({
   selectedOrder,
   orders,
   refetchOrders,
-  refetchAcceptedBtcOrders,
   ...props
 }: AcceptedOrdinalOrdersTableProps): JSX.Element => {
   const [orderModal, setOrderModal] = useState<{
@@ -120,7 +119,7 @@ const AcceptedOrdinalOrdersTable = ({
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{order.ordinalId}</StyledSpan>,
+              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId)}</StyledSpan>,
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {/* Add cancel order event */}
@@ -149,10 +148,9 @@ const AcceptedOrdinalOrdersTable = ({
         <Table {...props} columns={columns} rows={rows} />
       </StyledCard>
       {orderModal.order && (
-        <CompleteAcceptedOrderModal
+        <CompleteAcceptedOrdinalOrderModal
           isOpen={orderModal.isOpen && orderModal.type === 'fill'}
           onClose={handleCloseAnyOrderModal}
-          refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
           refetchOrders={refetchOrders}
           order={orderModal.order}
         />

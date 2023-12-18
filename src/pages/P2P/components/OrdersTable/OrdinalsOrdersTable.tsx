@@ -7,6 +7,7 @@ import { formatUSD } from '../../../../utils/format';
 import { CancelOrdinalOrderModal } from '../CancelOrderModal';
 import { FillOrdinalOrderModal } from '../FillOrderModal/FillOrdinalOrderModal';
 import { StyledCTA, StyledCard, StyledSpan } from './OrdersTable.style';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 
 const AmountCell = ({ amount, valueUSD, ticker }: { amount: string; ticker: string; valueUSD?: number }) => (
   <Flex alignItems='flex-start' direction='column'>
@@ -100,7 +101,7 @@ const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: Or
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{order.ordinalId}</StyledSpan>,
+              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId)}</StyledSpan>,
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {order.isOwnerOfOrder ? (
@@ -109,7 +110,7 @@ const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: Or
                     </StyledCTA>
                   ) : (
                     <StyledCTA onPress={() => handleOpenFillOrderModal(order)} size='small'>
-                      Fill Order‚‡
+                      Fill Order
                     </StyledCTA>
                   )}
                 </Flex>

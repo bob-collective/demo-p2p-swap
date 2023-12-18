@@ -34,7 +34,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
   };
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
-  console.log(inputBalance.toBig().toString(), order.totalAskingAmount)
+  console.log(inputBalance.toBig().toString(), order.totalAskingAmount);
 
   const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
@@ -67,10 +67,10 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
     .gte(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
   const isSubmitDisabled = isFormDisabled(form) || !hasEnoughFunds;
 
-  // NOTE: This mirrors the smart contract design of expecting first output of the utxo to be 
+  // NOTE: This mirrors the smart contract design of expecting first output of the utxo to be
   // the inscription, when smart contract is improved to store output index, this will
-  // need to be changed.  
-  const ordinalId = `${order.ordinalId.slice(2).slice(0, 64)}i0`
+  // need to be changed.
+  const ordinalId = `${order.ordinalId.slice(2).slice(0, 64)}i0`;
   return (
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
@@ -82,7 +82,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           {...form.getTokenFieldProps('amount')}
         />
         <Flex direction='column' gap='spacing2'>
-          <P size='s'>You will Receive</P>
+          <P size='xs'>You will Receive</P>
           <iframe
             src={`https://testnet.ordinals.com/preview/${ordinalId}`}
             sandbox='allow-scripts'

@@ -1,48 +1,33 @@
-import {
-  Card,
-  Flex,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalProps,
-  P,
-  Spinner,
-  Strong,
-  TextLink
-} from '@interlay/ui';
+import { Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
 import QrCode from 'qrcode.react';
-import { usePublicClient } from 'wagmi';
 
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AuthCTA } from '../../../../components/AuthCTA';
-import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
+import { Bitcoin, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useBtcTx } from '../../../../hooks/useBtcTx';
-import { useContract } from '../../../../hooks/useContract';
-import { AcceptedBtcOrder } from '../../../../types/orders';
+import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
+import { StyledSpinner } from './CompleteAcceptedOrderModal.styles';
 
-type CompleteAcceptedOrderModalProps = {
-  order: AcceptedBtcOrder | undefined;
+type CompleteAcceptedOrdinalOrderModalProps = {
+  order: AcceptedOrdinalOrder | undefined;
   refetchOrders: () => void;
-  refetchAcceptedBtcOrders: () => void;
 } & Omit<ModalProps, 'children'>;
 
-const CompleteAcceptedOrderModal = ({
+const CompleteAcceptedOrdinalOrderModal = ({
   onClose,
   refetchOrders,
-  refetchAcceptedBtcOrders,
   order,
   ...props
-}: CompleteAcceptedOrderModalProps): JSX.Element | null => {
+}: CompleteAcceptedOrdinalOrderModalProps): JSX.Element | null => {
   const [, setSearchParams] = useSearchParams();
-  const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
-  const publicClient = usePublicClient();
+  // const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
+  // const publicClient = usePublicClient();
 
   const [isLoading, setLoading] = useState(false);
 
-  const { status, txId, confirmations, proofData } = useBtcTx(order?.bitcoinAddress, order?.amountBtc);
+  const { status, txId, confirmations, proofData } = useBtcTx(order?.buyerBitcoinAddress, 0n);
 
   if (!order) {
     return null;
@@ -54,15 +39,8 @@ const CompleteAcceptedOrderModal = ({
     }
 
     setLoading(true);
-
     try {
-      if (order.type === 'buy') {
-        const hash = await writeBTCMarketplace.proofBtcBuyOrder([order.acceptId, proofData.info, proofData.proof]);
-        await publicClient.waitForTransactionReceipt({ hash });
-      } else {
-        const hash = await writeBTCMarketplace.proofBtcSellOrder([order.acceptId, proofData.info, proofData.proof]);
-        await publicClient.waitForTransactionReceipt({ hash });
-      }
+      // TODO: add
     } catch (e) {
       setLoading(false);
     }
@@ -73,7 +51,6 @@ const CompleteAcceptedOrderModal = ({
       return new URLSearchParams('market=buy');
     });
 
-    refetchAcceptedBtcOrders();
     refetchOrders();
 
     onClose();
@@ -86,10 +63,19 @@ const CompleteAcceptedOrderModal = ({
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
-          <P size='s'>
-            1. Send <Strong color='secondary'>{toBaseAmount(order.amountBtc, Bitcoin.ticker)} BTC</Strong> to the
-            following bitcoin address:
-          </P>
+          <P size='s'>1. Send the following inscription to the following bitcoin address:</P>
+          <Flex direction='column' gap='spacing2'>
+            <P size='s'>Inscription</P>
+            <iframe
+              src={`https://testnet.ordinals.com/preview/${'c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0'}`}
+              sandbox='allow-scripts'
+              scrolling='no'
+              loading='lazy'
+              allow=''
+              height={200}
+            />
+            <P size='s'>c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0</P>
+          </Flex>
           <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
             <Card
               rounded='lg'
@@ -99,30 +85,30 @@ const CompleteAcceptedOrderModal = ({
               alignItems='center'
               background='tertiary'
             >
-              <P size='s'>{order.bitcoinAddress}</P>
+              <P size='s'>{order.buyerBitcoinAddress}</P>
             </Card>
             <QrCode
               includeMargin
-              value={`bitcoin:${order.bitcoinAddress}?amount=${toBaseAmount(order.amountBtc, Bitcoin.ticker)}`}
+              value={`bitcoin:${order.buyerBitcoinAddress}?amount=${toBaseAmount(0n, Bitcoin.ticker)}`}
             />
           </Flex>
           <P size='s'>2. Submit your transaction proof by clicking on Complete order.</P>
           <P size='s'>
             3. Once the order is completed you will receive{' '}
             <Strong color='secondary'>
-              {toBaseAmount(order.otherCurrencyAmount, order.otherCurrency.ticker)} {order.otherCurrency.ticker}
+              {toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker)} {order.askingCurrency.ticker}
             </Strong>
           </P>
         </Flex>
         <Card variant='bordered' background='secondary' alignItems='center' justifyContent='center'>
           {status === 'NOT_FOUND' ? (
             <Flex gap='spacing2'>
-              <Spinner />
+              <StyledSpinner thickness={2} />
               <P size='s'>Waiting for bitcoin transaction to be made...</P>
             </Flex>
           ) : (
             <Flex alignItems='center' gap='spacing2'>
-              {isSubmissionDisabled && <Spinner />}
+              {isSubmissionDisabled && <StyledSpinner thickness={2} />}
               <P size='s'>
                 Bitcoin transaction found (
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>
@@ -154,5 +140,5 @@ const CompleteAcceptedOrderModal = ({
   );
 };
 
-export { CompleteAcceptedOrderModal };
-export type { CompleteAcceptedOrderModalProps };
+export { CompleteAcceptedOrdinalOrderModal };
+export type { CompleteAcceptedOrdinalOrderModalProps };
