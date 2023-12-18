@@ -31,7 +31,7 @@ const FillOrdinalOrderModal = ({
   const handleFillOrder = useCallback(
     async (data: FillOrdinalSellOrderFormData) => {
       setLoading(true);
-      console.log('a')
+      console.log(order)
       try {
         const btcAddress = { scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress) };
         const orderId = order.id;

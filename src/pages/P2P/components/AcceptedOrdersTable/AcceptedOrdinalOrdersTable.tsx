@@ -139,7 +139,7 @@ const AcceptedOrdinalOrdersTable = ({
             };
           })
         : [],
-    [orders]
+    [address, orders]
   );
 
   return (

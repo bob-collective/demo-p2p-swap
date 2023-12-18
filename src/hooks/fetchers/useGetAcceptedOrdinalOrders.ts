@@ -72,9 +72,9 @@ const useGetAcceptedOrdinalOrders = () => {
       ]);
 
       return rawOrderAcceptances.map((order, index) => {
-        const orderId = ordersIds.find((id) => id === order.orderId) as bigint;
+        const orderId = ordersIds.findIndex((id) => id === order.orderId);
 
-        return parseAcceptedOrdinalOrder(rawOrders[Number(orderId)], order, acceptIds[index], address);
+        return parseAcceptedOrdinalOrder(rawOrders[orderId], order, acceptIds[index], address);
       });
     },
     refetchInterval: REFETCH_INTERVAL.MINUTE
