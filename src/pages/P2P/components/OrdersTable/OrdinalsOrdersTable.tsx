@@ -62,14 +62,14 @@ type OrdinalOrdersTableRow = {
 
 type Props = {
   orders: Array<OrdinalOrder> | undefined;
-  refetchActiveOrdinalOrders: () => void;
+  refetchOrders: () => void;
 };
 
 type InheritAttrs = Omit<TableProps, keyof Props | 'columns' | 'rows'>;
 
 type OrdinalOrdersTableProps = Props & InheritAttrs;
 
-const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: OrdinalOrdersTableProps): JSX.Element => {
+const OrdinalOrdersTable = ({ orders, refetchOrders, ...props }: OrdinalOrdersTableProps): JSX.Element => {
   const [orderModal, setOrderModal] = useState<{ isOpen: boolean; type: 'fill' | 'cancel'; order?: OrdinalOrder }>({
     isOpen: false,
     type: 'fill'
@@ -130,7 +130,7 @@ const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: Or
         <FillOrdinalOrderModal
           isOpen={orderModal.isOpen && orderModal.type === 'fill'}
           onClose={handleCloseAnyOrderModal}
-          refetchActiveOrdinalOrders={refetchActiveOrdinalOrders}
+          refetchOrders={refetchOrders}
           order={orderModal.order}
         />
       )}
@@ -139,7 +139,7 @@ const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: Or
           isOpen={orderModal.isOpen && orderModal.type === 'cancel'}
           onClose={handleCloseAnyOrderModal}
           order={orderModal.order}
-          refetchOrdinalOrders={refetchActiveOrdinalOrders}
+          refetchOrders={refetchOrders}
         />
       )}
     </div>
