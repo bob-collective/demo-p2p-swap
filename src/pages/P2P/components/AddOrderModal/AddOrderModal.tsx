@@ -10,7 +10,6 @@ import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
 import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrderForm';
 import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
-import { HexString } from '../../../../types';
 import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 import { InscriptionId } from '../../../../hooks/ordinalsApi';
 import { addHexPrefix } from '../../../../utils/encoding';
@@ -94,7 +93,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
     const parseInscriptionId = (id: string): InscriptionId => {
       if (id.length < 65) {
-        throw new Error("Incorrect inscription id length.");
+        throw new Error('Incorrect inscription id length.');
       }
 
       const txid = id.slice(0, 64);
@@ -103,17 +102,17 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       return {
         txid,
         index
-      }
-    }
-    
+      };
+    };
+
     const inscriptionId = parseInscriptionId(data.inscriptionId);
     const inscriptionData = await ordClient.getInscriptionFromId(inscriptionId);
-  
+
     const utxo = {
       txHash: addHexPrefix(inscriptionData.satpoint.outpoint.txid),
       txOutputIndex: inscriptionData.satpoint.outpoint.vout,
       txOutputValue: BigInt(inscriptionData.output_value || 0) // TODO: Check why the output value can be null and how to handle that case
-    }
+    };
 
     // TODO: check that form data are of correct types
     const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
@@ -126,6 +125,8 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     ]);
 
     await publicClient.waitForTransactionReceipt({ hash: tx });
+    refetchOrders();
+    onClose();
   };
 
   return (

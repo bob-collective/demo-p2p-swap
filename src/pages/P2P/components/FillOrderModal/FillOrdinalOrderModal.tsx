@@ -3,6 +3,10 @@ import { useCallback, useState } from 'react';
 import { OrdinalOrder } from '../../../../types/orders';
 import { FillOrdinalSellOrderForm } from '../FillOrderForm';
 import { FillOrdinalSellOrderFormData } from '../FillOrderForm/FillOrdinalSellOrderForm';
+import { usePublicClient } from 'wagmi';
+import { ContractType } from '../../../../constants';
+import { useContract } from '../../../../hooks/useContract';
+import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 
 type Props = {
   order: OrdinalOrder;
@@ -21,18 +25,21 @@ const FillOrdinalOrderModal = ({
 }: FillOrdinalOrderModalProps): JSX.Element => {
   const [isLoading, setLoading] = useState(false);
 
-  // const publicClient = usePublicClient();
+  const publicClient = usePublicClient();
 
-  // const { write: writeOrdMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
-
+  const { write: writeOrdMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
+// 
   const handleFillOrder = useCallback(
     async (data: FillOrdinalSellOrderFormData) => {
       setLoading(true);
 
       try {
-        // TODO: add fill order
 
-        console.log(data);
+        const btcAddress = {scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress)};
+        const orderId = order.id;
+        
+        const txHash = await writeOrdMarketplace.acceptOrdinalSellOrder([orderId, btcAddress])
+        await publicClient.waitForTransactionReceipt({hash: txHash})
       } catch (e) {
         return setLoading(false);
       }
@@ -42,7 +49,7 @@ const FillOrdinalOrderModal = ({
       onClose();
       refetchActiveOrdinalOrders();
     },
-    [onClose, order, refetchActiveOrdinalOrders]
+    [onClose, order.id, publicClient, refetchActiveOrdinalOrders, writeOrdMarketplace]
   );
 
   return (

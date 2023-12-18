@@ -34,6 +34,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
   };
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
+  console.log(inputBalance.toBig().toString(), order.totalAskingAmount)
 
   const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
@@ -59,13 +60,17 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
     isLoading: isLoadingAllowance,
     isAllowed: isAskingCurrencyTransferApproved,
     wrapInErc20ApprovalTx
-  } = useErc20Allowance(ContractType.BTC_MARKETPLACE, order.askingCurrency.ticker);
+  } = useErc20Allowance(ContractType.ORD_MARKETPLACE, order.askingCurrency.ticker);
 
-  const hasEnoughtFunds = inputBalance
+  const hasEnoughFunds = inputBalance
     .toBig()
-    .lt(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
-  const isSubmitDisabled = isFormDisabled(form) || !hasEnoughtFunds;
+    .gte(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
+  const isSubmitDisabled = isFormDisabled(form) || !hasEnoughFunds;
 
+  // NOTE: This mirrors the smart contract design of expecting first output of the utxo to be 
+  // the inscription, when smart contract is improved to store output index, this will
+  // need to be changed.  
+  const ordinalId = `${order.ordinalId.slice(2).slice(0, 64)}i0`
   return (
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
@@ -79,7 +84,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
         <Flex direction='column' gap='spacing2'>
           <P size='s'>You will Receive</P>
           <iframe
-            src={`https://testnet.ordinals.com/preview/${'c05c1a49352ce0e91f0ca074a44371721a743b367a9a624d33ac04cf03711f28i0'}`}
+            src={`https://testnet.ordinals.com/preview/${ordinalId}`}
             sandbox='allow-scripts'
             scrolling='no'
             loading='lazy'
@@ -97,7 +102,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
         </Card>
         <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-          {hasEnoughtFunds ? `${!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order` : 'Insufficient Balance'}
+          {hasEnoughFunds ? `${!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order` : 'Insufficient Balance'}
         </AuthCTA>
       </Flex>
     </form>

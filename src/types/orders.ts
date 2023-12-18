@@ -49,7 +49,7 @@ interface AcceptedBtcOrder {
 type Utxo = { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
 interface OrdinalOrder {
   id: bigint;
-  ordinalId: string;
+  ordinalId: HexString;
   utxo: Utxo;
   askingCurrency: Erc20Currency;
   totalAskingAmount: bigint;
@@ -60,7 +60,7 @@ interface OrdinalOrder {
 interface AcceptedOrdinalOrder {
   orderId: bigint;
   acceptId: bigint;
-  ordinalId: string;
+  ordinalId: HexString;
   deadline: Date;
   askingCurrency: Erc20Currency;
   totalAskingAmount: bigint;
