@@ -7,14 +7,14 @@ import { ContractType } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
 import { OrdinalOrder } from '../../../../types/orders';
 
-type CancelOrdinalOrderModalProps = { order: OrdinalOrder | undefined; refetchOrdinalOrders: () => void } & Omit<
+type CancelOrdinalOrderModalProps = { order: OrdinalOrder | undefined; refetchOrders: () => void } & Omit<
   ModalProps,
   'children'
 >;
 
 const CancelOrdinalOrderModal = ({
   onClose,
-  refetchOrdinalOrders,
+  refetchOrders,
   order,
   ...props
 }: CancelOrdinalOrderModalProps): JSX.Element | null => {
@@ -33,7 +33,7 @@ const CancelOrdinalOrderModal = ({
     try {
       const hash = await writeOrdMarketplace.withdrawOrdinalSellOrder([order.id]);
       await publicClient.waitForTransactionReceipt({ hash });
-      refetchOrdinalOrders();
+      refetchOrders();
       onClose();
     } catch (e) {
       setLoading(false);

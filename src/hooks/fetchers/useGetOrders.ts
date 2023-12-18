@@ -4,6 +4,8 @@ import { useGetAcceptedBtcOrders } from './useGetAcceptedBtcOrders';
 import { useGetActiveBtcBuyOrders } from './useGetActiveBtcBuyOrders';
 import { useGetActiveBtcSellOrders } from './useGetActiveBtcSellOrders';
 import { useGetActiveErc20Orders } from './useGetActiveOrders';
+import { useGetAcceptedOrdinalOrders } from './useGetAcceptedOrdinalOrders';
+import { useGetActiveOrdinalOrders } from './useGetActiveOrdinalOrders';
 
 const useGetOrders = () => {
   useAccount({
@@ -20,12 +22,24 @@ const useGetOrders = () => {
   const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
   const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
 
+  const { data: acceptedOrdinalOrders, refetch: refetchAcceptedOrdinalOrders } = useGetAcceptedOrdinalOrders();
+  const { data: activeOrdinalOrders, refetch: refetchActiveOrdinalOrders } = useGetActiveOrdinalOrders();
+
   const refetch = useCallback(() => {
     refetchActiveErc20Orders();
     refetchBtcBuyOrders();
     refetchBtcSellOrders();
     refetchAcceptedBtcOrders();
-  }, [refetchActiveErc20Orders, refetchBtcBuyOrders, refetchBtcSellOrders, refetchAcceptedBtcOrders]);
+    refetchAcceptedOrdinalOrders();
+    refetchActiveOrdinalOrders();
+  }, [
+    refetchActiveErc20Orders,
+    refetchBtcBuyOrders,
+    refetchBtcSellOrders,
+    refetchAcceptedBtcOrders,
+    refetchAcceptedOrdinalOrders,
+    refetchActiveOrdinalOrders
+  ]);
 
   const data = useMemo(() => {
     const orders = [
@@ -40,9 +54,17 @@ const useGetOrders = () => {
       acceptedBtc: {
         created: acceptedBtcOrders?.filter((order) => order.isCreatorOfOrder),
         accepted: acceptedBtcOrders?.filter((order) => order.isAcceptorOfOrder)
+      },
+      ordinal: {
+        owned: (activeOrdinalOrders || []).filter((order) => order.isOwnerOfOrder),
+        unowned: (activeOrdinalOrders || []).filter((order) => !order.isOwnerOfOrder),
+        accepted: {
+          created: (acceptedOrdinalOrders || [])?.filter((order) => order.isCreatorOfOrder),
+          accepted: (acceptedOrdinalOrders || [])?.filter((order) => order.isAcceptorOfOrder)
+        }
       }
     };
-  }, [erc20Orders, btcBuyOrders, btcSellOrders, acceptedBtcOrders]);
+  }, [erc20Orders, btcBuyOrders, btcSellOrders, acceptedBtcOrders, activeOrdinalOrders, acceptedOrdinalOrders]);
 
   return {
     data,
@@ -50,7 +72,9 @@ const useGetOrders = () => {
     refetchActiveErc20Orders,
     refetchBtcBuyOrders,
     refetchBtcSellOrders,
-    refetchAcceptedBtcOrders
+    refetchAcceptedBtcOrders,
+    refetchAcceptedOrdinalOrders,
+    refetchActiveOrdinalOrders
   };
 };
 

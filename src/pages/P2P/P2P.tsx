@@ -1,16 +1,14 @@
 import { theme } from '@interlay/theme';
 import { Alert, CTA, Flex, H1, H2, Spinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
-import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
-import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
-import { useBalances } from '../../hooks/useBalances';
 import { useSearchParams } from 'react-router-dom';
-import { AcceptedBtcOrder } from '../../types/orders';
 import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
-import { useGetActiveOrdinalOrders } from '../../hooks/fetchers/useGetActiveOrdinalOrders';
-import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
-import { useGetAcceptedOrdinalOrders } from '../../hooks/fetchers/useGetAcceptedOrdinalOrders';
+import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
+import { useBalances } from '../../hooks/useBalances';
+import { AcceptedBtcOrder } from '../../types/orders';
+import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
+import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -24,10 +22,16 @@ const P2P = (): JSX.Element => {
   const titleId2 = 'titleId2';
   const titleId3 = 'titleId3';
   const titleId4 = 'titleId4';
+  const titleId5 = 'titleId5';
+  const titleId6 = 'titleId6';
 
-  const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
-  const { data: activeOrdinalOrders, refetch: refetchActiveOrdinalOrders } = useGetActiveOrdinalOrders();
-  const { data: acceptedOrdinalOrders, refetch: refetchAcceptedOrdinalOrders } = useGetAcceptedOrdinalOrders();
+  const {
+    data: orders,
+    refetch,
+    refetchAcceptedBtcOrders,
+    refetchAcceptedOrdinalOrders,
+    refetchActiveOrdinalOrders
+  } = useGetOrders();
 
   // just to prefetch
   useBalances();
@@ -95,11 +99,11 @@ const P2P = (): JSX.Element => {
                 <Spinner color='secondary' />
               </Flex>
             )}
-            {activeOrdinalOrders && (
+            {orders.ordinal.unowned.length && (
               <OrdinalOrdersTable
                 aria-labelledby={titleId}
-                orders={activeOrdinalOrders}
-                refetchActiveOrdinalOrders={refetchActiveOrdinalOrders}
+                orders={orders.ordinal.unowned}
+                refetchOrders={refetchActiveOrdinalOrders}
               />
             )}
             {/* Only unowned BTC orders can be bought */}
@@ -120,28 +124,45 @@ const P2P = (): JSX.Element => {
                 />
               </>
             )}
-            {!!acceptedOrdinalOrders?.length && (
-              <AcceptedOrdinalOrdersTable
-                aria-labelledby={titleId}
-                orders={acceptedOrdinalOrders}
-                refetchOrders={refetchAcceptedOrdinalOrders}
-              />
+            {!!orders?.ordinal.accepted.accepted.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId5} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Accepted Ordinals Orders
+                  </H2>
+                </Flex>
+                {/* Show all orders in which the current user is either the buyer or the seller */}
+                <AcceptedOrdinalOrdersTable
+                  aria-labelledby={titleId5}
+                  orders={orders.ordinal.accepted.accepted}
+                  refetchOrders={refetchAcceptedOrdinalOrders}
+                />
+              </>
             )}
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
-            {!!orders?.owned.length && (
+            {(!!orders?.owned.length || orders.ordinal.owned.length) && (
               <>
                 <Flex alignItems='center' justifyContent='space-between'>
                   <H2 size='xl' id={titleId3} style={{ marginTop: theme.spacing.spacing4 }}>
                     Sell
                   </H2>
                 </Flex>
-                <OrdersTable
-                  aria-labelledby={titleId3}
-                  orders={orders?.owned}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                />
+                {!!orders?.owned.length && (
+                  <OrdersTable
+                    aria-labelledby={titleId3}
+                    orders={orders?.owned}
+                    refetchOrders={refetch}
+                    refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                  />
+                )}
+                {!!orders.ordinal.owned.length && (
+                  <OrdinalOrdersTable
+                    aria-labelledby={titleId}
+                    orders={orders.ordinal.owned}
+                    refetchOrders={refetchActiveOrdinalOrders}
+                  />
+                )}
               </>
             )}
             {/* Only owned BTC orders can be sold */}
@@ -157,6 +178,21 @@ const P2P = (): JSX.Element => {
                   orders={orders?.acceptedBtc.created}
                   refetchOrders={refetch}
                   refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                />
+              </>
+            )}
+            {!!orders.ordinal.accepted.created.length && (
+              <>
+                <Flex alignItems='center' justifyContent='space-between'>
+                  <H2 size='xl' id={titleId6} style={{ marginTop: theme.spacing.spacing4 }}>
+                    Accepted Ordinals Orders
+                  </H2>
+                </Flex>
+                {/* Show all orders in which the current user is either the buyer or the seller */}
+                <AcceptedOrdinalOrdersTable
+                  aria-labelledby={titleId6}
+                  orders={orders.ordinal.accepted.created}
+                  refetchOrders={refetchAcceptedOrdinalOrders}
                 />
               </>
             )}

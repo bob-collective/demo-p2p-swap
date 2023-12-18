@@ -10,7 +10,7 @@ import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 
 type Props = {
   order: OrdinalOrder;
-  refetchActiveOrdinalOrders: () => void;
+  refetchOrders: () => void;
 };
 
 type InheritAttrs = Omit<ModalProps, 'children'>;
@@ -19,7 +19,7 @@ type FillOrdinalOrderModalProps = Props & InheritAttrs;
 
 const FillOrdinalOrderModal = ({
   order,
-  refetchActiveOrdinalOrders,
+  refetchOrders,
   onClose,
   ...props
 }: FillOrdinalOrderModalProps): JSX.Element => {
@@ -28,18 +28,17 @@ const FillOrdinalOrderModal = ({
   const publicClient = usePublicClient();
 
   const { write: writeOrdMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
-// 
+  //
   const handleFillOrder = useCallback(
     async (data: FillOrdinalSellOrderFormData) => {
       setLoading(true);
 
       try {
-
-        const btcAddress = {scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress)};
+        const btcAddress = { scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress) };
         const orderId = order.id;
-        
-        const txHash = await writeOrdMarketplace.acceptOrdinalSellOrder([orderId, btcAddress])
-        await publicClient.waitForTransactionReceipt({hash: txHash})
+
+        const txHash = await writeOrdMarketplace.acceptOrdinalSellOrder([orderId, btcAddress]);
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
       } catch (e) {
         return setLoading(false);
       }
@@ -47,9 +46,9 @@ const FillOrdinalOrderModal = ({
       setLoading(false);
 
       onClose();
-      refetchActiveOrdinalOrders();
+      refetchOrders();
     },
-    [onClose, order.id, publicClient, refetchActiveOrdinalOrders, writeOrdMarketplace]
+    [onClose, order.id, publicClient, refetchOrders, writeOrdMarketplace]
   );
 
   return (
