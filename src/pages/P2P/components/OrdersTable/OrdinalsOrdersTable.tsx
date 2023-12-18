@@ -3,7 +3,7 @@ import { Flex, Span, Table, TableProps } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { OrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
-import { formatUSD } from '../../../../utils/format';
+import { formatUSD, ordinalIdToString } from '../../../../utils/format';
 import { CancelOrdinalOrderModal } from '../CancelOrderModal';
 import { FillOrdinalOrderModal } from '../FillOrderModal/FillOrdinalOrderModal';
 import { StyledCTA, StyledCard, StyledSpan } from './OrdersTable.style';
@@ -103,7 +103,7 @@ const OrdinalOrdersTable = ({ orders, refetchOrders, ...props }: OrdinalOrdersTa
                     ticker={order.askingCurrency.ticker}
                   />
                 ),
-                inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId.txId)}</StyledSpan>,
+                inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>,
                 action: (
                   <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                     {order.isOwnerOfOrder ? (

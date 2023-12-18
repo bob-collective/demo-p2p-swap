@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
-import { formatUSD } from '../../../../utils/format';
+import { formatUSD, ordinalIdToString } from '../../../../utils/format';
 import { CancelOrdinalAcceptedOrderModal } from '../CancelAcceptedOrderModal';
 import { CompleteAcceptedOrdinalOrderModal } from '../CompleteAcceptedOrderModal';
 import { PendingOrderCTA } from '../PendingOrderCTA/PendingOrderCTA';
@@ -119,7 +119,7 @@ const AcceptedOrdinalOrdersTable = ({
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(order.ordinalId.txId)}</StyledSpan>,
+              inscriptionId: <StyledSpan size='s'>{truncateInscriptionId(ordinalIdToString(order.ordinalId))}</StyledSpan>,
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {/* Add cancel order event */}

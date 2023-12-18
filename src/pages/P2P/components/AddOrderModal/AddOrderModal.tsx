@@ -118,7 +118,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     const askingAmount = new Amount(askingCurrency, data.amount, true).toAtomic();
 
     const tx = await writeOrdMarketplace.placeOrdinalSellOrder([
-      {txId: addHexPrefix(inscriptionId.txid), index: inscriptionId.index},
+      { txId: addHexPrefix(inscriptionId.txid), index: inscriptionId.index },
       utxo,
       askingCurrency.address,
       askingAmount

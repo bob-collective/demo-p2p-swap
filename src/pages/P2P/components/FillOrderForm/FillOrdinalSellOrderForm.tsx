@@ -9,7 +9,7 @@ import { useAccount } from '../../../../lib/sats-wagmi';
 import { OrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
-import { formatUSD } from '../../../../utils/format';
+import { formatUSD, ordinalIdToString } from '../../../../utils/format';
 import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
 
@@ -67,9 +67,9 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
 
   const isSubmitDisabled = isFormDisabled(form) || !hasEnoughFunds;
 
-  const ordinalId = `${order.ordinalId.txId.slice(2)}i${order.ordinalId.index}`
+  const ordinalId = ordinalIdToString(order.ordinalId);
 
-  return (  
+  return (
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
         <TokenInput
@@ -100,7 +100,9 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
         </Card>
         <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-          {hasEnoughFunds ? `${!isAskingCurrencyTransferApproved ? 'Approve & ' : ""} Fill Order` : 'Insufficient Balance'}
+          {hasEnoughFunds
+            ? `${!isAskingCurrencyTransferApproved ? 'Approve & ' : ''} Fill Order`
+            : 'Insufficient Balance'}
         </AuthCTA>
       </Flex>
     </form>

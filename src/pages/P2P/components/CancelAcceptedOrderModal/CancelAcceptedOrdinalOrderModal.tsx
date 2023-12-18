@@ -6,6 +6,7 @@ import { ContractType } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
 import { AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Inscription } from '../../../../components';
+import { ordinalIdToString } from '../../../../utils/format';
 
 type CancelOrdinalAcceptedOrderModalProps = {
   order: AcceptedOrdinalOrder | undefined;
@@ -45,9 +46,9 @@ const CancelOrdinalAcceptedOrderModal = ({
       <ModalHeader>Cancel Order</ModalHeader>
       <ModalBody gap='spacing4'>
         <P>
-          Cancelling market order #{order.acceptId.toString()} of inscription {order.ordinalId}
+          Cancelling market order #{order.acceptId.toString()} of inscription {ordinalIdToString(order.ordinalId)}
         </P>
-        <Inscription id={order.ordinalId} height={200} />
+        <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
       </ModalBody>
       <ModalFooter direction='row'>
         <CTA size='large' fullWidth onPress={handleCancelOrder}>
