@@ -28,19 +28,21 @@ const FillOrdinalOrderModal = ({
   const publicClient = usePublicClient();
 
   const { write: writeOrdMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
-// 
+
   const handleFillOrder = useCallback(
     async (data: FillOrdinalSellOrderFormData) => {
       setLoading(true);
-
+      console.log('a')
       try {
-
+        console.log(data)
         const btcAddress = {scriptPubKey: getScriptPubKeyFromAddress(data.btcAddress)};
+        console.log('b')
         const orderId = order.id;
-        
+
         const txHash = await writeOrdMarketplace.acceptOrdinalSellOrder([orderId, btcAddress])
         await publicClient.waitForTransactionReceipt({hash: txHash})
       } catch (e) {
+        console.log(e);
         return setLoading(false);
       }
 

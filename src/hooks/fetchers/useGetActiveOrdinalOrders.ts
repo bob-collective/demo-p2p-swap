@@ -11,9 +11,7 @@ import { REFETCH_INTERVAL } from '../../constants/query';
 
 const parseOrdinalOrder = (
   rawOrder: {
-    ordinalID: {
-      ordinalID: `0x${string}`;
-    };
+    ordinalID: { txId: `0x${string}`; index: number };
     sellToken: `0x${string}`;
     sellAmount: bigint;
     utxo: { txHash: `0x${string}`; txOutputIndex: number; txOutputValue: bigint };
@@ -43,7 +41,7 @@ const parseOrdinalOrder = (
     askingCurrency: askingCurrency,
     totalAskingAmount: rawOrder.sellAmount,
     deadline: acceptedOrder?.acceptTime ? calculateOrderDeadline(acceptedOrder.acceptTime) : undefined,
-    ordinalId: rawOrder.ordinalID.ordinalID,
+    ordinalId: rawOrder.ordinalID,
     utxo: rawOrder.utxo,
     isOwnerOfOrder
   };
@@ -61,7 +59,9 @@ const useGetActiveOrdinalOrders = () => {
         readOrdinalMarketplace.getOpenOrdinalSellOrders(),
         readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders()
       ]);
-      return rawOrders.map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances));
+      return rawOrders
+        .filter((order) => !order.isOrderAccepted)
+        .map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances));
       // Filter out empty orders that are not in pending state.
       //   .filter((order) =>  order.deadline)
     },

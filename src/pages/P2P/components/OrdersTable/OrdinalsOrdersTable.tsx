@@ -100,7 +100,7 @@ const OrdinalOrdersTable = ({ orders, refetchActiveOrdinalOrders, ...props }: Or
                   ticker={order.askingCurrency.ticker}
                 />
               ),
-              inscriptionId: <StyledSpan size='s'>{order.ordinalId}</StyledSpan>,
+              inscriptionId: <StyledSpan size='s'>{order.ordinalId.txId}</StyledSpan>,
               action: (
                 <Flex justifyContent='flex-end' gap='spacing4' alignItems='center'>
                   {order.isOwnerOfOrder ? (

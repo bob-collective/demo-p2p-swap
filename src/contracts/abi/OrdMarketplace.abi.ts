@@ -79,9 +79,14 @@ export const OrdMarketplaceAbi = [
       {
         components: [
           {
-            internalType: 'bytes',
-            name: 'ordinalID',
-            type: 'bytes'
+            internalType: 'bytes32',
+            name: 'txId',
+            type: 'bytes32'
+          },
+          {
+            internalType: 'uint32',
+            name: 'index',
+            type: 'uint32'
           }
         ],
         indexed: false,
@@ -315,9 +320,14 @@ export const OrdMarketplaceAbi = [
           {
             components: [
               {
-                internalType: 'bytes',
-                name: 'ordinalID',
-                type: 'bytes'
+                internalType: 'bytes32',
+                name: 'txId',
+                type: 'bytes32'
+              },
+              {
+                internalType: 'uint32',
+                name: 'index',
+                type: 'uint32'
               }
             ],
             internalType: 'struct OrdMarketplace.OrdinalId',
@@ -360,6 +370,11 @@ export const OrdMarketplaceAbi = [
             internalType: 'address',
             name: 'requester',
             type: 'address'
+          },
+          {
+            internalType: 'bool',
+            name: 'isOrderAccepted',
+            type: 'bool'
           }
         ],
         internalType: 'struct OrdMarketplace.OrdinalSellOrder[]',
@@ -388,9 +403,14 @@ export const OrdMarketplaceAbi = [
       {
         components: [
           {
-            internalType: 'bytes',
-            name: 'ordinalID',
-            type: 'bytes'
+            internalType: 'bytes32',
+            name: 'txId',
+            type: 'bytes32'
+          },
+          {
+            internalType: 'uint32',
+            name: 'index',
+            type: 'uint32'
           }
         ],
         internalType: 'struct OrdMarketplace.OrdinalId',
@@ -433,6 +453,11 @@ export const OrdMarketplaceAbi = [
         internalType: 'address',
         name: 'requester',
         type: 'address'
+      },
+      {
+        internalType: 'bool',
+        name: 'isOrderAccepted',
+        type: 'bool'
       }
     ],
     stateMutability: 'view',
@@ -443,9 +468,14 @@ export const OrdMarketplaceAbi = [
       {
         components: [
           {
-            internalType: 'bytes',
-            name: 'ordinalID',
-            type: 'bytes'
+            internalType: 'bytes32',
+            name: 'txId',
+            type: 'bytes32'
+          },
+          {
+            internalType: 'uint32',
+            name: 'index',
+            type: 'uint32'
           }
         ],
         internalType: 'struct OrdMarketplace.OrdinalId',

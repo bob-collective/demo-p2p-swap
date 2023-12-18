@@ -34,7 +34,6 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
   };
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
-  console.log(inputBalance.toBig().toString(), order.totalAskingAmount)
 
   const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
@@ -65,13 +64,12 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
   const hasEnoughFunds = inputBalance
     .toBig()
     .gte(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
+
   const isSubmitDisabled = isFormDisabled(form) || !hasEnoughFunds;
 
-  // NOTE: This mirrors the smart contract design of expecting first output of the utxo to be 
-  // the inscription, when smart contract is improved to store output index, this will
-  // need to be changed.  
-  const ordinalId = `${order.ordinalId.slice(2).slice(0, 64)}i0`
-  return (
+  const ordinalId = `${order.ordinalId.txId.slice(2)}i${order.ordinalId.index}`
+
+  return (  
     <form onSubmit={form.handleSubmit}>
       <Flex direction='column' gap='spacing4'>
         <TokenInput
@@ -102,7 +100,7 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
         </Card>
         <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-          {hasEnoughFunds ? `${!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order` : 'Insufficient Balance'}
+          {hasEnoughFunds ? `${!isAskingCurrencyTransferApproved ? 'Approve & ' : ""} Fill Order` : 'Insufficient Balance'}
         </AuthCTA>
       </Flex>
     </form>
