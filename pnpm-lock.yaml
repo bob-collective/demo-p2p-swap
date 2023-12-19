@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@gobob/bob-sdk':
-    specifier: ^1.0.3
-    version: 1.0.3
+    specifier: ^1.1.1
+    version: 1.1.1
   '@interlay/hooks':
     specifier: ^0.0.8
     version: 0.0.8(react-dom@18.2.0)(react@18.2.0)
@@ -1787,8 +1787,8 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@gobob/bob-sdk@1.0.3:
-    resolution: {integrity: sha512-xk7uskzhpMVJyY03aSooXUD74wv5CSHIYzPPkmZitBdQ+q4s6GKC8N6eCMPF4nnAlvQ08XPn1yaMafoZEYje+A==}
+  /@gobob/bob-sdk@1.1.1:
+    resolution: {integrity: sha512-Dxgh7vl1UGR3ciOPL8ud9+yCDZW7mN8QECtLwR+38wQAKJHjdbr6MVS4fkjojm2SUbwXmSjslZibXvP+p0ffZQ==}
     dependencies:
       bitcoinjs-lib: 6.1.5
     dev: false
