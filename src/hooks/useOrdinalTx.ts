@@ -1,19 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HexString } from '../types';
-import {
-  DefaultElectrsClient,
-  getBitcoinTxProof,
-  // getBitcoinTxInfo,
-  BitcoinTxInfo,
-  ElectrsClient,
-  encodeRawInput,
-  encodeRawOutput
-  // encodeRawWitness
-} from '@gobob/bob-sdk';
+import { DefaultElectrsClient, getBitcoinTxProof, getBitcoinTxInfo } from '@gobob/bob-sdk';
 import { BITCOIN_NETWORK, fetchBtcNetwork } from '../utils/bitcoin';
 import { addHexPrefix } from '../utils/encoding';
 import { Utxo } from '../types/orders';
-import { Transaction } from 'bitcoinjs-lib';
 
 type TxStatus = 'NOT_FOUND' | 'IN_MEMPOOL' | 'IN_BLOCK';
 
@@ -38,24 +28,6 @@ interface ProofData {
   proof: ElectrsTxProof;
 }
 
-export async function getBitcoinTxInfo(electrsClient: ElectrsClient, txId: string): Promise<BitcoinTxInfo> {
-  const txHex = await electrsClient.getTransactionHex(txId);
-  const tx = Transaction.fromHex(txHex);
-  console.log(txId, txHex, tx, tx.getId());
-  const versionBuffer = Buffer.allocUnsafe(4);
-  versionBuffer.writeInt32LE(tx.version);
-
-  const locktimeBuffer = Buffer.allocUnsafe(4);
-  locktimeBuffer.writeInt32LE(tx.locktime);
-
-  return {
-    version: versionBuffer.toString('hex'),
-    inputVector: encodeRawInput(tx).toString('hex'),
-    outputVector: encodeRawOutput(tx).toString('hex'),
-    locktime: locktimeBuffer.toString('hex')
-  };
-}
-
 const fetchProofData = async (txId: string): Promise<ProofData> => {
   const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
   // TODO: fetch from chain when available
@@ -63,7 +35,6 @@ const fetchProofData = async (txId: string): Promise<ProofData> => {
   const info = await getBitcoinTxInfo(electrsClient, txId);
   const proof = await getBitcoinTxProof(electrsClient, txId, hardcodedProofDifficultyFactor);
   // TODO: Change types in SDK to return hex-prefixed data
-  console.log(txId, info);
   return {
     info: {
       version: addHexPrefix(info.version),
@@ -104,10 +75,8 @@ const useOrdinalTx = (receivingAddress?: string, utxo?: Utxo): UseBtcTxResult =>
       setStatus('NOT_FOUND');
 
       const txHistory = await fetchBtcNetwork(`/address/${receivingAddress}/txs`);
-      // MEMO: For the POC we expect that any tx is valid. Receiving address should be empty
-      // without any previous txs to make this work.
-      // Therefore if TX is found, then we consider it payment tx.
 
+      // NOTE: Looks for the utxo in which the ordinal resides.
       const tx = txHistory.find(({ vin }: { vin: { txid: HexString; vout: number }[] }) =>
         vin.find(
           ({ txid, vout }: { txid: string; vout: number }) =>
@@ -115,7 +84,6 @@ const useOrdinalTx = (receivingAddress?: string, utxo?: Utxo): UseBtcTxResult =>
         )
       );
 
-      console.log(tx);
       if (tx) {
         setStatus('IN_MEMPOOL');
         setTxId(tx.txid);

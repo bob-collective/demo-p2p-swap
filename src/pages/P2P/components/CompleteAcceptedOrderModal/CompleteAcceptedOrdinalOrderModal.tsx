@@ -45,12 +45,15 @@ const CompleteAcceptedOrdinalOrderModal = ({
 
     setLoading(true);
     try {
-      console.log(proofData.proof);
+      // Use this bitcoin headers data to submit them to relay if the difficulty changed.
+      console.log('Submitting proof with bitcoin headers:', proofData.proof.bitcoinHeaders);
+
       const txHash = await writeOrdinalMarketplace.proofOrdinalSellOrder([
         order.acceptId,
         proofData.info,
         proofData.proof
       ]);
+
       await publicClient.waitForTransactionReceipt({ hash: txHash });
     } catch (e) {
       setLoading(false);

@@ -34,7 +34,7 @@ const contracts = {
     abi: BtcMarketplaceAbi
   },
   [ContractType.ORD_MARKETPLACE]: {
-    address: '0xeb14A43b1821f8A4Fa56F4376ED601FC7fF02f3E',
+    address: '0x655Cf2755186Cd58b7bf7F5E2eD03D7B3E7b0260',
     abi: OrdMarketplaceAbi
   },
   [ContractType.FAUCET]: {

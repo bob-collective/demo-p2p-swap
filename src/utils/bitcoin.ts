@@ -65,9 +65,7 @@ const getAddressFromScriptPubKey = (scriptPubKey: HexString): string => {
 
 const getScriptPubKeyFromAddress = (address: string): HexString => {
   const network = getBitcoinLibNetwork();
-  console.log('first');
   const hexScriptPubKey = bitcoinJsLib.address.toOutputScript(address, network);
-  console.log('last');
   return addHexPrefix(hexScriptPubKey.toString('hex'));
 };
 
