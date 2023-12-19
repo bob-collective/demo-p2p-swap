@@ -1,22 +1,17 @@
 import { Flex, Modal, ModalBody, ModalHeader, ModalProps, P, Tabs, TabsItem } from '@interlay/ui';
-import truncateEthAddress from 'truncate-eth-address';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useAccount as useSatsAccount, useDisconnect as useSatsDisconnect } from '../../lib/sats-wagmi';
+import { useConnectWalletModal } from '../../providers/ConnectWalletContext';
 import { BtcWalletList } from './BtcWalletList';
 import { ConnectWalleSection } from './ConnectWalletSection';
 import { EvmWalletList } from './EvmWalletList';
-
-function shortenBitcoinAddress(address: string) {
-  // Extract the first and last 6 characters of the address
-  const shortenedAddress = address.slice(0, 6) + '...' + address.slice(-6);
-  return shortenedAddress;
-}
 
 type ConnectWalletModalProps = Omit<ModalProps, 'children'>;
 
 const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalProps) => {
   const { connector, address } = useAccount();
   const { disconnect } = useDisconnect();
+  const { walletTab, setWalletTab } = useConnectWalletModal();
 
   const { address: btcWalletAddress, connector: btcWalletConnector } = useSatsAccount();
   const { disconnect: btcWalletDisconnect } = useSatsDisconnect();
@@ -65,25 +60,27 @@ const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalPro
           <Flex direction='column'>
             {connector && address && (
               <ConnectWalleSection
-                address={truncateEthAddress(address)}
+                type='evm'
+                address={address}
                 onDisconnect={handleDisconnect}
                 wallet={connector.name}
               />
             )}
             {btcWalletConnector && btcWalletAddress && (
               <ConnectWalleSection
-                address={shortenBitcoinAddress(btcWalletAddress)}
+                type='btc'
+                address={btcWalletAddress}
                 onDisconnect={handleBtcWalletDisconnect}
                 wallet={btcWalletConnector.name}
               />
             )}
           </Flex>
         )}
-        <Tabs size='large' fullWidth>
-          <TabsItem title='EVM Wallet'>
+        <Tabs size='large' selectedKey={walletTab} fullWidth onSelectionChange={(key) => setWalletTab(key as 'evm')}>
+          <TabsItem key='evm' title='EVM Wallet'>
             <EvmWalletList onSelectionChange={onClose} />
           </TabsItem>
-          <TabsItem title='BTC Wallet'>
+          <TabsItem key='btc' title='BTC Wallet'>
             <BtcWalletList onSelectionChange={onClose} />
           </TabsItem>
         </Tabs>

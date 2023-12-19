@@ -16,4 +16,12 @@ const StyledDisconnectCTA = styled(CTA)`
   border: 1px solid #ffffff;
 `;
 
-export { StyledConnectedWallet, StyledDisconnectCTA };
+const StyledAddressCTA = styled(CTA)`
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.spacing2};
+  cursor: pointer;
+`;
+
+export { StyledConnectedWallet, StyledAddressCTA, StyledDisconnectCTA };

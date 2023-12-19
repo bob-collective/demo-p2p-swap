@@ -1,5 +1,5 @@
 import { useForm } from '@interlay/hooks';
-import { Card, Flex, Input, Item, P, Select, Span, TokenInput } from '@interlay/ui';
+import { CTA, Card, Flex, Input, Item, P, Select, Span, TokenInput } from '@interlay/ui';
 import { mergeProps } from '@react-aria/utils';
 import { Key, RefObject, useEffect, useMemo, useState } from 'react';
 import { Inscription } from '../../../../components';
@@ -13,6 +13,7 @@ import { formatUSD, ordinalIdToString } from '../../../../utils/format';
 import { AddOrdinalOrderSchemaParams, addOrdinalOrderSchema } from '../../../../utils/schemas';
 import { truncateInscriptionId } from '../../../../utils/truncate';
 import { isFormDisabled } from '../../../../utils/validation';
+import { useConnectWalletModal } from '../../../../providers/ConnectWalletContext';
 
 type AddOrdinalOrderFormData = {
   amount: string;
@@ -36,6 +37,7 @@ const AddOrdinalOrderForm = ({
   const [ticker, setTicker] = useState<CurrencyTicker>(Erc20CurrencyTicker.USDC);
   const { data: inscriptionsIds } = useGetInscriptions();
   const { address: btcAddress } = useAccount();
+  const { setOpen } = useConnectWalletModal();
 
   const {
     data: { ordinal: ordinalOrders }
@@ -122,7 +124,14 @@ const AddOrdinalOrderForm = ({
             <P size='s'>Waiting for inscription ID...</P>
           </Card>
         )}
-        {!btcAddress && <P size='xs'>NOTE: connect your btc wallet for a better experience</P>}
+        {!btcAddress && (
+          <Flex gap='spacing2'>
+            <P size='xs'>NOTE: connect your btc wallet for a better experience</P>
+            <CTA onPress={() => setOpen(true, { walletTab: 'btc' })} size='x-small'>
+              Connect
+            </CTA>
+          </Flex>
+        )}
         <TokenInput
           type='selectable'
           label='You will Receive'

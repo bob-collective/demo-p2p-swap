@@ -2,12 +2,16 @@ import { FC, ReactNode, createContext, useContext, useState } from 'react';
 
 type ConnectWalletData = {
   isOpen: boolean;
-  setOpen: (isOpen: boolean) => void;
+  walletTab: 'evm' | 'btc';
+  setOpen: (isOpen: boolean, options?: { walletTab?: 'evm' | 'btc' }) => void;
+  setWalletTab: (tab: 'evm' | 'btc') => void;
 };
 
 const StatsWagmiContext = createContext<ConnectWalletData>({
   isOpen: false,
-  setOpen: () => {}
+  walletTab: 'evm',
+  setOpen: () => {},
+  setWalletTab: () => {}
 });
 
 const useConnectWalletModal = (): ConnectWalletData => {
@@ -26,8 +30,21 @@ type ConnectWalletContextProps = {
 
 const ConnectWalletProvider: FC<ConnectWalletContextProps> = ({ children }) => {
   const [isOpen, setOpen] = useState(false);
+  const [walletTab, setWalletTab] = useState<'evm' | 'btc'>('evm');
 
-  return <StatsWagmiContext.Provider value={{ isOpen, setOpen }}>{children}</StatsWagmiContext.Provider>;
+  const handleOpen = (isOpen: boolean, options?: { walletTab?: 'evm' | 'btc' }) => {
+    setOpen(isOpen);
+
+    if (options?.walletTab) {
+      setWalletTab(options?.walletTab);
+    }
+  };
+
+  return (
+    <StatsWagmiContext.Provider value={{ isOpen, walletTab, setOpen: handleOpen, setWalletTab }}>
+      {children}
+    </StatsWagmiContext.Provider>
+  );
 };
 
 export { ConnectWalletProvider, useConnectWalletModal };
