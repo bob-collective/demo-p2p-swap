@@ -99,7 +99,7 @@ const CompleteAcceptedOrderModal = ({
               alignItems='center'
               background='tertiary'
             >
-              <P size='s'>{order.bitcoinAddress}</P>
+              <P size='xs'>{order.bitcoinAddress}</P>
             </Card>
             <QrCode
               includeMargin

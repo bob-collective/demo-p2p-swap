@@ -1,5 +1,6 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useAccount } from 'wagmi';
+import { useAccount as useBtcAccount } from '../../lib/sats-wagmi';
 import { useGetAcceptedBtcOrders } from './useGetAcceptedBtcOrders';
 import { useGetActiveBtcBuyOrders } from './useGetActiveBtcBuyOrders';
 import { useGetActiveBtcSellOrders } from './useGetActiveBtcSellOrders';
@@ -40,6 +41,14 @@ const useGetOrders = () => {
     refetchAcceptedOrdinalOrders,
     refetchActiveOrdinalOrders
   ]);
+
+  const { address } = useBtcAccount();
+
+  useEffect(() => {
+    if (address) {
+      refetch();
+    }
+  }, [address, refetch]);
 
   const data = useMemo(() => {
     const orders = [

@@ -12,6 +12,8 @@ import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD, ordinalIdToString } from '../../../../utils/format';
 import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
+import { Inscription } from '../../../../components';
+import { truncateInscriptionId } from '../../../../utils/truncate';
 
 type FillOrdinalSellOrderFormData = {
   amount: string;
@@ -65,9 +67,9 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
     .toBig()
     .gte(new Amount(order.askingCurrency, order.totalAskingAmount.toString()).toBig());
 
-  const isSubmitDisabled = isFormDisabled(form) || !hasEnoughFunds;
+  const isSubmitDisabled = (!btcAddress && isFormDisabled(form)) || !hasEnoughFunds;
 
-  const ordinalId = ordinalIdToString(order.ordinalId);
+  const inscriptionId = ordinalIdToString(order.ordinalId);
 
   return (
     <form onSubmit={form.handleSubmit}>
@@ -81,14 +83,10 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
         />
         <Flex direction='column' gap='spacing2'>
           <P size='xs'>You will Receive</P>
-          <iframe
-            src={`https://testnet.ordinals.com/preview/${ordinalId}`}
-            sandbox='allow-scripts'
-            scrolling='no'
-            loading='lazy'
-            allow=''
-            height={200}
-          />
+          <Inscription id={inscriptionId} height={200} />
+          <P align='center' size='xs'>
+            {truncateInscriptionId(inscriptionId)}
+          </P>
         </Flex>
         <Input
           label='Bitcoin Address'

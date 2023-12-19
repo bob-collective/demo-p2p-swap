@@ -30,11 +30,11 @@ const contracts = {
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x0cfd830a59e94b6957609fFd85CcDD742C521F34',
+    address: '0x3336ff156B91B35E520741a660B9717C50c84c86',
     abi: BtcMarketplaceAbi
   },
   [ContractType.ORD_MARKETPLACE]: {
-    address: '0x655Cf2755186Cd58b7bf7F5E2eD03D7B3E7b0260',
+    address: '0x24b044481c5cF6f43178b5C673f3D6121054135e',
     abi: OrdMarketplaceAbi
   },
   [ContractType.FAUCET]: {

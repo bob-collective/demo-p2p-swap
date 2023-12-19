@@ -9,6 +9,7 @@ import { AcceptedBtcOrder } from '../../types/orders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
 import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
+import { useGetInscriptions } from '../../hooks/fetchers/useGetInscriptions';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -35,6 +36,7 @@ const P2P = (): JSX.Element => {
 
   // just to prefetch
   useBalances();
+  useGetInscriptions();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 

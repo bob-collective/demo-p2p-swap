@@ -2,23 +2,25 @@ import { Modal, ModalBody, ModalHeader, ModalProps, P, TabsItem } from '@interla
 import { useCallback, useRef, useState } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ContractType, Erc20Currency, currencies } from '../../../../constants';
+import { InscriptionId } from '../../../../hooks/ordinalsApi';
 import { useContract } from '../../../../hooks/useContract';
+import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 import { Amount } from '../../../../utils/amount';
+import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 import { isBitcoinCurrency, isErc20Currency } from '../../../../utils/currencies';
+import { addHexPrefix } from '../../../../utils/encoding';
 import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
-import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
 import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrderForm';
-import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
-import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
-import { InscriptionId } from '../../../../hooks/ordinalsApi';
-import { addHexPrefix } from '../../../../utils/encoding';
+import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 
 const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps): JSX.Element => {
+  const selectInscriptionModalRef = useRef<HTMLDivElement>(null);
   const offerModalRef = useRef<HTMLDivElement>(null);
   const receiveModalRef = useRef<HTMLDivElement>(null);
+  const selectTokenModalRef = useRef<HTMLDivElement>(null);
 
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
@@ -143,7 +145,10 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       onClose={onClose}
       align='top'
       shouldCloseOnInteractOutside={(el) =>
-        !offerModalRef.current?.contains(el) && !receiveModalRef.current?.contains(el)
+        !offerModalRef.current?.contains(el) &&
+        !receiveModalRef.current?.contains(el) &&
+        !selectTokenModalRef.current?.contains(el) &&
+        !selectInscriptionModalRef.current?.contains(el)
       }
     >
       <ModalHeader>New Order</ModalHeader>
@@ -163,9 +168,10 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
           <TabsItem key='withdraw' title='Ordinals'>
             <StyledWrapper>
               <AddOrdinalOrderForm
-                overlappingModalRef={receiveModalRef}
                 isLoading={isLoading}
                 onSubmit={handleAddOrdinalOrder}
+                selectTokenModalRef={selectTokenModalRef}
+                selectInscriptionModalRef={selectInscriptionModalRef}
               />
             </StyledWrapper>
           </TabsItem>
