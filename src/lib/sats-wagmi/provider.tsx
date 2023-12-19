@@ -40,13 +40,13 @@ const SatsWagmiConfig: FC<SatsWagmiConfigProps> = ({ children }) => {
 
       readyConnectors.push(xverse);
 
-      const leather = new LeatherConnector();
-
-      readyConnectors.push(leather);
-
       const unisat = new UnisatConnector();
 
       readyConnectors.push(unisat);
+
+      const leather = new LeatherConnector();
+
+      readyConnectors.push(leather);
 
       setConnectors(readyConnectors);
     };

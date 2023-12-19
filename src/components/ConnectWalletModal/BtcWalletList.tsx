@@ -1,4 +1,4 @@
-import { List, ListItem, ListProps } from '@interlay/ui';
+import { Card, Flex, List, ListItem, ListProps, Span } from '@interlay/ui';
 import { useCallback } from 'react';
 import { useAccount, useConnect, useDisconnect } from '../../lib/sats-wagmi';
 import { WalletIcon } from '../WalletIcon';
@@ -40,14 +40,28 @@ const BtcWalletList = ({ onSelectionChange, ...props }: BtcWalletListProps) => {
       selectionBehavior='replace'
       variant='secondary'
       selectedKeys={connector ? [connector.id] : []}
+      disabledKeys={['leather']}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onSelectionChange={handleSelect as any}
       marginTop='spacing4'
     >
       {connectors.map((connector) => (
-        <ListItem key={connector.id} textValue={connector.id} alignItems='center' gap='spacing2'>
-          <WalletIcon name={connector.name} size='lg' />
-          {connector.name}
+        <ListItem
+          key={connector.id}
+          textValue={connector.id}
+          alignItems='center'
+          gap='spacing2'
+          justifyContent='space-between'
+        >
+          <Flex gap='spacing2' alignItems='center'>
+            <WalletIcon name={connector.name} size='lg' />
+            {connector.name}
+          </Flex>
+          {connector.id === 'leather' && (
+            <Card background='secondary' padding='spacing2' rounded='full'>
+              <Span size='s'>Coming Soon</Span>
+            </Card>
+          )}
         </ListItem>
       ))}
     </List>
