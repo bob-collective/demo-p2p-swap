@@ -51,7 +51,6 @@ const CancelOrdinalAcceptedOrderModal = ({
         <P size='s' align='center'>
           {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
         </P>
-        <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
       </ModalBody>
       <ModalFooter direction='row'>
         <CTA size='large' fullWidth onPress={handleCancelOrder}>
