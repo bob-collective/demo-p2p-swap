@@ -35,6 +35,10 @@ const ConnectWalletProvider: FC<ConnectWalletContextProps> = ({ children }) => {
   const handleOpen = (isOpen: boolean, options?: { walletTab?: 'evm' | 'btc' }) => {
     setOpen(isOpen);
 
+    if (!isOpen) {
+      setWalletTab('evm');
+    }
+
     if (options?.walletTab) {
       setWalletTab(options?.walletTab);
     }
