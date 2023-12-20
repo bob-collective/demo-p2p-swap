@@ -1,5 +1,5 @@
 import { DocumentDuplicate } from '@interlay/icons';
-import { Flex, P, Span } from '@interlay/ui';
+import { Flex, P, Span, Strong } from '@interlay/ui';
 import { useCopyToClipboard } from 'react-use';
 import truncateEthAddress from 'truncate-eth-address';
 import { WalletIcon } from '../WalletIcon';
@@ -26,7 +26,9 @@ const ConnectWalleSection = ({ type, onDisconnect, address, wallet }: ConnectWal
       <Flex alignItems='center' gap='spacing2'>
         <WalletIcon name={wallet} size='lg' />
         <Flex direction='column' gap='spacing2' alignItems='flex-start'>
-          <P size='s'>Connected with {wallet}</P>
+          <P size='s'>
+            Connected with <Strong>{wallet}</Strong>
+          </P>
           <StyledAddressCTA variant='text' size='x-small' onPress={() => copy(address)}>
             <Span weight='bold' size='s'>
               {type === 'evm' ? truncateEthAddress(address) : shortenBitcoinAddress(address)}
