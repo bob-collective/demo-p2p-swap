@@ -116,13 +116,13 @@ const CompleteAcceptedOrderModal = ({
         </Flex>
         <Card variant='bordered' background='secondary' alignItems='center' justifyContent='center'>
           {status === 'NOT_FOUND' ? (
-            <Flex gap='spacing2'>
-              <Spinner />
+            <Flex gap='spacing3' alignItems='center'>
+              <Spinner color='secondary' thickness={3} />
               <P size='s'>Waiting for bitcoin transaction to be made...</P>
             </Flex>
           ) : (
             <Flex alignItems='center' gap='spacing2'>
-              {isSubmissionDisabled && <Spinner />}
+              {isSubmissionDisabled && <Spinner color='secondary' thickness={3} />}
               <P size='s'>
                 Bitcoin transaction found (
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>

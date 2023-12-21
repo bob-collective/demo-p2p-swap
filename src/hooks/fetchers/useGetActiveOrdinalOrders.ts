@@ -60,7 +60,9 @@ const useGetActiveOrdinalOrders = () => {
         readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders()
       ]);
 
-      return rawOrders.map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances));
+      return rawOrders
+        .map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances))
+        .filter(({ deadline }) => !deadline);
       // Filter out empty orders that are not in pending state.
       // .filter((order) => !order.deadline)
     },

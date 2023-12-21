@@ -91,6 +91,8 @@ const AddOrdinalOrderForm = ({
             type='modal'
             modalProps={{ title: 'Inscriptions', ref: selectInscriptionModalRef }}
             size='large'
+            label='Inscription ID'
+            placeholder='Select an inscription'
             renderValue={(el) => <Span>{truncateInscriptionId(el.value?.id || '')}</Span>}
             items={availableInscriptionsIds.map((id) => ({ id }))}
             {...form.getSelectFieldProps('inscriptionId')}
@@ -126,7 +128,7 @@ const AddOrdinalOrderForm = ({
         )}
         {!btcAddress && (
           <Flex gap='spacing2'>
-            <P size='xs'>NOTE: connect your btc wallet for a better experience</P>
+            <P size='xs'>TIP: Connect your BTC wallet for a better experience</P>
             <CTA onPress={() => setOpen(true, { walletTab: 'btc' })} size='x-small'>
               Connect
             </CTA>

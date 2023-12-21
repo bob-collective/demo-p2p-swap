@@ -102,11 +102,7 @@ const P2P = (): JSX.Element => {
               </Flex>
             )}
             {!!orders.ordinal.unowned.length && (
-              <OrdinalOrdersTable
-                aria-labelledby={titleId}
-                orders={orders.ordinal.unowned}
-                refetchOrders={refetchActiveOrdinalOrders}
-              />
+              <OrdinalOrdersTable aria-labelledby={titleId} orders={orders.ordinal.unowned} refetchOrders={refetch} />
             )}
             {/* Only unowned BTC orders can be bought */}
             {!!orders?.acceptedBtc.accepted?.length && (

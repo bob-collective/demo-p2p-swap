@@ -57,8 +57,6 @@ const useGetOrders = () => {
       ...(btcSellOrders ? btcSellOrders : [])
     ];
 
-    const activeOrdOrders = (activeOrdinalOrders || []).filter(({ deadline }) => !deadline);
-
     return {
       owned: orders.filter((order) => order.isOwnerOfOrder),
       unowned: orders.filter((order) => !order.isOwnerOfOrder),
@@ -67,8 +65,8 @@ const useGetOrders = () => {
         accepted: acceptedBtcOrders?.filter((order) => order.isAcceptorOfOrder)
       },
       ordinal: {
-        owned: activeOrdOrders.filter((order) => order.isOwnerOfOrder),
-        unowned: activeOrdOrders.filter((order) => !order.isOwnerOfOrder),
+        owned: (activeOrdinalOrders || []).filter((order) => order.isOwnerOfOrder),
+        unowned: (activeOrdinalOrders || []).filter((order) => !order.isOwnerOfOrder),
         accepted: {
           created: (acceptedOrdinalOrders || [])?.filter((order) => order.isCreatorOfOrder),
           accepted: (acceptedOrdinalOrders || [])?.filter((order) => order.isAcceptorOfOrder)

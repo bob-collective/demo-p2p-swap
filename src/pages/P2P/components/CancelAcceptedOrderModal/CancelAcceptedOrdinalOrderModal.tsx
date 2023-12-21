@@ -53,7 +53,7 @@ const CancelOrdinalAcceptedOrderModal = ({
         </P>
       </ModalBody>
       <ModalFooter direction='row'>
-        <CTA size='large' fullWidth onPress={handleCancelOrder}>
+        <CTA size='large' fullWidth onPress={onClose}>
           Back
         </CTA>
         <AuthCTA loading={isLoading} variant='secondary' size='large' fullWidth onPress={handleCancelOrder}>

@@ -1,6 +1,6 @@
 import { CTALink, Flex } from '@interlay/ui';
 import { useAccount, useConnect } from 'wagmi';
-import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
+import { FAUCET_URL, BRIDGE_URL } from '../../constants/links';
 import { useAccount as useSatsAccount } from '../../lib/sats-wagmi';
 import { useConnectWalletModal } from '../../providers/ConnectWalletContext';
 import { Badge } from '../Badge';
@@ -38,8 +38,8 @@ const Header = () => {
               <CTALink external icon href={FAUCET_URL} size='small'>
                 ETH Faucet
               </CTALink>
-              <CTALink external icon href={SUPERBRIDGE_URL} size='small'>
-                Superbridge
+              <CTALink external icon href={BRIDGE_URL} size='small'>
+                Bridge
               </CTALink>
             </>
           )}
