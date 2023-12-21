@@ -18,13 +18,37 @@ const useGetOrders = () => {
     }
   });
 
-  const { data: erc20Orders, refetch: refetchActiveErc20Orders } = useGetActiveErc20Orders();
-  const { data: btcBuyOrders, refetch: refetchBtcBuyOrders } = useGetActiveBtcBuyOrders();
-  const { data: btcSellOrders, refetch: refetchBtcSellOrders } = useGetActiveBtcSellOrders();
-  const { data: acceptedBtcOrders, refetch: refetchAcceptedBtcOrders } = useGetAcceptedBtcOrders();
+  const {
+    data: erc20Orders,
+    refetch: refetchActiveErc20Orders,
+    isLoading: isErc20OrdersLoading
+  } = useGetActiveErc20Orders();
+  const {
+    data: btcBuyOrders,
+    refetch: refetchBtcBuyOrders,
+    isLoading: isBtcBuyOrdersLoading
+  } = useGetActiveBtcBuyOrders();
+  const {
+    data: btcSellOrders,
+    refetch: refetchBtcSellOrders,
+    isLoading: isBtcSellOrdersLoading
+  } = useGetActiveBtcSellOrders();
+  const {
+    data: acceptedBtcOrders,
+    refetch: refetchAcceptedBtcOrders,
+    isLoading: isAcceptedBtcOrdersLoading
+  } = useGetAcceptedBtcOrders();
 
-  const { data: acceptedOrdinalOrders, refetch: refetchAcceptedOrdinalOrders } = useGetAcceptedOrdinalOrders();
-  const { data: activeOrdinalOrders, refetch: refetchActiveOrdinalOrders } = useGetActiveOrdinalOrders();
+  const {
+    data: acceptedOrdinalOrders,
+    refetch: refetchAcceptedOrdinalOrders,
+    isLoading: isAcceptedOrdinalOrdersLoading
+  } = useGetAcceptedOrdinalOrders();
+  const {
+    data: activeOrdinalOrders,
+    refetch: refetchActiveOrdinalOrders,
+    isLoading: isOrdinalOrdersLoading
+  } = useGetActiveOrdinalOrders();
 
   const refetch = useCallback(() => {
     refetchActiveErc20Orders();
@@ -75,8 +99,15 @@ const useGetOrders = () => {
     };
   }, [erc20Orders, btcBuyOrders, btcSellOrders, acceptedBtcOrders, activeOrdinalOrders, acceptedOrdinalOrders]);
 
+  const isUnownedOrdersLoading =
+    isErc20OrdersLoading || isBtcBuyOrdersLoading || isBtcSellOrdersLoading || isOrdinalOrdersLoading;
+
+  const isLoading = isAcceptedBtcOrdersLoading || isAcceptedOrdinalOrdersLoading || isUnownedOrdersLoading;
+
   return {
     data,
+    isLoading,
+    isUnownedOrdersLoading,
     refetch,
     refetchActiveErc20Orders,
     refetchBtcBuyOrders,

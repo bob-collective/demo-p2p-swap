@@ -1,5 +1,5 @@
 import { theme } from '@interlay/theme';
-import { Flex, Span, Table, TableProps } from '@interlay/ui';
+import { Card, Flex, P, Span, Table, TableProps } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { OrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
@@ -122,6 +122,15 @@ const OrdinalOrdersTable = ({ orders, refetchOrders, ...props }: OrdinalOrdersTa
         : [],
     [orders]
   );
+
+  if (!orders || !orders.length) {
+    return (
+      <Card gap='spacing4' alignItems='center'>
+        <Table {...props} rows={[]} columns={columns} aria-labelledby={props.id} />
+        <P>There are no open orders</P>
+      </Card>
+    );
+  }
 
   return (
     <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
