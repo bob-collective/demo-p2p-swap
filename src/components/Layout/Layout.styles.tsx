@@ -3,10 +3,10 @@ import { CTA, Flex } from '@interlay/ui';
 import styled from 'styled-components';
 
 const StyledHeader = styled(Flex)`
-  padding: 0 ${theme.spacing.spacing4};
+  padding: ${theme.spacing.spacing2} ${theme.spacing.spacing4};
 
   @media ${theme.breakpoints.up('md')} {
-    padding: 0 ${theme.spacing.spacing12};
+    padding: ${theme.spacing.spacing2} ${theme.spacing.spacing12};
   }
 `;
 

@@ -2,14 +2,14 @@ import { theme } from '@interlay/theme';
 import { Alert, CTA, Flex, H1, H2, Spinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
+import { BRIDGE_URL, FAUCET_URL } from '../../constants/links';
+import { useGetInscriptions } from '../../hooks/fetchers/useGetInscriptions';
 import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
 import { useBalances } from '../../hooks/useBalances';
 import { AcceptedBtcOrder } from '../../types/orders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
 import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
-import { useGetInscriptions } from '../../hooks/fetchers/useGetInscriptions';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -52,9 +52,9 @@ const P2P = (): JSX.Element => {
           <a href={FAUCET_URL} rel='external' target='_blank'>
             testnet faucet
           </a>{' '}
-          and transfer it to the BOB network using{' '}
-          <a href={SUPERBRIDGE_URL} rel='external' target='_blank'>
-            Superbridge
+          and transfer it to the BOB network using our{' '}
+          <a href={BRIDGE_URL} rel='external' target='_blank'>
+            bridge
           </a>
           .
         </Alert>
