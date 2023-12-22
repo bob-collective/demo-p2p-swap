@@ -64,7 +64,7 @@ const useGetActiveBtcSellOrders = () => {
         rawOrders
           .map((order, index) => parseBtcSellOrder(order, address, ordersIds[index], rawOrderAcceptances))
           // Filter out empty orders that are not in pending state.
-          .filter((order) => order.availableLiquidity > 0 || order.deadline)
+          .filter((order) => order.availableLiquidity > 0 && !order.deadline)
       );
     },
     refetchInterval: REFETCH_INTERVAL.MINUTE

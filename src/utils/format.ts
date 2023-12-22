@@ -15,4 +15,7 @@ const formatUSD = (amount: number, options?: { compact?: boolean }): string => {
   return format(amount);
 };
 
-export { formatUSD };
+const ordinalIdToString = (ordinalId: { txId: `0x${string}`; index: number }): string =>
+  `${ordinalId.txId.slice(2)}i${ordinalId.index}`;
+
+export { formatUSD, ordinalIdToString };

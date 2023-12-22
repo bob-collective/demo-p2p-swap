@@ -11,6 +11,7 @@ import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD } from '../../../../utils/format';
 import { FillOrderSchemaParams, fillOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
+import { useAccount } from '../../../../lib/sats-wagmi';
 
 type FillBTCSellOrderFormData = {
   inputValue: string;
@@ -26,6 +27,8 @@ type FillBtcSellOrderFormProps = {
 
 const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFormProps): JSX.Element => {
   const { balances, getBalance } = useBalances();
+
+  const { address: btcAddress } = useAccount();
 
   const handleSubmit = (values: FillBTCSellOrderFormData) => {
     wrapInErc20ApprovalTx(() => onSubmit?.(values));
@@ -53,7 +56,7 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
       inputValue: inputMaxAmount.toString(),
       // TODO: set to "" when allowing partial fullfilments
       outputValue: outputMaxAmount.toString(),
-      btcAddress: ''
+      btcAddress: btcAddress || ''
     },
     validationSchema: fillOrderSchema(schemaParams, true),
     onSubmit: handleSubmit,
@@ -106,6 +109,7 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
         <Input
           label='Bitcoin Address'
           placeholder='Enter your bitcoin address'
+          isReadOnly={!!btcAddress}
           {...form.getTokenFieldProps('btcAddress')}
         />
         <Flex direction='column' gap='spacing2'>
@@ -121,10 +125,16 @@ const FillBtcSellOrderForm = ({ isLoading, order, onSubmit }: FillBtcSellOrderFo
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
+        <AuthCTA
+          fullWidth
+          loading={isLoading || isLoadingAllowance}
+          disabled={isSubmitDisabled}
+          size='large'
+          type='submit'
+        >
+          {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
+        </AuthCTA>
       </Flex>
-      <AuthCTA loading={isLoading || isLoadingAllowance} disabled={isSubmitDisabled} size='large' type='submit'>
-        {!isAskingCurrencyTransferApproved && 'Approve & '} Fill Order
-      </AuthCTA>
     </form>
   );
 };

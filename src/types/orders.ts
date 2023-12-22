@@ -46,8 +46,43 @@ interface AcceptedBtcOrder {
   isCreatorOfOrder: boolean;
 }
 
+type Utxo = { txHash: HexString; txOutputIndex: number; txOutputValue: bigint };
+
+interface OrdinalOrder {
+  id: bigint;
+  ordinalId: { txId: HexString; index: number };
+  utxo: Utxo;
+  askingCurrency: Erc20Currency;
+  totalAskingAmount: bigint;
+  deadline: Date | undefined;
+  isOwnerOfOrder: boolean;
+}
+
+interface AcceptedOrdinalOrder {
+  orderId: bigint;
+  acceptId: bigint;
+  ordinalId: { txId: HexString; index: number };
+  deadline: Date;
+  askingCurrency: Erc20Currency;
+  totalAskingAmount: bigint;
+  buyerBitcoinAddress: string;
+  isAcceptorOfOrder: boolean;
+  isCreatorOfOrder: boolean;
+  utxo: Utxo;
+}
+
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
 
 type Order = BtcOrder | Erc20Order;
 
-export type { Order, Erc20Order, AcceptedBtcOrder, BtcBuyOrder, BtcSellOrder, BtcOrder };
+export type {
+  AcceptedBtcOrder,
+  AcceptedOrdinalOrder,
+  BtcBuyOrder,
+  BtcOrder,
+  BtcSellOrder,
+  Erc20Order,
+  Order,
+  OrdinalOrder,
+  Utxo
+};

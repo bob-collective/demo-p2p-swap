@@ -1,16 +1,27 @@
-import { Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
+import {
+  Card,
+  Flex,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalProps,
+  P,
+  Spinner,
+  Strong,
+  TextLink
+} from '@interlay/ui';
 import QrCode from 'qrcode.react';
 import { usePublicClient } from 'wagmi';
 
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AuthCTA } from '../../../../components/AuthCTA';
 import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useBtcTx } from '../../../../hooks/useBtcTx';
 import { useContract } from '../../../../hooks/useContract';
 import { AcceptedBtcOrder } from '../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
-import { StyledLoadingSpinner } from './CompleteAcceptedOrderModal.styles';
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
 type CompleteAcceptedOrderModalProps = {
   order: AcceptedBtcOrder | undefined;
@@ -88,7 +99,7 @@ const CompleteAcceptedOrderModal = ({
               alignItems='center'
               background='tertiary'
             >
-              <P size='s'>{order.bitcoinAddress}</P>
+              <P size='xs'>{order.bitcoinAddress}</P>
             </Card>
             <QrCode
               includeMargin
@@ -105,13 +116,13 @@ const CompleteAcceptedOrderModal = ({
         </Flex>
         <Card variant='bordered' background='secondary' alignItems='center' justifyContent='center'>
           {status === 'NOT_FOUND' ? (
-            <Flex gap='spacing2'>
-              <StyledLoadingSpinner variant='indeterminate' diameter={18} thickness={2} />
+            <Flex gap='spacing3' alignItems='center'>
+              <Spinner color='secondary' thickness={3} />
               <P size='s'>Waiting for bitcoin transaction to be made...</P>
             </Flex>
           ) : (
             <Flex alignItems='center' gap='spacing2'>
-              {isSubmissionDisabled && <StyledLoadingSpinner variant='indeterminate' diameter={18} thickness={2} />}
+              {isSubmissionDisabled && <Spinner color='secondary' thickness={3} />}
               <P size='s'>
                 Bitcoin transaction found (
                 <TextLink external href={`https://mempool.space/testnet/tx/${txId}`}>

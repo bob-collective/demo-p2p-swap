@@ -9,6 +9,8 @@ import '@interlay/theme/dist/bob.css';
 import { CSSReset } from '@interlay/ui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SatsWagmiConfig } from './lib/sats-wagmi';
+import { ConnectWalletProvider } from './providers/ConnectWalletContext';
 
 const queryClient = new QueryClient();
 
@@ -16,10 +18,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <WagmiConfig config={config}>
-        <InterlayUIProvider>
-          <CSSReset />
-          <App />
-        </InterlayUIProvider>
+        <SatsWagmiConfig>
+          <ConnectWalletProvider>
+            <InterlayUIProvider>
+              <CSSReset />
+              <App />
+            </InterlayUIProvider>
+          </ConnectWalletProvider>
+        </SatsWagmiConfig>
       </WagmiConfig>
     </QueryClientProvider>
   </React.StrictMode>

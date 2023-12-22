@@ -1,5 +1,4 @@
-import { theme } from '@interlay/theme';
-import { Flex, Span, Table, TableProps, TokenStack } from '@interlay/ui';
+import { Card, Flex, P, Span, Table, TableProps, TokenStack } from '@interlay/ui';
 import { ReactNode, useMemo, useState } from 'react';
 import { Order } from '../../.../../../../types/orders';
 import { toBaseAmount } from '../../../../utils/currencies';
@@ -120,8 +119,17 @@ const OrdersTable = ({
     [orders]
   );
 
+  if (!orders || !orders.length) {
+    return (
+      <Card gap='spacing4' alignItems='center'>
+        <Table {...props} rows={[]} columns={columns} aria-labelledby={props.id} />
+        <P>There are no open orders</P>
+      </Card>
+    );
+  }
+
   return (
-    <div style={{ margin: `${theme.spacing.spacing4} 0` }}>
+    <>
       <StyledCard>
         <Table {...props} columns={columns} rows={rows} />
       </StyledCard>
@@ -143,7 +151,7 @@ const OrdersTable = ({
           refetchOrders={refetchOrders}
         />
       )}
-    </div>
+    </>
   );
 };
 

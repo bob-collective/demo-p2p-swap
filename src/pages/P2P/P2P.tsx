@@ -1,12 +1,14 @@
-import { theme } from '@interlay/theme';
-import { Alert, CTA, Flex, H1, H2, LoadingSpinner, Tabs, TabsItem } from '@interlay/ui';
+import { Alert, CTA, Flex, H1, H2, Spinner, Tabs, TabsItem } from '@interlay/ui';
 import { useState } from 'react';
-import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
-import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
-import { useBalances } from '../../hooks/useBalances';
 import { useSearchParams } from 'react-router-dom';
+import { BRIDGE_URL, FAUCET_URL } from '../../constants/links';
+import { useGetInscriptions } from '../../hooks/fetchers/useGetInscriptions';
+import { useGetOrders } from '../../hooks/fetchers/useGetOrders';
+import { useBalances } from '../../hooks/useBalances';
 import { AcceptedBtcOrder } from '../../types/orders';
-import { FAUCET_URL, SUPERBRIDGE_URL } from '../../constants/links';
+import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
+import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
+import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -17,14 +19,25 @@ const P2P = (): JSX.Element => {
     isOpen: false
   });
   const titleId = 'titleId';
+  const titleId7 = 'titleId7';
   const titleId2 = 'titleId2';
   const titleId3 = 'titleId3';
   const titleId4 = 'titleId4';
+  const titleId5 = 'titleId5';
+  const titleId6 = 'titleId6';
 
-  const { data: orders, refetch, refetchAcceptedBtcOrders } = useGetOrders();
+  const {
+    data: orders,
+    isUnownedOrdersLoading,
+    refetch,
+    refetchAcceptedBtcOrders,
+    refetchAcceptedOrdinalOrders,
+    refetchActiveOrdinalOrders
+  } = useGetOrders();
 
   // just to prefetch
   useBalances();
+  useGetInscriptions();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
 
@@ -40,9 +53,9 @@ const P2P = (): JSX.Element => {
           <a href={FAUCET_URL} rel='external' target='_blank'>
             testnet faucet
           </a>{' '}
-          and transfer it to the BOB network using{' '}
-          <a href={SUPERBRIDGE_URL} rel='external' target='_blank'>
-            Superbridge
+          and transfer it to the BOB network using our{' '}
+          <a href={BRIDGE_URL} rel='external' target='_blank'>
+            bridge
           </a>
           .
         </Alert>
@@ -65,83 +78,138 @@ const P2P = (): JSX.Element => {
           }}
         >
           <TabsItem key='buy' title='Buy'>
-            <>
-              <Flex alignItems='center' justifyContent='space-between'>
-                <H2 size='xl' id={titleId} style={{ marginTop: theme.spacing.spacing4 }}>
-                  Buy
+            <Flex direction='column' gap='spacing6' marginTop='spacing6'>
+              <Flex direction='column' justifyContent='space-between' gap='spacing4'>
+                <H2 size='xl' id={titleId}>
+                  Buy Tokens
                 </H2>
+                {isUnownedOrdersLoading ? (
+                  <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
+                    <Spinner color='secondary' />
+                  </Flex>
+                ) : (
+                  <OrdersTable
+                    aria-labelledby={titleId}
+                    orders={orders?.unowned}
+                    refetchOrders={refetch}
+                    refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                    onFillBuyBtc={(order) => {
+                      setSearchParams((params) => {
+                        params.set('order', order.id.toString());
+                        params.set('market', 'buy');
+                        return params;
+                      });
+                    }}
+                  />
+                )}
               </Flex>
-              {orders?.unowned.length ? (
-                <OrdersTable
-                  aria-labelledby={titleId}
-                  orders={orders?.unowned}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                  onFillBuyBtc={(order) => {
-                    setSearchParams((params) => {
-                      params.set('order', order.id.toString());
-                      params.set('market', 'buy');
-                      return params;
-                    });
-                  }}
-                />
+              {isUnownedOrdersLoading ? (
+                <></>
               ) : (
-                <Flex style={{ minHeight: 200 }} alignItems='center' justifyContent='center'>
-                  <LoadingSpinner color='secondary' variant='indeterminate' diameter={36} thickness={4} />
+                <Flex direction='column' justifyContent='space-between' gap='spacing4'>
+                  <H2 size='xl' id={titleId7}>
+                    Buy Ordinals
+                  </H2>
+                  <OrdinalOrdersTable
+                    aria-labelledby={titleId7}
+                    orders={orders.ordinal.unowned}
+                    refetchOrders={refetch}
+                  />
                 </Flex>
               )}
-            </>
-            {/* Only unowned BTC orders can be bought */}
-            {!!orders?.acceptedBtc.accepted?.length && (
-              <>
-                <Flex alignItems='center' justifyContent='space-between'>
-                  <H2 size='xl' id={titleId2} style={{ marginTop: theme.spacing.spacing4 }}>
-                    Accepted BTC Orders
-                  </H2>
-                </Flex>
-                {/* Show all orders in which the current user is either the buyer or the seller */}
-                <AcceptedOrdersTable
-                  selectedOrder={selectedAcceptedOrder}
-                  aria-labelledby={titleId2}
-                  orders={orders.acceptedBtc.accepted}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                />
-              </>
-            )}
+              {/* Only unowned BTC orders can be bought */}
+              {!!orders?.acceptedBtc.accepted?.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId2}>
+                      Accepted BTC Orders
+                    </H2>
+                  </Flex>
+                  {/* Show all orders in which the current user is either the buyer or the seller */}
+                  <AcceptedOrdersTable
+                    selectedOrder={selectedAcceptedOrder}
+                    aria-labelledby={titleId2}
+                    orders={orders.acceptedBtc.accepted}
+                    refetchOrders={refetch}
+                    refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                  />
+                </>
+              )}
+              {!!orders?.ordinal.accepted.accepted.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId5}>
+                      Accepted Ordinals Orders
+                    </H2>
+                  </Flex>
+                  {/* Show all orders in which the current user is either the buyer or the seller */}
+                  <AcceptedOrdinalOrdersTable
+                    aria-labelledby={titleId5}
+                    orders={orders.ordinal.accepted.accepted}
+                    refetchOrders={refetchAcceptedOrdinalOrders}
+                  />
+                </>
+              )}
+            </Flex>
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
-            {!!orders?.owned.length && (
-              <>
-                <Flex alignItems='center' justifyContent='space-between'>
-                  <H2 size='xl' id={titleId3} style={{ marginTop: theme.spacing.spacing4 }}>
-                    Sell
-                  </H2>
-                </Flex>
-                <OrdersTable
-                  aria-labelledby={titleId3}
-                  orders={orders?.owned}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                />
-              </>
-            )}
-            {/* Only owned BTC orders can be sold */}
-            {!!orders.acceptedBtc.created?.length && (
-              <>
-                <Flex alignItems='center' justifyContent='space-between'>
-                  <H2 size='xl' id={titleId4} style={{ marginTop: theme.spacing.spacing4 }}>
-                    Accepted BTC Orders
-                  </H2>
-                </Flex>
-                <AcceptedOrdersTable
-                  aria-labelledby={titleId4}
-                  orders={orders?.acceptedBtc.created}
-                  refetchOrders={refetch}
-                  refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
-                />
-              </>
-            )}
+            <Flex direction='column' gap='spacing6' marginTop='spacing6'>
+              {(!!orders?.owned.length || orders.ordinal.owned.length) && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId3}>
+                      Sell
+                    </H2>
+                  </Flex>
+                  {!!orders?.owned.length && (
+                    <OrdersTable
+                      aria-labelledby={titleId3}
+                      orders={orders?.owned}
+                      refetchOrders={refetch}
+                      refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                    />
+                  )}
+                  {!!orders.ordinal.owned.length && (
+                    <OrdinalOrdersTable
+                      aria-labelledby={titleId}
+                      orders={orders.ordinal.owned}
+                      refetchOrders={refetchActiveOrdinalOrders}
+                    />
+                  )}
+                </>
+              )}
+              {/* Only owned BTC orders can be sold */}
+              {!!orders.acceptedBtc.created?.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId4}>
+                      Accepted BTC Orders
+                    </H2>
+                  </Flex>
+                  <AcceptedOrdersTable
+                    aria-labelledby={titleId4}
+                    orders={orders?.acceptedBtc.created}
+                    refetchOrders={refetch}
+                    refetchAcceptedBtcOrders={refetchAcceptedBtcOrders}
+                  />
+                </>
+              )}
+              {!!orders.ordinal.accepted.created.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId6}>
+                      Accepted Ordinals Orders
+                    </H2>
+                  </Flex>
+                  {/* Show all orders in which the current user is either the buyer or the seller */}
+                  <AcceptedOrdinalOrdersTable
+                    aria-labelledby={titleId6}
+                    orders={orders.ordinal.accepted.created}
+                    refetchOrders={refetchAcceptedOrdinalOrders}
+                  />
+                </>
+              )}
+            </Flex>
           </TabsItem>
         </Tabs>
       </Flex>
@@ -151,6 +219,7 @@ const P2P = (): JSX.Element => {
         refetchOrders={() => {
           refetch();
           refetchAcceptedBtcOrders();
+          refetchActiveOrdinalOrders();
         }}
       />
     </>

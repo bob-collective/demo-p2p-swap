@@ -29,6 +29,28 @@ export const addOrderSchema = (params: AddOrderSchemaParams) => {
   });
 };
 
+export type AddOrdinalOrderSchemaParams = {
+  inputValue?: Partial<MinAmountValidationParams>;
+  // ownedInscriptions: string[];
+};
+
+export const addOrdinalOrderSchema = (params: AddOrdinalOrderSchemaParams) => {
+  return yup.object().shape({
+    ticker: yup.string().required(),
+    inscriptionId: yup
+      .string()
+      .required('Please enter inscription ID')
+      .min(65, 'Please enter a inscription ID over 65 characters'),
+    // .test('is-owned-inscription', 'Please enter a inscription ID that you own', (value) =>
+    //   params.ownedInscriptions.includes(value || '')
+    // ),
+    amount: yup
+      .string()
+      .requiredAmount('receive')
+      .minAmount(params.inputValue as MinAmountValidationParams, 'receive')
+  });
+};
+
 export type FillOrderSchemaParams = {
   inputValue?: Partial<MaxAmountValidationParams & MinAmountValidationParams>;
   outputValue?: Partial<MaxAmountValidationParams & MinAmountValidationParams>;
@@ -59,5 +81,12 @@ export const fillOrderSchema = (params: FillOrderSchemaParams, isSellBTC?: boole
         then: (schema) => schema.maxAmount(params?.outputValue as MaxAmountValidationParams, 'receive')
       }),
     btcAddress: baseBtcAddress
+  });
+};
+
+export const fillOrdinalOrderSchema = () => {
+  return yup.object().shape({
+    amount: yup.string().requiredAmount('offer'),
+    btcAddress: yup.string().required('Please enter bitcoin address').address()
   });
 };
