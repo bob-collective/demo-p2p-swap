@@ -103,20 +103,20 @@ const P2P = (): JSX.Element => {
                   />
                 )}
               </Flex>
-              <Flex direction='column' justifyContent='space-between' gap='spacing4'>
-                <H2 size='xl' id={titleId7}>
-                  Buy Ordinals
-                </H2>
-                {isUnownedOrdersLoading ? (
-                  <></>
-                ) : (
+              {isUnownedOrdersLoading ? (
+                <></>
+              ) : (
+                <Flex direction='column' justifyContent='space-between' gap='spacing4'>
+                  <H2 size='xl' id={titleId7}>
+                    Buy Ordinals
+                  </H2>
                   <OrdinalOrdersTable
                     aria-labelledby={titleId7}
                     orders={orders.ordinal.unowned}
                     refetchOrders={refetch}
                   />
-                )}
-              </Flex>
+                </Flex>
+              )}
               {/* Only unowned BTC orders can be bought */}
               {!!orders?.acceptedBtc.accepted?.length && (
                 <>
