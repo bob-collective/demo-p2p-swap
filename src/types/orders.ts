@@ -69,6 +69,7 @@ interface AcceptedOrdinalOrder {
   isAcceptorOfOrder: boolean;
   isCreatorOfOrder: boolean;
   utxo: Utxo;
+  isErc20: boolean;
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;

@@ -1,5 +1,7 @@
+import { RemoteSigner } from '@gobob/bob-sdk';
 import { SatsConnector, Address } from './base';
 import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect';
+import * as bitcoin from 'bitcoinjs-lib';
 
 const payload = {
   purposes: [AddressPurpose.Ordinals, AddressPurpose.Payment],
@@ -36,6 +38,16 @@ class XVerseConnector extends SatsConnector {
 
     return this.ready;
   }
+
+  // getSigner(): RemoteSigner {
+
+  //   return {
+  //     async getNetwork() {
+  //       return bitcoin.networks.testnet
+  //     },
+  //     getPublicKey
+  //   }
+  // }
 }
 
 export { XVerseConnector };

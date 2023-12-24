@@ -9,9 +9,12 @@ import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
 import { calculateOrderDeadline } from '../../utils/orders';
 import { useContract } from '../useContract';
 import { REFETCH_INTERVAL } from '../../constants/query';
-import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
+import { BITCOIN_NETWORK, getAddressFromScriptPubKey } from '../../utils/bitcoin';
+import { ordinalIdToString } from '../../utils/format';
+import { getContentType, getInscriptionFromId } from '../../utils/inscription';
+import { DefaultElectrsClient } from '@gobob/bob-sdk';
 
-const parseAcceptedOrdinalOrder = (
+const parseAcceptedOrdinalOrder = async (
   rawOrder: {
     ordinalID: { txId: `0x${string}`; index: number };
     sellToken: `0x${string}`;
@@ -32,7 +35,7 @@ const parseAcceptedOrdinalOrder = (
   },
   id: bigint,
   address: HexString | undefined
-): AcceptedOrdinalOrder => {
+): Promise<AcceptedOrdinalOrder> => {
   const askingCurrency = getErc20CurrencyFromContractAddress(rawAcceptedOrder.ercToken);
 
   const deadline = calculateOrderDeadline(rawAcceptedOrder.acceptTime);
@@ -45,6 +48,14 @@ const parseAcceptedOrdinalOrder = (
     throw new Error('Bitcoin address not found');
   }
 
+  const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
+
+  const inscription = await getInscriptionFromId(electrsClient, ordinalIdToString(rawOrder.ordinalID));
+
+  const contentType = getContentType(inscription);
+
+  const isErc20 = contentType?.includes('text/plain');
+
   return {
     acceptId: id,
     orderId: rawAcceptedOrder.orderId,
@@ -55,7 +66,8 @@ const parseAcceptedOrdinalOrder = (
     buyerBitcoinAddress: getAddressFromScriptPubKey(bitcoinAddress.scriptPubKey),
     isAcceptorOfOrder,
     isCreatorOfOrder,
-    utxo: rawOrder.utxo
+    utxo: rawOrder.utxo,
+    isErc20: isErc20 as boolean
   };
 };
 
@@ -72,11 +84,13 @@ const useGetAcceptedOrdinalOrders = () => {
         readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders()
       ]);
 
-      return rawOrderAcceptances.map((order, index) => {
-        const orderId = ordersIds.findIndex((id) => id === order.orderId);
+      return Promise.all(
+        rawOrderAcceptances.map((order, index) => {
+          const orderId = ordersIds.findIndex((id) => id === order.orderId);
 
-        return parseAcceptedOrdinalOrder(rawOrders[orderId], order, acceptIds[index], address);
-      });
+          return parseAcceptedOrdinalOrder(rawOrders[orderId], order, acceptIds[index], address);
+        })
+      );
     },
     refetchInterval: REFETCH_INTERVAL.MINUTE
   });

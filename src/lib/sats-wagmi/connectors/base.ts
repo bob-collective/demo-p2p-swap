@@ -1,3 +1,5 @@
+import { RemoteSigner } from '@gobob/bob-sdk';
+
 type Address = string;
 
 // type Network = string;
@@ -29,6 +31,8 @@ abstract class SatsConnector {
   }
 
   abstract isReady(): boolean;
+
+  abstract getSigner(): RemoteSigner;
 }
 
 export { SatsConnector };

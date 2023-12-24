@@ -9,6 +9,7 @@ import { AcceptedBtcOrder } from '../../types/orders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
 import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
+import { useBrc20Balances } from '../../hooks/useBrc20Balances';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -37,6 +38,7 @@ const P2P = (): JSX.Element => {
 
   // just to prefetch
   useBalances();
+  useBrc20Balances();
   useGetInscriptions();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
@@ -154,7 +156,7 @@ const P2P = (): JSX.Element => {
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
             <Flex direction='column' gap='spacing6' marginTop='spacing6'>
-              {(!!orders?.owned.length || orders.ordinal.owned.length) && (
+              {!!(orders?.owned.length || orders.ordinal.owned.length) && (
                 <>
                   <Flex alignItems='center' justifyContent='space-between'>
                     <H2 size='xl' id={titleId3}>

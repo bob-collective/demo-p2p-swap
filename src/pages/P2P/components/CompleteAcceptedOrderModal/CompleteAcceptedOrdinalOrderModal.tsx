@@ -1,4 +1,4 @@
-import { Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
+import { CTA, Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
 import QrCode from 'qrcode.react';
 
 import { useState } from 'react';
@@ -33,10 +33,12 @@ const CompleteAcceptedOrdinalOrderModal = ({
   const [isLoading, setLoading] = useState(false);
 
   const { status, txId, confirmations, proofData } = useOrdinalTx(order?.buyerBitcoinAddress, order?.utxo);
-
+  
   if (!order) {
     return null;
   }
+
+  const ha
 
   const handleCompleteOrder = async () => {
     if (!proofData) {
@@ -91,6 +93,7 @@ const CompleteAcceptedOrdinalOrderModal = ({
               </TextLink>
             </Flex>
           </Flex>
+          <CTA onPress={() => }>Send Inscription</CTA>
           <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
             <Card
               rounded='lg'
