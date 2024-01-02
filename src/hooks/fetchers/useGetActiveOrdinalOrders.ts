@@ -2,14 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
 import { ContractType } from '../../constants';
+import { REFETCH_INTERVAL } from '../../constants/query';
 import { HexString } from '../../types';
 import { OrdinalOrder } from '../../types/orders';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
+import { getBrc20Amount } from '../../utils/inscription';
 import { calculateOrderDeadline } from '../../utils/orders';
 import { useContract } from '../useContract';
-import { REFETCH_INTERVAL } from '../../constants/query';
 
-const parseOrdinalOrder = (
+const parseOrdinalOrder = async (
   rawOrder: {
     ordinalID: { txId: `0x${string}`; index: number };
     sellToken: `0x${string}`;
@@ -30,11 +31,13 @@ const parseOrdinalOrder = (
     acceptor: `0x${string}`;
     acceptTime: bigint;
   }[]
-): OrdinalOrder => {
+): Promise<OrdinalOrder> => {
   const acceptedOrder = orderAcceptances.find(({ orderId }) => orderId === id);
   const isOwnerOfOrder = !!address && isAddressEqual(rawOrder.requester, address);
 
   const askingCurrency = getErc20CurrencyFromContractAddress(rawOrder.sellToken);
+
+  const brc20Amount = await getBrc20Amount(rawOrder.ordinalID);
 
   return {
     id,
@@ -43,6 +46,7 @@ const parseOrdinalOrder = (
     deadline: acceptedOrder?.acceptTime ? calculateOrderDeadline(acceptedOrder.acceptTime) : undefined,
     ordinalId: rawOrder.ordinalID,
     utxo: rawOrder.utxo,
+    brc20Amount,
     isOwnerOfOrder
   };
 };
@@ -60,9 +64,11 @@ const useGetActiveOrdinalOrders = () => {
         readOrdinalMarketplace.getOpenAcceptedOrdinalSellOrders()
       ]);
 
-      return rawOrders
-        .map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances))
-        .filter(({ deadline }) => !deadline);
+      const data = await Promise.all(
+        rawOrders.map((order, index) => parseOrdinalOrder(order, address, ordersIds[index], rawOrderAcceptances))
+      );
+
+      return data.filter(({ deadline }) => !deadline);
       // Filter out empty orders that are not in pending state.
       // .filter((order) => !order.deadline)
     },

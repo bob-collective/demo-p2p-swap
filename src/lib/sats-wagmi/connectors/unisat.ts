@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DefaultElectrsClient, RemoteSigner } from '@gobob/bob-sdk';
-import { SatsConnector } from './base';
+import retry from 'async-retry';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BITCOIN_NETWORK } from '../../../utils/bitcoin';
-import retry from 'async-retry';
+import { SatsConnector } from './base';
 
 async function getTxHex(txId: string) {
   const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
@@ -13,7 +14,7 @@ async function getTxHex(txId: string) {
       const res = await electrsClient.getTransactionHex(txId);
 
       if (!res) {
-        bail('Failed');
+        bail(new Error('Failed'));
       }
 
       return res;
@@ -54,6 +55,7 @@ class UnisatConnector extends SatsConnector {
   getSigner(): RemoteSigner {
     return {
       async getNetwork(): Promise<bitcoin.networks.Network> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         switch (await (window as any).unisat.getNetwork()) {
           case 'livenet':
             return bitcoin.networks.bitcoin;

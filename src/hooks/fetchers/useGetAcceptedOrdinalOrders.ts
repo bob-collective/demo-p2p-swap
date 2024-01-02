@@ -3,16 +3,14 @@ import { ContractType } from '../../constants';
 
 import { isAddressEqual } from 'viem';
 import { useAccount } from 'wagmi';
+import { REFETCH_INTERVAL } from '../../constants/query';
 import { HexString } from '../../types';
 import { AcceptedOrdinalOrder, Utxo } from '../../types/orders';
+import { getAddressFromScriptPubKey } from '../../utils/bitcoin';
 import { getErc20CurrencyFromContractAddress } from '../../utils/currencies';
+import { getBrc20Amount } from '../../utils/inscription';
 import { calculateOrderDeadline } from '../../utils/orders';
 import { useContract } from '../useContract';
-import { REFETCH_INTERVAL } from '../../constants/query';
-import { BITCOIN_NETWORK, getAddressFromScriptPubKey } from '../../utils/bitcoin';
-import { ordinalIdToString } from '../../utils/format';
-import { getContentType, getInscriptionFromId } from '../../utils/inscription';
-import { DefaultElectrsClient } from '@gobob/bob-sdk';
 
 const parseAcceptedOrdinalOrder = async (
   rawOrder: {
@@ -48,13 +46,7 @@ const parseAcceptedOrdinalOrder = async (
     throw new Error('Bitcoin address not found');
   }
 
-  const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
-
-  const inscription = await getInscriptionFromId(electrsClient, ordinalIdToString(rawOrder.ordinalID));
-
-  const contentType = getContentType(inscription);
-
-  const isErc20 = contentType?.includes('text/plain');
+  const brc20Amount = await getBrc20Amount(rawOrder.ordinalID);
 
   return {
     acceptId: id,
@@ -67,7 +59,7 @@ const parseAcceptedOrdinalOrder = async (
     isAcceptorOfOrder,
     isCreatorOfOrder,
     utxo: rawOrder.utxo,
-    isErc20: isErc20 as boolean
+    brc20Amount
   };
 };
 

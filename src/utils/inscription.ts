@@ -1,6 +1,10 @@
-import { ElectrsClient } from '@gobob/bob-sdk';
+import { DefaultElectrsClient, ElectrsClient } from '@gobob/bob-sdk';
 import { InscriptionId } from '@gobob/bob-sdk/dist/ordinal-api';
 import * as bitcoin from 'bitcoinjs-lib';
+import { BITCOIN_NETWORK } from './bitcoin';
+import { ordinalIdToString } from './format';
+import { Brc20Currency } from '../constants';
+import { Amount } from './amount';
 
 // https://github.com/rust-bitcoin/rust-bitcoin/blob/64bd34cffb54603db58efd718bd0b44c86366529/bitcoin/src/taproot.rs#L146
 const TAPROOT_ANNEX_PREFIX = 0x50;
@@ -115,4 +119,33 @@ export async function getInscriptionFromId(electrsClient: ElectrsClient, inscrip
   const { txid, index } = InscriptionId.fromString(inscriptionId);
   const inscriptions = await getTxInscriptions(electrsClient, txid);
   return inscriptions[index];
+}
+
+export async function getBrc20Amount(ordinalId: {
+  txId: `0x${string}`;
+  index: number;
+}): Promise<Amount<Brc20Currency> | undefined> {
+  const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
+
+  const inscription = await getInscriptionFromId(electrsClient, ordinalIdToString(ordinalId));
+
+  const contentType = getContentType(inscription);
+
+  if (!contentType) {
+    throw new Error('No content type to check');
+  }
+
+  const isBrc20 = contentType?.includes('text/plain');
+
+  if (!isBrc20) return undefined;
+
+  const { tick, amt } = JSON.parse(inscription.body.toString());
+
+  const currency: Brc20Currency = {
+    decimals: 18,
+    name: tick,
+    ticker: tick
+  };
+
+  return new Amount(currency, amt, true);
 }
