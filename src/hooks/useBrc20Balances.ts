@@ -3,6 +3,8 @@ import { useCallback } from 'react';
 import { Brc20Currency } from '../constants';
 import { useAccount } from '../lib/sats-wagmi';
 import { Amount } from '../utils/amount';
+import { useGetOrders } from './fetchers/useGetOrders';
+import Big from 'big.js';
 
 type Response = {
   availableBalance: string;
@@ -30,6 +32,8 @@ const queryFn = async (address: string): Promise<Record<string, number>> => {
 const useBrc20Balances = () => {
   const { address } = useAccount();
 
+  const { data: orders } = useGetOrders();
+
   const { data, ...query } = useQuery(['balances', address], () => (address ? queryFn(address) : undefined), {
     enabled: !!address
   });
@@ -47,21 +51,16 @@ const useBrc20Balances = () => {
       }
 
       const current = new Amount(currency, data[ticker], true);
+      const toDeduct = [...orders.brc20.owned, ...orders.brc20.accepted.created].reduce(
+        (acc, order) => (order.amount.currency.ticker === currency.ticker ? acc.add(order.amount.toBig()) : acc),
+        new Big(0)
+      );
 
-      return current;
-      // const toDeduct = orders.owned.reduce(
-      //   (acc, order) =>
-      //     order.offeringCurrency.ticker === currency.ticker
-      //       ? acc.add(new Amount(order.offeringCurrency, Number(order.availableLiquidity)).toBig())
-      //       : acc,
-      //   new Big(0)
-      // );
+      const balance = current.toBig().minus(toDeduct);
 
-      // const balance = current.toBig().minus(toDeduct);
-
-      // return balance.gt(0) ? new Amount(currency, balance, true) : new Amount(currency, 0);
+      return balance.gt(0) ? new Amount(currency, balance, true) : new Amount(currency, 0);
     },
-    [data]
+    [data, orders.brc20.accepted.created, orders.brc20.owned]
   );
 
   return { ...query, balances: data, getBalance };

@@ -5,7 +5,7 @@ enum Erc20CurrencyTicker {
   USDC = 'USDC'
 }
 
-type CurrencyTicker = keyof typeof Erc20CurrencyTicker | BitcoinTicker;
+type CurrencyTicker = string;
 
 interface CurrencyBase {
   ticker: string;

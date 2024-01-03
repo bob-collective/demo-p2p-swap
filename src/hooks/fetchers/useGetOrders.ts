@@ -88,12 +88,20 @@ const useGetOrders = () => {
         created: acceptedBtcOrders?.filter((order) => order.isCreatorOfOrder),
         accepted: acceptedBtcOrders?.filter((order) => order.isAcceptorOfOrder)
       },
-      ordinal: {
-        owned: (activeOrdinalOrders || []).filter((order) => order.isOwnerOfOrder),
-        unowned: (activeOrdinalOrders || []).filter((order) => !order.isOwnerOfOrder),
+      brc20: {
+        owned: (activeOrdinalOrders?.brc20 || []).filter((order) => order.isOwnerOfOrder),
+        unowned: (activeOrdinalOrders?.brc20 || []).filter((order) => !order.isOwnerOfOrder),
         accepted: {
-          created: (acceptedOrdinalOrders || [])?.filter((order) => order.isCreatorOfOrder),
-          accepted: (acceptedOrdinalOrders || [])?.filter((order) => order.isAcceptorOfOrder)
+          created: (acceptedOrdinalOrders?.brc20 || [])?.filter((order) => order.isCreatorOfOrder),
+          accepted: (acceptedOrdinalOrders?.brc20 || [])?.filter((order) => order.isAcceptorOfOrder)
+        }
+      },
+      ordinal: {
+        owned: (activeOrdinalOrders?.ordinals || []).filter((order) => order.isOwnerOfOrder),
+        unowned: (activeOrdinalOrders?.ordinals || []).filter((order) => !order.isOwnerOfOrder),
+        accepted: {
+          created: (acceptedOrdinalOrders?.ordinals || [])?.filter((order) => order.isCreatorOfOrder),
+          accepted: (acceptedOrdinalOrders?.ordinals || [])?.filter((order) => order.isAcceptorOfOrder)
         }
       }
     };

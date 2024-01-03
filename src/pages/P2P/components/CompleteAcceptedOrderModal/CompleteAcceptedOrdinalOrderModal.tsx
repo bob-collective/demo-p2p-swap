@@ -23,7 +23,7 @@ import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../
 import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalTx } from '../../../../hooks/useOrdinalTx';
 import { useAccount } from '../../../../lib/sats-wagmi';
-import { AcceptedOrdinalOrder } from '../../../../types/orders';
+import { AcceptedBrc20Order, AcceptedOrdinalOrder } from '../../../../types/orders';
 import { BITCOIN_NETWORK, getElectrsUrl } from '../../../../utils/bitcoin';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { ordinalIdToString } from '../../../../utils/format';
@@ -40,7 +40,7 @@ export async function broadcastTx(txHex: string): Promise<string> {
 }
 
 type CompleteAcceptedOrdinalOrderModalProps = {
-  order: AcceptedOrdinalOrder | undefined;
+  order: AcceptedOrdinalOrder | AcceptedBrc20Order | undefined;
   refetchOrders: () => void;
 } & Omit<ModalProps, 'children'>;
 
@@ -79,7 +79,7 @@ const CompleteAcceptedOrdinalOrderModal = ({
     const txHex = await electrsClient.getTransactionHex(txId);
     const utx = bitcoin.Transaction.fromHex(txHex);
 
-    // const internalPubKey = Buffer.from(await signer.getPublicKey(), 'hex');
+    const internalPubKey = Buffer.from(await signer.getPublicKey(), 'hex');
 
     psbt.addInput({
       hash: txId,
@@ -87,17 +87,17 @@ const CompleteAcceptedOrdinalOrderModal = ({
       witnessUtxo: {
         script: utx.outs[utxo.txOutputIndex].script,
         value: Number(utxo.txOutputValue)
-      }
-      // tapInternalKey: internalPubKey,
-      // sighashType: 3 || 0x80
+      },
+      tapInternalKey: internalPubKey,
+      sighashType: 3 || 0x80
     });
 
-    // psbt.addOutput({
-    //   address: order.buyerBitcoinAddress,
-    //   value: Number(utxo.txOutputValue) - 80000
-    // });
+    psbt.addOutput({
+      address: order.buyerBitcoinAddress,
+      value: Number(utxo.txOutputValue) - 80000
+    });
 
-    // const tx = await connector?.signPsbt([psbt.toHex()]);
+    // const tx = await signer.signInput([psbt.toHex()]);
 
     // return broadcastTx(tx as string);
   };
@@ -136,17 +136,19 @@ const CompleteAcceptedOrdinalOrderModal = ({
 
   const isSubmissionDisabled = !confirmations || !proofData || confirmations < REQUIRED_BITCOIN_CONFIRMATIONS;
 
+  const { amount } = order as AcceptedBrc20Order;
+
   return (
     <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
-          {order.brc20Amount ? (
+          {amount ? (
             <>
               <P size='s'>
                 1. Transfer{' '}
                 <Strong color='secondary'>
-                  {order.brc20Amount.toBig().toString()} {order.brc20Amount.currency.ticker}
+                  {amount.toBig().toString()} {amount.currency.ticker}
                 </Strong>{' '}
                 to <Strong color='secondary'>{shortenBitcoinAddress(order.buyerBitcoinAddress)}</Strong> by using the
                 following button:
@@ -157,7 +159,7 @@ const CompleteAcceptedOrdinalOrderModal = ({
             </>
           ) : (
             <>
-              {' '}
+              <P size='s'>1. Send the following inscription to the following bitcoin address:</P>
               <Flex direction='column' gap='spacing2'>
                 <Inscription height={200} id={ordinalIdToString(order.ordinalId)} />
                 <Flex justifyContent='center'>

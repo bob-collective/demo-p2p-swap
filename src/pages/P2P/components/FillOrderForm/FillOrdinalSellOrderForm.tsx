@@ -6,7 +6,7 @@ import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { useAccount } from '../../../../lib/sats-wagmi';
-import { OrdinalOrder } from '../../../../types/orders';
+import { Brc20Order, OrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD, ordinalIdToString } from '../../../../utils/format';
@@ -24,7 +24,7 @@ type FillOrdinalSellOrderFormData = {
 
 type FillOrdinalSellOrderFormProps = {
   isLoading: boolean;
-  order: OrdinalOrder;
+  order: OrdinalOrder | Brc20Order;
   onSubmit: (values: FillOrdinalSellOrderFormData) => void;
 };
 
@@ -39,10 +39,12 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
+  const { amount } = order as Brc20Order;
+
   const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
       inputAmount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
-      outputAmount: order.brc20Amount?.toBig().toString(),
+      outputAmount: amount ? amount?.toBig().toString() : undefined,
       btcAddress: btcAddress || ''
     },
     validationSchema: fillOrdinalOrderSchema(),
@@ -86,12 +88,12 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
           ticker={order.askingCurrency.ticker}
           {...form.getTokenFieldProps('inputAmount')}
         />
-        {order.brc20Amount ? (
+        {amount ? (
           <TokenInput
             label='You will Receive'
             isReadOnly
             valueUSD={0}
-            ticker={order.brc20Amount.currency.ticker}
+            ticker={amount.currency.ticker}
             {...mergeProps(form.getTokenFieldProps('outputAmount'))}
           />
         ) : (
