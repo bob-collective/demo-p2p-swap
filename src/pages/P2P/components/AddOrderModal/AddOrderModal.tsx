@@ -3,14 +3,14 @@ import { Modal, ModalBody, ModalHeader, ModalProps, P, TabsItem } from '@interla
 import * as bitcoinjsLib from 'bitcoinjs-lib';
 import { useCallback, useRef, useState } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
-import { ContractType, Erc20Currency, currencies } from '../../../../constants';
+import { ContractType, Erc20Currency } from '../../../../constants';
 import { InscriptionId } from '../../../../hooks/ordinalsApi';
 import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 import { useAccount as useBtcAccount } from '../../../../lib/sats-wagmi';
 import { Amount } from '../../../../utils/amount';
 import { getBlockStreamUrl, getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
-import { isBitcoinCurrency, isErc20Currency } from '../../../../utils/currencies';
+import { getCurrency, isBitcoinCurrency, isErc20Currency } from '../../../../utils/currencies';
 import { addHexPrefix } from '../../../../utils/encoding';
 import { AddBrc20OrderForm, AddBrc20OrderFormData } from '../AddBrc20OrderForm';
 import { AddOrderForm } from '../AddOrderForm';
@@ -62,8 +62,8 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
         return;
       }
 
-      const inputCurrency = currencies[inputTicker];
-      const outputCurrency = currencies[outputTicker];
+      const inputCurrency = getCurrency(inputTicker);
+      const outputCurrency = getCurrency(outputTicker);
       const inputAtomicAmount = new Amount(inputCurrency, inputValue, true).toAtomic();
       const outputAtomicAmount = new Amount(outputCurrency, outputValue, true).toAtomic();
 
@@ -89,9 +89,9 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
           ]);
         } else {
           tx = await writeErc20Marketplace.placeErcErcOrder([
-            inputCurrency.address,
+            (inputCurrency as Erc20Currency).address,
             inputAtomicAmount,
-            outputCurrency.address,
+            (outputCurrency as Erc20Currency).address,
             outputAtomicAmount
           ]);
         }
@@ -113,7 +113,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     if (!ordClient) {
       throw new Error('TODO');
     }
-    const askingCurrency = currencies[data.ticker];
+    const askingCurrency = getCurrency(data.ticker);
     if (!isErc20Currency(askingCurrency)) {
       throw new Error('TODO');
     }
@@ -156,7 +156,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     if (!ordClient) {
       throw new Error('TODO');
     }
-    const askingCurrency = currencies[data.outputTicker];
+    const askingCurrency = getCurrency(data.outputTicker);
 
     if (!isErc20Currency(askingCurrency)) {
       throw new Error('TODO');
@@ -198,10 +198,6 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
 
       const inscriptionId = parseInscriptionId(`${txid}i${commitUtxoIndex}`);
 
-      // const inscriptionData = await getInscriptionFromId(electrsClient, `${txid}i${commitUtxoIndex}`);
-      // inscriptionData.body;
-      // console.log(inscriptionData.body[0].toString());
-
       const utxo = {
         txHash: addHexPrefix(txid),
         txOutputIndex: commitUtxoIndex,
@@ -223,8 +219,8 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       setLoading(false);
     }
 
-    // refetchOrders();
-    // onClose();
+    refetchOrders();
+    onClose();
     setLoading(false);
   };
 

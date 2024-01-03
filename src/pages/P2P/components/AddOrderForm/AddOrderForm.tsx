@@ -46,7 +46,7 @@ const AddOrderForm = ({ isLoading, offerModalRef, receiveModalRef, onSubmit }: A
     wrapInErc20ApprovalTx(() => onSubmit?.(values as Required<AddOrderFormData>));
   };
 
-  const inputBalance = isSellingBTC ? undefined : getBalance(tickers.inputTicker);
+  const inputBalance = isSellingBTC ? undefined : getBalance(tickers.inputTicker as Erc20CurrencyTicker);
 
   const schemaParams: AddOrderSchemaParams = {
     inputValue: {

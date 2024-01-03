@@ -1,30 +1,64 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { DefaultElectrsClient, RemoteSigner } from '@gobob/bob-sdk';
-import retry from 'async-retry';
-import * as bitcoin from 'bitcoinjs-lib';
-import { BITCOIN_NETWORK } from '../../../utils/bitcoin';
+import { Network, Psbt, networks } from 'bitcoinjs-lib';
 import { SatsConnector } from './base';
 
-async function getTxHex(txId: string) {
-  const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
+type AccountsChangedEvent = (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
 
-  return await retry(
-    async (bail) => {
-      // if anything throws, we retry
-      const res = await electrsClient.getTransactionHex(txId);
+type Inscription = {
+  inscriptionId: string;
+  inscriptionNumber: string;
+  address: string;
+  outputValue: string;
+  content: string;
+  contentLength: string;
+  contentType: string;
+  preview: string;
+  timestamp: number;
+  offset: number;
+  genesisTransaction: string;
+  location: string;
+};
 
-      if (!res) {
-        bail(new Error('Failed'));
-      }
+type getInscriptionsResult = { total: number; list: Inscription[] };
 
-      return res;
-    },
-    {
-      retries: 20,
-      minTimeout: 2000,
-      maxTimeout: 5000
+type SendInscriptionsResult = { txid: string };
+
+type Balance = { confirmed: number; unconfirmed: number; total: number };
+
+type Unisat = {
+  requestAccounts: () => Promise<string[]>;
+  getAccounts: () => Promise<string[]>;
+  on: AccountsChangedEvent;
+  removeListener: AccountsChangedEvent;
+  getInscriptions: (cursor: number, size: number) => Promise<getInscriptionsResult>;
+  sendInscription: (
+    address: string,
+    inscriptionId: string,
+    options?: { feeRate: number }
+  ) => Promise<SendInscriptionsResult>;
+  switchNetwork: (network: 'livenet' | 'testnet') => Promise<void>;
+  getNetwork: () => Promise<string>;
+  getPublicKey: () => Promise<string>;
+  getBalance: () => Promise<Balance>;
+  sendBitcoin: (address: string, atomicAmount: number, options?: { feeRate: number }) => Promise<string>;
+  signPsbt: (
+    psbtHex: string,
+    options?: {
+      autoFinalized?: boolean;
+      toSignInputs: {
+        index: number;
+        address?: string;
+        publicKey?: string;
+        sighashTypes?: number[];
+        disableTweakSigner?: boolean;
+      }[];
     }
-  );
+  ) => Promise<string>;
+};
+
+declare global {
+  interface Window {
+    unisat: Unisat;
+  }
 }
 
 class UnisatConnector extends SatsConnector {
@@ -36,62 +70,62 @@ class UnisatConnector extends SatsConnector {
   }
 
   async connect(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const accounts = await (window as any).unisat.requestAccounts();
+    const accounts = await window.unisat.requestAccounts();
     this.address = accounts[0];
+
+    window.unisat.on('accountsChanged', ([account]) => {
+      this.address = account;
+    });
   }
 
   async disconnect(): Promise<void> {
     this.address = undefined;
+
+    window.unisat.removeListener('accountsChanged', ([account]) => {
+      this.address = account;
+    });
   }
 
   isReady(): boolean {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.ready = typeof (window as any).unisat !== 'undefined';
+    this.ready = typeof window.unisat !== 'undefined';
 
     return this.ready;
   }
 
-  getSigner(): RemoteSigner {
-    return {
-      async getNetwork(): Promise<bitcoin.networks.Network> {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        switch (await (window as any).unisat.getNetwork()) {
-          case 'livenet':
-            return bitcoin.networks.bitcoin;
-          case 'testnet':
-            return bitcoin.networks.testnet;
-          default:
-            throw new Error('Unknown network');
-        }
-      },
-      async getPublicKey() {
-        return await (window as any).unisat.getPublicKey();
-      },
-      async sendToAddress(toAddress: string, amount: number): Promise<string> {
-        const txid = await (window as any).unisat.sendBitcoin(toAddress, amount);
-        return txid;
-      },
-      async getTransaction(txId: string): Promise<bitcoin.Transaction> {
-        const txHex = await getTxHex(txId);
+  async getNetwork(): Promise<Network> {
+    switch (await window.unisat.getNetwork()) {
+      case 'livenet':
+        return networks.bitcoin;
+      case 'testnet':
+        return networks.testnet;
+      default:
+        throw new Error('Unknown network');
+    }
+  }
 
-        return bitcoin.Transaction.fromHex(txHex);
-      },
-      async signInput(inputIndex, psbt) {
-        const publicKey = await this.getPublicKey();
-        const psbtHex = await (window as any).unisat.signPsbt(psbt.toHex(), {
-          autoFinalized: false,
-          toSignInputs: [
-            {
-              index: inputIndex,
-              publicKey,
-              disableTweakSigner: true
-            }
-          ]
-        });
-        return bitcoin.Psbt.fromHex(psbtHex);
-      }
-    };
+  async getPublicKey() {
+    return await window.unisat.getPublicKey();
+  }
+
+  async sendToAddress(toAddress: string, amount: number): Promise<string> {
+    const txid = await window.unisat.sendBitcoin(toAddress, amount);
+    return txid;
+  }
+
+  async signInput(inputIndex: number, psbt: Psbt) {
+    const publicKey = await this.getPublicKey();
+
+    const psbtHex = await window.unisat.signPsbt(psbt.toHex(), {
+      autoFinalized: false,
+      toSignInputs: [
+        {
+          index: inputIndex,
+          publicKey,
+          disableTweakSigner: true
+        }
+      ]
+    });
+    return Psbt.fromHex(psbtHex);
   }
 }
 

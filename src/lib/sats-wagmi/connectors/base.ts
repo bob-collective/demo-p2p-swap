@@ -1,8 +1,31 @@
-import { RemoteSigner } from '@gobob/bob-sdk';
+import { DefaultElectrsClient, RemoteSigner } from '@gobob/bob-sdk';
+import { Network, Psbt, Transaction } from 'bitcoinjs-lib';
+import { BITCOIN_NETWORK } from '../../../utils/bitcoin';
+import retry from 'async-retry';
+
+async function getTxHex(txId: string) {
+  const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
+
+  return await retry(
+    async (bail) => {
+      // if anything throws, we retry
+      const res = await electrsClient.getTransactionHex(txId);
+
+      if (!res) {
+        bail(new Error('Failed'));
+      }
+
+      return res;
+    },
+    {
+      retries: 20,
+      minTimeout: 2000,
+      maxTimeout: 5000
+    }
+  );
+}
 
 type Address = string;
-
-// type Network = string;
 
 abstract class SatsConnector {
   /** Unique connector id */
@@ -32,7 +55,29 @@ abstract class SatsConnector {
 
   abstract isReady(): boolean;
 
-  abstract getSigner(): RemoteSigner;
+  abstract getNetwork(): Promise<Network>;
+
+  abstract getPublicKey(): Promise<string>;
+
+  abstract sendToAddress(toAddress: string, amount: number): Promise<string>;
+
+  abstract signInput(inputIndex: number, psbt: Psbt): Promise<Psbt>;
+
+  async getTransaction(txId: string): Promise<Transaction> {
+    const txHex = await getTxHex(txId);
+
+    return Transaction.fromHex(txHex);
+  }
+
+  getSigner(): RemoteSigner {
+    return {
+      getNetwork: this.getNetwork,
+      getPublicKey: this.getPublicKey,
+      getTransaction: this.getTransaction,
+      sendToAddress: this.sendToAddress,
+      signInput: this.signInput
+    };
+  }
 }
 
 export { SatsConnector };
