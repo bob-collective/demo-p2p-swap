@@ -14,4 +14,10 @@ function truncateString(inputString: string, prefixLength: number, suffixLength:
   return truncatedString;
 }
 
-export { truncateString };
+function shortenBitcoinAddress(address: string) {
+  // Extract the first and last 6 characters of the address
+  const shortenedAddress = address.slice(0, 6) + '...' + address.slice(-6);
+  return shortenedAddress;
+}
+
+export { truncateString, shortenBitcoinAddress };

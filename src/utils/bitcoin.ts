@@ -69,6 +69,16 @@ const getScriptPubKeyFromAddress = (address: string): HexString => {
   return addHexPrefix(hexScriptPubKey.toString('hex'));
 };
 
+export const getBlockStreamUrl = () => {
+  if (BITCOIN_NETWORK === 'testnet') {
+    return 'https://blockstream.info/testnet/api';
+  }
+  if (BITCOIN_NETWORK === 'mainnet') {
+    return 'https://blockstream.info/api';
+  }
+  throw new Error(`Invalid bitcoin network configured: ${BITCOIN_NETWORK}. Valid values are: testnet | mainnet.`);
+};
+
 export {
   fetchBtcNetwork,
   getElectrsUrl,

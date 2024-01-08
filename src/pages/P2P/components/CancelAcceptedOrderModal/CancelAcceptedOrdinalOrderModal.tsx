@@ -4,13 +4,14 @@ import { usePublicClient } from 'wagmi';
 import { AuthCTA } from '../../../../components/AuthCTA';
 import { ContractType } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
-import { AcceptedOrdinalOrder } from '../../../../types/orders';
+import { AcceptedBrc20Order, AcceptedOrdinalOrder } from '../../../../types/orders';
 import { Inscription } from '../../../../components';
 import { ordinalIdToString } from '../../../../utils/format';
 import { truncateInscriptionId } from '../../../../utils/truncate';
+import { toBaseAmount } from '../../../../utils/currencies';
 
 type CancelOrdinalAcceptedOrderModalProps = {
-  order: AcceptedOrdinalOrder | undefined;
+  order: AcceptedOrdinalOrder | AcceptedBrc20Order | undefined;
   refetchOrders: () => void;
 } & Omit<ModalProps, 'children'>;
 
@@ -42,15 +43,29 @@ const CancelOrdinalAcceptedOrderModal = ({
     onClose();
   };
 
+  const { amount } = order as AcceptedBrc20Order;
+
   return (
     <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Cancel Order</ModalHeader>
       <ModalBody gap='spacing4'>
-        <P size='s'>Cancelling market order #{order.acceptId.toString()} of inscription the following inscription</P>
-        <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
-        <P size='s' align='center'>
-          {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
-        </P>
+        {amount ? (
+          <P>
+            Cancelling accepted {amount.toBig.toString()} {amount.currency.ticker} order #{order.acceptId.toString()},
+            you will get back {toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker)}{' '}
+            {order.askingCurrency.ticker}.
+          </P>
+        ) : (
+          <>
+            <P size='s'>
+              Cancelling market order #{order.acceptId.toString()} of inscription the following inscription
+            </P>
+            <Inscription id={ordinalIdToString(order.ordinalId)} height={200} />
+            <P size='s' align='center'>
+              {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
+            </P>
+          </>
+        )}
       </ModalBody>
       <ModalFooter direction='row'>
         <CTA size='large' fullWidth onPress={onClose}>

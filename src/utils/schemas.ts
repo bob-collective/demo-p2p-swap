@@ -86,7 +86,8 @@ export const fillOrderSchema = (params: FillOrderSchemaParams, isSellBTC?: boole
 
 export const fillOrdinalOrderSchema = () => {
   return yup.object().shape({
-    amount: yup.string().requiredAmount('offer'),
+    inputAmount: yup.string().requiredAmount('offer'),
+    outputAmount: yup.string().requiredAmount('receive'),
     btcAddress: yup.string().required('Please enter bitcoin address').address()
   });
 };

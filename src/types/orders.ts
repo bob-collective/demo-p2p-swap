@@ -1,4 +1,5 @@
-import { BitcoinCurrency, Currency, Erc20Currency } from '../constants';
+import { BitcoinCurrency, Brc20Currency, Currency, Erc20Currency } from '../constants';
+import { Amount } from '../utils/amount';
 import { HexString } from './common';
 
 interface BaseOrder {
@@ -58,6 +59,11 @@ interface OrdinalOrder {
   isOwnerOfOrder: boolean;
 }
 
+interface Brc20Order extends OrdinalOrder {
+  amount: Amount<Brc20Currency>;
+  price: number;
+}
+
 interface AcceptedOrdinalOrder {
   orderId: bigint;
   acceptId: bigint;
@@ -69,6 +75,11 @@ interface AcceptedOrdinalOrder {
   isAcceptorOfOrder: boolean;
   isCreatorOfOrder: boolean;
   utxo: Utxo;
+}
+
+interface AcceptedBrc20Order extends AcceptedOrdinalOrder {
+  amount: Amount<Brc20Currency>;
+  price: number;
 }
 
 type BtcOrder = BtcBuyOrder | BtcSellOrder;
@@ -83,6 +94,8 @@ export type {
   BtcSellOrder,
   Erc20Order,
   Order,
+  AcceptedBrc20Order,
+  Brc20Order,
   OrdinalOrder,
   Utxo
 };
