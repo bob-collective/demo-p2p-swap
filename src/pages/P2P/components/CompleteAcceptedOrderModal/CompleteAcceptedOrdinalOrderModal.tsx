@@ -24,12 +24,28 @@ import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalTx } from '../../../../hooks/useOrdinalTx';
 import { useAccount } from '../../../../lib/sats-wagmi';
 import { AcceptedBrc20Order, AcceptedOrdinalOrder } from '../../../../types/orders';
-import { BITCOIN_NETWORK, getElectrsUrl } from '../../../../utils/bitcoin';
+import { BITCOIN_NETWORK, getBlockStreamUrl, getElectrsUrl } from '../../../../utils/bitcoin';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { ordinalIdToString } from '../../../../utils/format';
 import { truncateInscriptionId } from '../../../../utils/truncate';
 import { StyledSpinner } from './CompleteAcceptedOrderModal.styles';
 import { shortenBitcoinAddress } from '../../../../utils/string';
+
+function estimateTxSize(network: bitcoin.Network, toAddress: string) {
+  const tx = new bitcoin.Transaction();
+  tx.addInput(Buffer.alloc(32, 0), 0);
+  tx.ins[0].witness = [Buffer.alloc(71, 0), Buffer.alloc(33, 0)];
+  tx.addOutput(bitcoin.address.toOutputScript(toAddress, network), 0);
+  return tx.virtualSize();
+}
+
+async function getFeeRate(): Promise<number> {
+  const res = await fetch(`${getBlockStreamUrl()}/fee-estimates`);
+  const feeRates = await res.json();
+  return feeRates['6']; // one hour
+}
+
+const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
 
 export async function broadcastTx(txHex: string): Promise<string> {
   const res = await fetch(`${getElectrsUrl()}/tx`, {
@@ -79,7 +95,7 @@ const CompleteAcceptedOrdinalOrderModal = ({
     const txHex = await electrsClient.getTransactionHex(txId);
     const utx = bitcoin.Transaction.fromHex(txHex);
 
-    const internalPubKey = Buffer.from(await signer.getPublicKey(), 'hex');
+    const internalPubKey = toXOnly(Buffer.from(await signer.getPublicKey(), 'hex'));
 
     psbt.addInput({
       hash: txId,
@@ -92,14 +108,22 @@ const CompleteAcceptedOrdinalOrderModal = ({
       sighashType: 3 || 0x80
     });
 
+    const txSize = estimateTxSize(bitcoin.networks.testnet, order.buyerBitcoinAddress);
+
+    const feeRate = await getFeeRate();
+
+    const fee = txSize * feeRate;
+
     psbt.addOutput({
       address: order.buyerBitcoinAddress,
-      value: Number(utxo.txOutputValue) - 80000
+      value: Number(utxo.txOutputValue) - fee
     });
 
-    // const tx = await signer.signInput([psbt.toHex()]);
+    const tx = await connector?.signInput(0, psbt);
 
-    // return broadcastTx(tx as string);
+    if (!tx) return;
+
+    return broadcastTx(tx.toHex());
   };
 
   const handleCompleteOrder = async () => {
