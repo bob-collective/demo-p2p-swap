@@ -127,7 +127,6 @@ const P2P = (): JSX.Element => {
                     </H2>
                     <Brc20OrdersTable
                       aria-labelledby={titleId7}
-                      refetchAcceptedOrdinalsOrders={refetchAcceptedOrdinalOrders}
                       orders={orders.brc20.unowned}
                       refetchOrders={refetch}
                     />
@@ -213,7 +212,6 @@ const P2P = (): JSX.Element => {
                       aria-labelledby={titleId}
                       orders={orders.brc20.owned}
                       refetchOrders={refetchActiveOrdinalOrders}
-                      refetchAcceptedOrdinalsOrders={refetchAcceptedOrdinalOrders}
                     />
                   )}
                 </>

@@ -1,7 +1,15 @@
 import { Network, Psbt, networks } from 'bitcoinjs-lib';
-import { AddressPurpose, BitcoinNetworkType, getAddress, sendBtcTransaction } from 'sats-connect';
+import {
+  AddressPurpose,
+  BitcoinNetworkType,
+  createInscription,
+  getAddress,
+  sendBtcTransaction,
+  signTransaction
+} from 'sats-connect';
 import { BITCOIN_NETWORK } from '../../../utils/bitcoin';
 import { SatsConnector } from './base';
+import { RemoteSigner } from '@gobob/bob-sdk';
 
 const network = {
   type: BITCOIN_NETWORK === 'mainnet' ? BitcoinNetworkType.Mainnet : BitcoinNetworkType.Testnet
@@ -26,6 +34,8 @@ class XVerseConnector extends SatsConnector {
 
   publicKey: string | undefined;
 
+  paymentAddress: string | undefined;
+
   constructor() {
     super();
   }
@@ -37,14 +47,23 @@ class XVerseConnector extends SatsConnector {
         throw new Error('User rejected connect');
       },
       onFinish: (res) => {
-        const account = res.addresses.find((address) => address.purpose === AddressPurpose.Ordinals) as {
+        const { address } = res.addresses.find((address) => address.purpose === AddressPurpose.Ordinals) as {
           address: string;
           publicKey: string;
           purpose: string;
         };
 
-        this.address = account.address;
-        this.publicKey = account.publicKey;
+        const { publicKey, address: paymentAddress } = res.addresses.find(
+          (address) => address.purpose === AddressPurpose.Payment
+        ) as {
+          address: string;
+          publicKey: string;
+          purpose: string;
+        };
+
+        this.address = address;
+        this.paymentAddress = paymentAddress;
+        this.publicKey = publicKey;
       }
     });
   }
@@ -75,11 +94,15 @@ class XVerseConnector extends SatsConnector {
     let txId: string | undefined = undefined;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
+    if (!this.address || !this.paymentAddress) {
+      throw new Error('Something went wrong while connecting');
+    }
+
     await sendBtcTransaction({
       payload: {
         network,
         recipients: [{ address: toAddress, amountSats: BigInt(amount) }],
-        senderAddress: 'paymentAddress'
+        senderAddress: this.paymentAddress
       },
       onFinish: (res) => {
         txId = res;
@@ -93,6 +116,36 @@ class XVerseConnector extends SatsConnector {
     // Set a timeout to cancel the request if the txId is not received within a certain time
     timeoutId = setTimeout(() => {
       throw new Error('Send BTC Transaction timed out');
+    }, 10 * 10000); // 10 seconds
+
+    if (!txId) {
+      throw new Error('Failed to send BTC Transaction');
+    }
+
+    return txId;
+  }
+
+  async inscribe(contentType: 'text' | 'image', content: string): Promise<string> {
+    let txId: string | undefined = undefined;
+    let timeoutId: NodeJS.Timeout | undefined = undefined;
+
+    await createInscription({
+      payload: {
+        network,
+        content,
+        contentType: contentType === 'text' ? 'text/plain;charset=utf-8' : 'image/jpeg',
+        payloadType: contentType === 'text' ? 'PLAIN_TEXT' : 'BASE_64'
+      },
+      onFinish: (response) => {
+        txId = response.txId;
+        clearTimeout(timeoutId); // Clear the timeout if the txId is received
+      },
+      onCancel: () => alert('Canceled')
+    });
+
+    // Set a timeout to cancel the request if the txId is not received within a certain time
+    timeoutId = setTimeout(() => {
+      throw new Error('Sign psbt failed timed out');
     }, 10 * 1000); // 10 seconds
 
     if (!txId) {
@@ -102,9 +155,62 @@ class XVerseConnector extends SatsConnector {
     return txId;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  signInput(inputIndex: number, psbt: Psbt): Promise<Psbt> {
-    throw new Error('Method not implemented.');
+  async signInput(inputIndex: number, psbt: Psbt): Promise<Psbt> {
+    let signedPsbt: Psbt | undefined = undefined;
+    let timeoutId: NodeJS.Timeout | undefined = undefined;
+
+    if (!this.address || !this.paymentAddress) {
+      throw new Error('Something went wrong while connecting');
+    }
+
+    await signTransaction({
+      payload: {
+        network,
+        message: 'Sign Transaction',
+        psbtBase64: psbt.toBase64(),
+        broadcast: false,
+        inputsToSign: [
+          {
+            address: this.address,
+            signingIndexes: [inputIndex]
+          }
+        ]
+      },
+      onFinish: (response) => {
+        signedPsbt = Psbt.fromBase64(response.psbtBase64);
+        clearTimeout(timeoutId); // Clear the timeout if the txId is received
+      },
+      onCancel: () => alert('Canceled')
+    });
+
+    // Set a timeout to cancel the request if the txId is not received within a certain time
+    timeoutId = setTimeout(() => {
+      throw new Error('Sign psbt failed timed out');
+    }, 10 * 1000); // 10 seconds
+
+    if (!signedPsbt) {
+      throw new Error('Failed to send BTC Transaction');
+    }
+
+    return signedPsbt;
+  }
+
+  getSigner(): RemoteSigner {
+    const data = {
+      address: this.address,
+      paymentAddress: this.paymentAddress,
+      publicKey: this.publicKey
+    };
+
+    return {
+      // Passing data because methods need access these data fields
+      ...data,
+      getTransaction: this.getTransaction,
+      sendToAddress: this.sendToAddress,
+      signInput: this.signInput,
+      getNetwork: this.getNetwork,
+      getPublicKey: this.getPublicKey
+    };
   }
 }
 

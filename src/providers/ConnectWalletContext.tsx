@@ -1,6 +1,7 @@
-import { FC, ReactNode, createContext, useContext, useState } from 'react';
+import { FC, ReactNode, RefObject, createContext, useContext, useRef, useState } from 'react';
 
 type ConnectWalletData = {
+  ref?: RefObject<HTMLDivElement>;
   isOpen: boolean;
   walletTab: 'evm' | 'btc';
   setOpen: (isOpen: boolean, options?: { walletTab?: 'evm' | 'btc' }) => void;
@@ -8,6 +9,7 @@ type ConnectWalletData = {
 };
 
 const StatsWagmiContext = createContext<ConnectWalletData>({
+  ref: undefined,
   isOpen: false,
   walletTab: 'evm',
   setOpen: () => {},
@@ -32,6 +34,8 @@ const ConnectWalletProvider: FC<ConnectWalletContextProps> = ({ children }) => {
   const [isOpen, setOpen] = useState(false);
   const [walletTab, setWalletTab] = useState<'evm' | 'btc'>('evm');
 
+  const ref = useRef<HTMLDivElement>(null);
+
   const handleOpen = (isOpen: boolean, options?: { walletTab?: 'evm' | 'btc' }) => {
     setOpen(isOpen);
 
@@ -45,7 +49,7 @@ const ConnectWalletProvider: FC<ConnectWalletContextProps> = ({ children }) => {
   };
 
   return (
-    <StatsWagmiContext.Provider value={{ isOpen, walletTab, setOpen: handleOpen, setWalletTab }}>
+    <StatsWagmiContext.Provider value={{ isOpen, ref, walletTab, setOpen: handleOpen, setWalletTab }}>
       {children}
     </StatsWagmiContext.Provider>
   );

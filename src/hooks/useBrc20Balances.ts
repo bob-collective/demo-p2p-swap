@@ -3,8 +3,6 @@ import { useCallback } from 'react';
 import { Brc20Currency } from '../constants';
 import { useAccount } from '../lib/sats-wagmi';
 import { Amount } from '../utils/amount';
-import { useGetOrders } from './fetchers/useGetOrders';
-import Big from 'big.js';
 
 type Response = {
   availableBalance: string;
@@ -24,15 +22,13 @@ const queryFn = async (address: string): Promise<Record<string, number>> => {
   const response = await res.json();
 
   return response.data.detail.reduce(
-    (acc: Record<string, number>, token: Response) => ({ ...acc, [token.ticker]: Number(token.transferableBalance) }),
+    (acc: Record<string, number>, token: Response) => ({ ...acc, [token.ticker]: Number(token.availableBalance) }),
     {}
   );
 };
 
 const useBrc20Balances = () => {
   const { address } = useAccount();
-
-  const { data: orders } = useGetOrders();
 
   const { data, ...query } = useQuery(['balances', address], () => (address ? queryFn(address) : undefined), {
     enabled: !!address
@@ -50,17 +46,17 @@ const useBrc20Balances = () => {
         return new Amount(currency, 0);
       }
 
-      const current = new Amount(currency, data[ticker], true);
-      const toDeduct = [...orders.brc20.owned, ...orders.brc20.accepted.created].reduce(
-        (acc, order) => (order.amount.currency.ticker === currency.ticker ? acc.add(order.amount.toBig()) : acc),
-        new Big(0)
-      );
+      return new Amount(currency, data[ticker], true);
+      // const toDeduct = [...orders.brc20.owned, ...orders.brc20.accepted.created].reduce(
+      //   (acc, order) => (address === order. order.amount.currency.ticker === currency.ticker ? acc.add(order.amount.toBig()) : acc),
+      //   new Big(0)
+      // );
 
-      const balance = current.toBig().minus(toDeduct);
+      // const balance = current.toBig().minus(toDeduct);
 
-      return balance.gt(0) ? new Amount(currency, balance, true) : new Amount(currency, 0);
+      // return balance.gt(0) ? new Amount(currency, balance, true) : new Amount(currency, 0);
     },
-    [data, orders.brc20.accepted.created, orders.brc20.owned]
+    [data]
   );
 
   return { ...query, balances: data, getBalance };

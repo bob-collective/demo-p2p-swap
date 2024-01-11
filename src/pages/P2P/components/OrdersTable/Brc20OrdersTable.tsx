@@ -44,7 +44,6 @@ type Brc20OrdersTableRow = {
 type Props = {
   orders: Array<Brc20Order> | undefined;
   refetchOrders: () => void;
-  refetchAcceptedOrdinalsOrders: () => void;
   onFillBuyBtc?: (order: Brc20Order) => void;
 };
 

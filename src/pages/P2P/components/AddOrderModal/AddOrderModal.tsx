@@ -1,4 +1,3 @@
-import { createTextInscription, inscribeData } from '@gobob/bob-sdk';
 import { Modal, ModalBody, ModalHeader, ModalProps, P, TabsItem } from '@interlay/ui';
 import * as bitcoinjsLib from 'bitcoinjs-lib';
 import { useCallback, useRef, useState } from 'react';
@@ -9,7 +8,7 @@ import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 import { useAccount as useBtcAccount } from '../../../../lib/sats-wagmi';
 import { Amount } from '../../../../utils/amount';
-import { getBlockStreamUrl, getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
+import { getScriptPubKeyFromAddress } from '../../../../utils/bitcoin';
 import { getCurrency, isBitcoinCurrency, isErc20Currency } from '../../../../utils/currencies';
 import { addHexPrefix } from '../../../../utils/encoding';
 import { AddBrc20OrderForm, AddBrc20OrderFormData } from '../AddBrc20OrderForm';
@@ -17,12 +16,7 @@ import { AddOrderForm } from '../AddOrderForm';
 import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrderForm';
 import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
-
-async function getFeeRate(): Promise<number> {
-  const res = await fetch(`${getBlockStreamUrl()}/fee-estimates`);
-  const feeRates = await res.json();
-  return feeRates['6']; // one hour
-}
+import { useConnectWalletModal } from '../../../../providers/ConnectWalletContext';
 
 const parseInscriptionId = (id: string): InscriptionId => {
   if (id.length < 65) {
@@ -45,6 +39,7 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
   const offerModalRef = useRef<HTMLDivElement>(null);
   const receiveModalRef = useRef<HTMLDivElement>(null);
   const selectTokenModalRef = useRef<HTMLDivElement>(null);
+  const { ref: conntectWalletModalRef } = useConnectWalletModal();
 
   const { write: writeErc20Marketplace } = useContract(ContractType.ERC20_MARKETPLACE);
   const { write: writeBTCMarketplace } = useContract(ContractType.BTC_MARKETPLACE);
@@ -173,23 +168,17 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
     const inscriptionJson = JSON.stringify(inscriptionObj);
 
     try {
-      const inscription = await createTextInscription(inscriptionJson);
-
       const signer = btcConnector?.getSigner();
 
       if (!signer) {
         throw new Error('Wallet does support getSigner');
       }
 
-      const feeRate = await getFeeRate();
+      const txid = await btcConnector?.inscribe('text', inscriptionJson);
 
-      const inscribeTx = await inscribeData(signer, btcAddress, feeRate, inscription); // 546
-
-      const res = await fetch(`${getBlockStreamUrl()}/tx`, {
-        method: 'POST',
-        body: inscribeTx.toHex()
-      });
-      const txid = await res.text();
+      if (!txid) {
+        throw new Error('Failed to inscribe');
+      }
 
       const commitTx = await signer.getTransaction(txid);
 
@@ -215,8 +204,10 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
       ]);
 
       await publicClient.waitForTransactionReceipt({ hash: tx });
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       setLoading(false);
+      throw new Error(e);
     }
 
     refetchOrders();
@@ -233,7 +224,8 @@ const AddOrderModal = ({ onClose, refetchOrders, ...props }: AddOrderModalProps)
         !offerModalRef.current?.contains(el) &&
         !receiveModalRef.current?.contains(el) &&
         !selectTokenModalRef.current?.contains(el) &&
-        !selectInscriptionModalRef.current?.contains(el)
+        !selectInscriptionModalRef.current?.contains(el) &&
+        !(conntectWalletModalRef && conntectWalletModalRef.current?.contains(el))
       }
     >
       <ModalHeader>New Order</ModalHeader>

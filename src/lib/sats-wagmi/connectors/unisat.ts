@@ -1,4 +1,7 @@
+import { RemoteSigner, createTextInscription, inscribeData } from '@gobob/bob-sdk';
 import { Network, Psbt, networks } from 'bitcoinjs-lib';
+import { getBlockStreamUrl } from '../../../utils/bitcoin';
+import { getFeeRate } from '../../../utils/fee';
 import { SatsConnector } from './base';
 
 type AccountsChangedEvent = (event: 'accountsChanged', handler: (accounts: Array<string>) => void) => void;
@@ -107,6 +110,27 @@ class UnisatConnector extends SatsConnector {
     return await window.unisat.getPublicKey();
   }
 
+  async inscribe(contentType: 'text' | 'image', content: string): Promise<string> {
+    if (contentType === 'image') {
+      throw new Error('Inscribe image not implemented');
+    }
+
+    if (!this.address) {
+      throw new Error('Something went wrong while connecting');
+    }
+
+    const [inscription, feeRate] = await Promise.all([createTextInscription(content), getFeeRate()]);
+
+    const inscribeTx = await inscribeData(this.getSigner(), this.address, feeRate, inscription); // 546
+
+    const res = await fetch(`${getBlockStreamUrl()}/tx`, {
+      method: 'POST',
+      body: inscribeTx.toHex()
+    });
+
+    return res.text();
+  }
+
   async sendToAddress(toAddress: string, amount: number): Promise<string> {
     const txid = await window.unisat.sendBitcoin(toAddress, amount);
     return txid;
@@ -125,7 +149,18 @@ class UnisatConnector extends SatsConnector {
         }
       ]
     });
+
     return Psbt.fromHex(psbtHex);
+  }
+
+  getSigner(): RemoteSigner {
+    return {
+      getNetwork: this.getNetwork,
+      getPublicKey: this.getPublicKey,
+      getTransaction: this.getTransaction,
+      sendToAddress: this.sendToAddress,
+      signInput: this.signInput
+    };
   }
 }
 

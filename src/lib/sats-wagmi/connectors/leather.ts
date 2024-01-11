@@ -1,5 +1,6 @@
 import { Network, Psbt } from 'bitcoinjs-lib';
 import { SatsConnector } from './base';
+import { RemoteSigner } from '@gobob/bob-sdk';
 
 type Response<T> = {
   jsonrpc: string;
@@ -92,7 +93,16 @@ class LeatherConnector extends SatsConnector {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  signInput(inputIndex: number, psbt: Psbt): Promise<Psbt> {
+  signInput(_inputIndex: number, _psbt: Psbt): Promise<Psbt> {
+    throw new Error('Method not implemented.');
+  }
+
+  getSigner(): RemoteSigner {
+    throw new Error('Method not implemented.');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  inscribe(_contentType: 'text' | 'image', _content: string): Promise<string> {
     throw new Error('Method not implemented.');
   }
 }

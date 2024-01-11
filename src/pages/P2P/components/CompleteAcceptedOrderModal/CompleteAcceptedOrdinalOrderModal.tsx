@@ -1,19 +1,5 @@
-import {
-  CTA,
-  Card,
-  Flex,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalProps,
-  P,
-  Strong,
-  TextLink
-} from '@interlay/ui';
-import * as bitcoin from 'bitcoinjs-lib';
+import { Card, Flex, Modal, ModalBody, ModalFooter, ModalHeader, ModalProps, P, Strong, TextLink } from '@interlay/ui';
 import QrCode from 'qrcode.react';
-import { DefaultElectrsClient } from '@gobob/bob-sdk';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { usePublicClient } from 'wagmi';
@@ -22,38 +8,35 @@ import { AuthCTA } from '../../../../components/AuthCTA';
 import { Bitcoin, ContractType, REQUIRED_BITCOIN_CONFIRMATIONS } from '../../../../constants';
 import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalTx } from '../../../../hooks/useOrdinalTx';
-import { useAccount } from '../../../../lib/sats-wagmi';
 import { AcceptedBrc20Order, AcceptedOrdinalOrder } from '../../../../types/orders';
-import { BITCOIN_NETWORK, getBlockStreamUrl, getElectrsUrl } from '../../../../utils/bitcoin';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { ordinalIdToString } from '../../../../utils/format';
 import { truncateInscriptionId } from '../../../../utils/truncate';
 import { StyledSpinner } from './CompleteAcceptedOrderModal.styles';
-import { shortenBitcoinAddress } from '../../../../utils/string';
 
-function estimateTxSize(network: bitcoin.Network, toAddress: string) {
-  const tx = new bitcoin.Transaction();
-  tx.addInput(Buffer.alloc(32, 0), 0);
-  tx.ins[0].witness = [Buffer.alloc(71, 0), Buffer.alloc(33, 0)];
-  tx.addOutput(bitcoin.address.toOutputScript(toAddress, network), 0);
-  return tx.virtualSize();
-}
+// function estimateTxSize(network: bitcoin.Network, toAddress: string) {
+//   const tx = new bitcoin.Transaction();
+//   tx.addInput(Buffer.alloc(32, 0), 0);
+//   tx.ins[0].witness = [Buffer.alloc(71, 0), Buffer.alloc(33, 0)];
+//   tx.addOutput(bitcoin.address.toOutputScript(toAddress, network), 0);
+//   return tx.virtualSize();
+// }
 
-async function getFeeRate(): Promise<number> {
-  const res = await fetch(`${getBlockStreamUrl()}/fee-estimates`);
-  const feeRates = await res.json();
-  return feeRates['6']; // one hour
-}
+// async function getFeeRate(): Promise<number> {
+//   const res = await fetch(`${getBlockStreamUrl()}/fee-estimates`);
+//   const feeRates = await res.json();
+//   return feeRates['6']; // one hour
+// }
 
-const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
+// const toXOnly = (pubKey: Buffer) => (pubKey.length === 32 ? pubKey : pubKey.slice(1, 33));
 
-export async function broadcastTx(txHex: string): Promise<string> {
-  const res = await fetch(`${getElectrsUrl()}/tx`, {
-    method: 'POST',
-    body: txHex
-  });
-  return await res.text();
-}
+// export async function broadcastTx(txHex: string): Promise<string> {
+//   const res = await fetch(`${getBlockStreamUrl()}/tx`, {
+//     method: 'POST',
+//     body: txHex
+//   });
+//   return res.text();
+// }
 
 type CompleteAcceptedOrdinalOrderModalProps = {
   order: AcceptedOrdinalOrder | AcceptedBrc20Order | undefined;
@@ -69,7 +52,6 @@ const CompleteAcceptedOrdinalOrderModal = ({
   const [, setSearchParams] = useSearchParams();
   const { write: writeOrdinalMarketplace } = useContract(ContractType.ORD_MARKETPLACE);
   const publicClient = usePublicClient();
-  const { connector } = useAccount();
 
   const [isLoading, setLoading] = useState(false);
 
@@ -79,52 +61,57 @@ const CompleteAcceptedOrdinalOrderModal = ({
     return null;
   }
 
-  const handleSendInscription = async () => {
-    const { utxo } = order;
-    const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
-    const signer = connector?.getSigner();
+  // TODO: implement programatically transfer in next iteration
+  // const handleSendInscription = async () => {
+  //   const { utxo } = order;
+  //   const electrsClient = new DefaultElectrsClient(BITCOIN_NETWORK);
+  //   const signer = connector?.getSigner();
 
-    if (!signer) return;
+  //   if (!signer) return;
 
-    const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
+  //   const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
 
-    const txIdWithIndex = utxo.txHash.substring(2);
+  //   const txIdWithIndex = utxo.txHash.substring(2);
 
-    const [txId] = txIdWithIndex.split('i');
+  //   const [txId] = txIdWithIndex.split('i');
 
-    const txHex = await electrsClient.getTransactionHex(txId);
-    const utx = bitcoin.Transaction.fromHex(txHex);
+  //   const txHex = await electrsClient.getTransactionHex(txId);
+  //   const utx = bitcoin.Transaction.fromHex(txHex);
 
-    const internalPubKey = toXOnly(Buffer.from(await signer.getPublicKey(), 'hex'));
+  //   const internalPubKey = toXOnly(Buffer.from(await signer.getPublicKey(), 'hex'));
 
-    psbt.addInput({
-      hash: txId,
-      index: utxo.txOutputIndex,
-      witnessUtxo: {
-        script: utx.outs[utxo.txOutputIndex].script,
-        value: Number(utxo.txOutputValue)
-      },
-      tapInternalKey: internalPubKey,
-      sighashType: 3 || 0x80
-    });
+  //   const nonWitnessUtxo = utx.toBuffer();
 
-    const txSize = estimateTxSize(bitcoin.networks.testnet, order.buyerBitcoinAddress);
+  //   psbt.addInput({
+  //     hash: txId,
+  //     index: utxo.txOutputIndex,
+  //     nonWitnessUtxo,
+  //     witnessUtxo: {
+  //       script: utx.outs[utxo.txOutputIndex].script,
+  //       value: Number(utxo.txOutputValue)
+  //     },
+  //     tapInternalKey: internalPubKey
+  //   });
 
-    const feeRate = await getFeeRate();
+  //   const txSize = estimateTxSize(bitcoin.networks.testnet, order.buyerBitcoinAddress);
 
-    const fee = txSize * feeRate;
+  //   const feeRate = await getFeeRate();
 
-    psbt.addOutput({
-      address: order.buyerBitcoinAddress,
-      value: Number(utxo.txOutputValue) - fee
-    });
+  //   const fee = txSize * feeRate;
 
-    const tx = await connector?.signInput(0, psbt);
+  //   psbt.addOutput({
+  //     address: order.buyerBitcoinAddress,
+  //     value: Number(utxo.txOutputValue) - fee
+  //   });
 
-    if (!tx) return;
+  //   const tx = await connector?.signInput(0, psbt);
 
-    return broadcastTx(tx.toHex());
-  };
+  //   console.log(tx, psbt);
+
+  //   if (!tx) return;
+
+  //   return broadcastTx(tx.toHex());
+  // };
 
   const handleCompleteOrder = async () => {
     if (!proofData) {
@@ -160,14 +147,12 @@ const CompleteAcceptedOrdinalOrderModal = ({
 
   const isSubmissionDisabled = !confirmations || !proofData || confirmations < REQUIRED_BITCOIN_CONFIRMATIONS;
 
-  const { amount } = order as AcceptedBrc20Order;
-
   return (
     <Modal {...props} align='top' onClose={onClose}>
       <ModalHeader>Complete Order</ModalHeader>
       <ModalBody gap='spacing8'>
         <Flex gap='spacing3' direction='column'>
-          {amount ? (
+          {/* {amount ? (
             <>
               <P size='s'>
                 1. Transfer{' '}
@@ -181,40 +166,40 @@ const CompleteAcceptedOrdinalOrderModal = ({
                 Transfer
               </CTA>
             </>
-          ) : (
-            <>
-              <P size='s'>1. Send the following inscription to the following bitcoin address:</P>
-              <Flex direction='column' gap='spacing2'>
-                <Inscription height={200} id={ordinalIdToString(order.ordinalId)} />
-                <Flex justifyContent='center'>
-                  <TextLink
-                    external
-                    icon
-                    href={`https://testnet.ordinals.com/inscription/${ordinalIdToString(order.ordinalId)}`}
-                    size='s'
-                  >
-                    {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
-                  </TextLink>
-                </Flex>
-              </Flex>
-              <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
-                <Card
-                  rounded='lg'
-                  variant='bordered'
-                  shadowed={false}
-                  padding='spacing3'
-                  alignItems='center'
-                  background='tertiary'
+          ) : ( */}
+          <>
+            <P size='s'>1. Send the following inscription to the following bitcoin address:</P>
+            <Flex direction='column' gap='spacing2'>
+              <Inscription height={200} id={ordinalIdToString(order.ordinalId)} />
+              <Flex justifyContent='center'>
+                <TextLink
+                  external
+                  icon
+                  href={`https://testnet.ordinals.com/inscription/${ordinalIdToString(order.ordinalId)}`}
+                  size='s'
                 >
-                  <P size='xs'>{order.buyerBitcoinAddress}</P>
-                </Card>
-                <QrCode
-                  includeMargin
-                  value={`bitcoin:${order.buyerBitcoinAddress}?amount=${toBaseAmount(0n, Bitcoin.ticker)}`}
-                />
+                  {truncateInscriptionId(ordinalIdToString(order.ordinalId))}
+                </TextLink>
               </Flex>
-            </>
-          )}
+            </Flex>
+            <Flex gap='spacing2' direction='column' justifyContent='center' alignItems='center'>
+              <Card
+                rounded='lg'
+                variant='bordered'
+                shadowed={false}
+                padding='spacing3'
+                alignItems='center'
+                background='tertiary'
+              >
+                <P size='xs'>{order.buyerBitcoinAddress}</P>
+              </Card>
+              <QrCode
+                includeMargin
+                value={`bitcoin:${order.buyerBitcoinAddress}?amount=${toBaseAmount(0n, Bitcoin.ticker)}`}
+              />
+            </Flex>
+          </>
+          {/* )} */}
           <P size='s'>2. Submit your transaction proof by clicking on Complete order.</P>
           <P size='s'>
             3. Once the order is completed you will receive{' '}

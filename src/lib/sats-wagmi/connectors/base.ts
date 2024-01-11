@@ -69,15 +69,9 @@ abstract class SatsConnector {
     return Transaction.fromHex(txHex);
   }
 
-  getSigner(): RemoteSigner {
-    return {
-      getNetwork: this.getNetwork,
-      getPublicKey: this.getPublicKey,
-      getTransaction: this.getTransaction,
-      sendToAddress: this.sendToAddress,
-      signInput: this.signInput
-    };
-  }
+  abstract getSigner(): RemoteSigner;
+
+  abstract inscribe(contentType: 'text' | 'image', content: string): Promise<string>;
 }
 
 export { SatsConnector };

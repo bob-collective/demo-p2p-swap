@@ -141,7 +141,7 @@ const AddBrc20OrderForm = ({
             <P size='xs'>Tx Fees 0 ETH ({formatUSD(0)})</P>
           </Card>
         </Flex>
-        <AuthCTA fullWidth loading={isLoading} disabled={isSubmitDisabled} size='large' type='submit'>
+        <AuthCTA isBtcAuthRequired fullWidth loading={isLoading} disabled={isSubmitDisabled} size='large' type='submit'>
           Place Order
         </AuthCTA>
       </Flex>
