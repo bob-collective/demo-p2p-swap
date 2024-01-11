@@ -3,7 +3,6 @@ import * as bitcoinjsLib from 'bitcoinjs-lib';
 import { useCallback, useRef, useState } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ContractType, Erc20Currency } from '../../../../constants';
-import { InscriptionId } from '../../../../hooks/ordinalsApi';
 import { useContract } from '../../../../hooks/useContract';
 import { useOrdinalsAPI } from '../../../../hooks/useOrdinalsAPI';
 import { useAccount as useBtcAccount } from '../../../../lib/sats-wagmi';
@@ -17,20 +16,7 @@ import { AddOrderFormData } from '../AddOrderForm/AddOrderForm';
 import { AddOrdinalOrderForm, AddOrdinalOrderFormData } from '../AddOrdinalOrderForm';
 import { StyledTabs, StyledWrapper } from './AddOrderModal.style';
 import { useConnectWalletModal } from '../../../../providers/ConnectWalletContext';
-
-const parseInscriptionId = (id: string): InscriptionId => {
-  if (id.length < 65) {
-    throw new Error('Incorrect inscription id length.');
-  }
-
-  const txid = id.slice(0, 64);
-  const index = parseInt(id.slice(65));
-
-  return {
-    txid,
-    index
-  };
-};
+import { parseInscriptionId } from '../../../../utils/inscription';
 
 type AddOrderModalProps = { refetchOrders: () => void } & Omit<ModalProps, 'children'>;
 

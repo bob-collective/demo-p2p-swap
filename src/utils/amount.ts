@@ -15,6 +15,10 @@ export class Amount<T extends Currency> {
   }
 
   public toAtomic() {
-    return BigInt(this.amount.mul(new Big(10).pow(this.currency.decimals)).toString());
+    try {
+      return BigInt(this.amount.times(new Big(10).pow(this.currency.decimals)).toString());
+    } catch (e) {
+      return BigInt(this.amount.times(new Big(10).pow(this.currency.decimals)).toNumber());
+    }
   }
 }

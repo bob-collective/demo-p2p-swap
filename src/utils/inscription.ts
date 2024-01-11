@@ -141,6 +141,8 @@ export async function getBrc20Amount(ordinalId: {
 
   const { tick, amt } = JSON.parse(inscription.body.toString());
 
+  if (!amt || Number.isNaN(amt)) return undefined;
+
   const currency: Brc20Currency = {
     decimals: 18,
     name: tick,
@@ -149,3 +151,17 @@ export async function getBrc20Amount(ordinalId: {
 
   return new Amount(currency, amt, true);
 }
+
+export const parseInscriptionId = (id: string): InscriptionId => {
+  if (id.length < 65) {
+    throw new Error('Incorrect inscription id length.');
+  }
+
+  const txid = id.slice(0, 64);
+  const index = parseInt(id.slice(65));
+
+  return {
+    txid,
+    index
+  };
+};
