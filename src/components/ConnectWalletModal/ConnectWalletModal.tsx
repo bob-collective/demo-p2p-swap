@@ -11,7 +11,7 @@ type ConnectWalletModalProps = Omit<ModalProps, 'children'>;
 const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalProps) => {
   const { connector, address } = useAccount();
   const { disconnect } = useDisconnect();
-  const { walletTab, setWalletTab } = useConnectWalletModal();
+  const { ref, walletTab, setWalletTab } = useConnectWalletModal();
 
   const { address: btcWalletAddress, connector: btcWalletConnector } = useSatsAccount();
   const { disconnect: btcWalletDisconnect } = useSatsDisconnect();
@@ -32,6 +32,7 @@ const ConnectWalletModal = ({ onClose, isOpen, ...props }: ConnectWalletModalPro
   return (
     <Modal
       {...props}
+      ref={ref}
       align='top'
       isOpen={isOpen}
       onClose={onClose}

@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import Big from 'big.js';
 import { useCallback } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
-import { CurrencyTicker, Erc20Currencies, Erc20CurrencyTicker, currencies } from '../constants';
+import { Erc20Currencies, Erc20CurrencyTicker } from '../constants';
 import { REFETCH_INTERVAL } from '../constants/query';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { Amount } from '../utils/amount';
-import { isBitcoinTicker } from '../utils/currencies';
+import { getCurrency, isBitcoinTicker } from '../utils/currencies';
 import { useGetOrders } from './fetchers/useGetOrders';
 
 type Balances = {
@@ -43,15 +43,16 @@ const useBalances = () => {
   });
 
   const getBalance = useCallback(
-    (ticker: CurrencyTicker) => {
-      const currency = currencies[ticker];
+    (ticker: Erc20CurrencyTicker) => {
+      const currency = getCurrency(ticker);
 
       if (isBitcoinTicker(ticker) || data?.[ticker] === undefined) {
         return new Amount(currency, 0);
       }
 
-      const current = new Amount(currencies[ticker], Number(data[ticker]));
+      const current = new Amount(getCurrency(ticker), Number(data[ticker]));
 
+      // TODO: might need to include accepted orders
       const toDeduct = orders.owned.reduce(
         (acc, order) =>
           order.offeringCurrency.ticker === currency.ticker

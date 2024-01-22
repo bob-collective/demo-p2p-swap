@@ -5,7 +5,7 @@ enum Erc20CurrencyTicker {
   USDC = 'USDC'
 }
 
-type CurrencyTicker = keyof typeof Erc20CurrencyTicker | BitcoinTicker;
+type CurrencyTicker = string;
 
 interface CurrencyBase {
   ticker: string;
@@ -18,6 +18,10 @@ interface Erc20Currency extends CurrencyBase {
   address: HexString;
 }
 
+interface Brc20Currency extends CurrencyBase {
+  decimals: 18;
+}
+
 type BitcoinTicker = 'BTC';
 
 const Bitcoin = {
@@ -28,7 +32,7 @@ const Bitcoin = {
 
 type BitcoinCurrency = typeof Bitcoin;
 
-type Currency = Erc20Currency | BitcoinCurrency;
+type Currency = Erc20Currency | BitcoinCurrency | Brc20Currency;
 
 const Erc20Currencies: {
   [ticker in Erc20CurrencyTicker]: Erc20Currency;
@@ -53,4 +57,4 @@ const currencies = {
 };
 
 export { Erc20Currencies, Erc20CurrencyTicker, currencies, Bitcoin };
-export type { Erc20Currency, Currency, BitcoinCurrency, BitcoinTicker, CurrencyTicker };
+export type { Erc20Currency, Currency, BitcoinCurrency, BitcoinTicker, CurrencyTicker, Brc20Currency };

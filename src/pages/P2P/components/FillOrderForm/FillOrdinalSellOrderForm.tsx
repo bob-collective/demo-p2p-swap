@@ -6,7 +6,7 @@ import { ContractType, Erc20CurrencyTicker } from '../../../../constants';
 import { useBalances } from '../../../../hooks/useBalances';
 import { useErc20Allowance } from '../../../../hooks/useErc20Allowance';
 import { useAccount } from '../../../../lib/sats-wagmi';
-import { OrdinalOrder } from '../../../../types/orders';
+import { Brc20Order, OrdinalOrder } from '../../../../types/orders';
 import { Amount } from '../../../../utils/amount';
 import { toBaseAmount } from '../../../../utils/currencies';
 import { formatUSD, ordinalIdToString } from '../../../../utils/format';
@@ -14,15 +14,17 @@ import { fillOrdinalOrderSchema } from '../../../../utils/schemas';
 import { isFormDisabled } from '../../../../utils/validation';
 import { Inscription } from '../../../../components';
 import { truncateInscriptionId } from '../../../../utils/truncate';
+import { mergeProps } from '@react-aria/utils';
 
 type FillOrdinalSellOrderFormData = {
-  amount: string;
+  inputAmount: string;
+  outputAmount?: string;
   btcAddress: string;
 };
 
 type FillOrdinalSellOrderFormProps = {
   isLoading: boolean;
-  order: OrdinalOrder;
+  order: OrdinalOrder | Brc20Order;
   onSubmit: (values: FillOrdinalSellOrderFormData) => void;
 };
 
@@ -37,9 +39,12 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
 
   const inputBalance = getBalance(Erc20CurrencyTicker[order.askingCurrency.ticker]);
 
+  const { amount } = order as Brc20Order;
+
   const form = useForm<FillOrdinalSellOrderFormData>({
     initialValues: {
-      amount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
+      inputAmount: toBaseAmount(order.totalAskingAmount, order.askingCurrency.ticker).toString(),
+      outputAmount: amount ? amount?.toBig().toString() : undefined,
       btcAddress: btcAddress || ''
     },
     validationSchema: fillOrdinalOrderSchema(),
@@ -76,18 +81,30 @@ const FillOrdinalSellOrderForm = ({ isLoading, order, onSubmit }: FillOrdinalSel
       <Flex direction='column' gap='spacing4'>
         <TokenInput
           label='Pay with'
+          balance={inputBalance.toBig().toString()}
+          balanceLabel='Available'
           isReadOnly
           valueUSD={0}
           ticker={order.askingCurrency.ticker}
-          {...form.getTokenFieldProps('amount')}
+          {...form.getTokenFieldProps('inputAmount')}
         />
-        <Flex direction='column' gap='spacing2'>
-          <P size='xs'>You will Receive</P>
-          <Inscription id={inscriptionId} height={200} />
-          <P align='center' size='xs'>
-            {truncateInscriptionId(inscriptionId)}
-          </P>
-        </Flex>
+        {amount ? (
+          <TokenInput
+            label='You will Receive'
+            isReadOnly
+            valueUSD={0}
+            ticker={amount.currency.ticker}
+            {...mergeProps(form.getTokenFieldProps('outputAmount'))}
+          />
+        ) : (
+          <Flex direction='column' gap='spacing2'>
+            <P size='xs'>You will Receive</P>
+            <Inscription id={inscriptionId} height={200} />
+            <P align='center' size='xs'>
+              {truncateInscriptionId(inscriptionId)}
+            </P>
+          </Flex>
+        )}
         <Input
           label='Bitcoin Address'
           placeholder='Enter your bitcoin address'

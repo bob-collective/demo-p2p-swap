@@ -9,6 +9,9 @@ import { AcceptedBtcOrder } from '../../types/orders';
 import { AcceptedOrdersTable, AddOrderModal, OrdersTable } from './components';
 import { AcceptedOrdinalOrdersTable } from './components/AcceptedOrdersTable/AcceptedOrdinalOrdersTable';
 import { OrdinalOrdersTable } from './components/OrdersTable/OrdinalsOrdersTable';
+import { useBrc20Balances } from '../../hooks/useBrc20Balances';
+import { Brc20OrdersTable } from './components/OrdersTable';
+import { AcceptedBrc20OrdersTable } from './components/AcceptedOrdersTable';
 
 const findOrder = (orders: AcceptedBtcOrder[], id: number) => orders.find((order) => Number(order.orderId) === id);
 
@@ -37,6 +40,7 @@ const P2P = (): JSX.Element => {
 
   // just to prefetch
   useBalances();
+  useBrc20Balances();
   useGetInscriptions();
 
   const handleCloseNewOrderModal = () => setAddNewOrderModal((s) => ({ ...s, isOpen: false }));
@@ -106,16 +110,28 @@ const P2P = (): JSX.Element => {
               {isUnownedOrdersLoading ? (
                 <></>
               ) : (
-                <Flex direction='column' justifyContent='space-between' gap='spacing4'>
-                  <H2 size='xl' id={titleId7}>
-                    Buy Ordinals
-                  </H2>
-                  <OrdinalOrdersTable
-                    aria-labelledby={titleId7}
-                    orders={orders.ordinal.unowned}
-                    refetchOrders={refetch}
-                  />
-                </Flex>
+                <>
+                  <Flex direction='column' justifyContent='space-between' gap='spacing4'>
+                    <H2 size='xl' id={titleId7}>
+                      Buy Ordinals
+                    </H2>
+                    <OrdinalOrdersTable
+                      aria-labelledby={titleId7}
+                      orders={orders.ordinal.unowned}
+                      refetchOrders={refetch}
+                    />
+                  </Flex>
+                  <Flex direction='column' justifyContent='space-between' gap='spacing4'>
+                    <H2 size='xl' id={titleId7}>
+                      Buy BRC20
+                    </H2>
+                    <Brc20OrdersTable
+                      aria-labelledby={titleId7}
+                      orders={orders.brc20.unowned}
+                      refetchOrders={refetch}
+                    />
+                  </Flex>
+                </>
               )}
               {/* Only unowned BTC orders can be bought */}
               {!!orders?.acceptedBtc.accepted?.length && (
@@ -150,11 +166,26 @@ const P2P = (): JSX.Element => {
                   />
                 </>
               )}
+              {!!orders?.brc20.accepted.accepted.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId5}>
+                      Accepted BRC20 Orders
+                    </H2>
+                  </Flex>
+                  {/* Show all orders in which the current user is either the buyer or the seller */}
+                  <AcceptedBrc20OrdersTable
+                    aria-labelledby={titleId5}
+                    orders={orders.brc20.accepted.accepted}
+                    refetchOrders={refetchAcceptedOrdinalOrders}
+                  />
+                </>
+              )}
             </Flex>
           </TabsItem>
           <TabsItem key='sell' title='Sell'>
             <Flex direction='column' gap='spacing6' marginTop='spacing6'>
-              {(!!orders?.owned.length || orders.ordinal.owned.length) && (
+              {!!(orders?.owned.length || orders.ordinal.owned.length || orders.brc20.owned.length) && (
                 <>
                   <Flex alignItems='center' justifyContent='space-between'>
                     <H2 size='xl' id={titleId3}>
@@ -173,6 +204,13 @@ const P2P = (): JSX.Element => {
                     <OrdinalOrdersTable
                       aria-labelledby={titleId}
                       orders={orders.ordinal.owned}
+                      refetchOrders={refetchActiveOrdinalOrders}
+                    />
+                  )}
+                  {!!orders.brc20.owned.length && (
+                    <Brc20OrdersTable
+                      aria-labelledby={titleId}
+                      orders={orders.brc20.owned}
                       refetchOrders={refetchActiveOrdinalOrders}
                     />
                   )}
@@ -205,6 +243,21 @@ const P2P = (): JSX.Element => {
                   <AcceptedOrdinalOrdersTable
                     aria-labelledby={titleId6}
                     orders={orders.ordinal.accepted.created}
+                    refetchOrders={refetchAcceptedOrdinalOrders}
+                  />
+                </>
+              )}
+              {!!orders.brc20.accepted.created.length && (
+                <>
+                  <Flex alignItems='center' justifyContent='space-between'>
+                    <H2 size='xl' id={titleId6}>
+                      Accepted BRC20 Orders
+                    </H2>
+                  </Flex>
+                  {/* Show all orders in which the current user is either the buyer or the seller */}
+                  <AcceptedBrc20OrdersTable
+                    aria-labelledby={titleId6}
+                    orders={orders.brc20.accepted.created}
                     refetchOrders={refetchAcceptedOrdinalOrders}
                   />
                 </>

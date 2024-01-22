@@ -4,12 +4,7 @@ import { useCopyToClipboard } from 'react-use';
 import truncateEthAddress from 'truncate-eth-address';
 import { WalletIcon } from '../WalletIcon';
 import { StyledAddressCTA, StyledConnectedWallet, StyledDisconnectCTA } from './ConnectWalletModal.style';
-
-function shortenBitcoinAddress(address: string) {
-  // Extract the first and last 6 characters of the address
-  const shortenedAddress = address.slice(0, 6) + '...' + address.slice(-6);
-  return shortenedAddress;
-}
+import { shortenBitcoinAddress } from '../../utils/string';
 
 type ConnectWalleSectionProps = {
   type: 'evm' | 'btc';

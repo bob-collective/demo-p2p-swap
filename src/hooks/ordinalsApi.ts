@@ -22,6 +22,16 @@ export type InscriptionId = {
   index: number;
 };
 
+export interface InscriptionUTXO {
+  value: number;
+  script_pubkey: string;
+  address: string;
+  transaction: string;
+  sat_ranges: string;
+  inscriptions: string[];
+  runes: Record<string, any>;
+}
+
 export module InscriptionId {
   export function toString(id: InscriptionId): string {
     return `${id.txid}i${id.index}`;
@@ -479,6 +489,10 @@ export class DefaultOrdinalsClient implements OrdinalsClient {
       ...satJson,
       inscriptions: satJson.inscriptions.map((id) => InscriptionId.fromString(id))
     };
+  }
+
+  async getInscriptionFromUTXO(utxo: string): Promise<InscriptionUTXO> {
+    return await this.getJson<InscriptionUTXO>(`${this.basePath}/output/${utxo}`);
   }
 
   /**
