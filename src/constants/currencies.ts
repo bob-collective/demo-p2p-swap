@@ -41,13 +41,13 @@ const Erc20Currencies: {
     ticker: Erc20CurrencyTicker.WBTC,
     name: 'wBTC',
     decimals: 8,
-    address: '0x2868d708e442A6a940670d26100036d426F1e16b'
+    address: '0xf6b2b29ecbe3b5a39da1306849a127e35ea8131a'
   },
   [Erc20CurrencyTicker.USDC]: {
     ticker: Erc20CurrencyTicker.USDC,
     name: 'USDC',
     decimals: 6,
-    address: '0x27c3321E40f039d10D5FF831F528C9CEAE601B1d'
+    address: '0x8aa78abb7f48e65ca96769c28eb99b3f26e43e3e'
   }
 };
 
