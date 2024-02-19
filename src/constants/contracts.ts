@@ -1,7 +1,7 @@
 import { BtcMarketplaceAbi } from '../contracts/abi/BtcMarketplace.abi';
 import { ERC20Abi } from '../contracts/abi/ERC20.abi';
 import { Erc20MarketplaceAbi } from '../contracts/abi/Marketplace.abi';
-import { FaucetAbi } from '../contracts/abi/Faucet.abi';
+// import { FaucetAbi } from '../contracts/abi/Faucet.abi';
 import { HexString } from '../types';
 import { Erc20Currencies, Erc20CurrencyTicker } from './currencies';
 import { OrdMarketplaceAbi } from '../contracts/abi/OrdMarketplace.abi';
@@ -26,21 +26,21 @@ const contracts = {
     {} as { [ticker in Erc20CurrencyTicker]: { abi: typeof ERC20Abi; address: HexString } }
   ),
   [ContractType.ERC20_MARKETPLACE]: {
-    address: '0xE0Fd942cEa2f2e56f26AAC279F8D0F280bF52d7C',
+    address: '0xbA4415009b3a2218f6e377Aa03e5eA1D373d27f3',
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x193E50fa1b7f8a65d8BC64143b698b573baFDF0c',
+    address: '0x58CB036Ac410fbB5016684d5B5EEe36782b9EC32',
     abi: BtcMarketplaceAbi
   },
   [ContractType.ORD_MARKETPLACE]: {
-    address: '0x97F6148Cd4a579b9833E0995cE7634D5d2226E3B',
+    address: '0xf71136c937357eBcC874c15414FB76B111620932',
     abi: OrdMarketplaceAbi
   },
-  [ContractType.FAUCET]: {
-    address: '0x7884560F14c62E0a83420F17832988cC1a775df1',
-    abi: FaucetAbi
-  }
+  // [ContractType.FAUCET]: {
+  //   address: '0x7884560F14c62E0a83420F17832988cC1a775df1',
+  //   abi: FaucetAbi
+  // }
 } as const;
 
 export { contracts, ContractType };
