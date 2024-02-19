@@ -25,13 +25,13 @@ const L2_CHAIN_CONFIG = {
     symbol: 'ETH'
   },
   rpcUrls: {
-    public: { http: [L2_RPC_URL], webSocket: [L2_WSS_URL] },
-    default: { http: [L2_RPC_URL], webSocket: [L2_WSS_URL] }
+    public: { http: [L2_RPC_URL], webSocket: L2_WSS_URL && [L2_WSS_URL] },
+    default: { http: [L2_RPC_URL], webSocket: L2_WSS_URL && [L2_WSS_URL] }
   },
   blockExplorers: {
     default: { name: 'BobScan', url: L2_BLOCK_EXPLORER }
   },
-  contracts: {
+  contracts: L2_MULTICALL3_ADDRESS && {
     multicall3: {
       address: L2_MULTICALL3_ADDRESS
     }
