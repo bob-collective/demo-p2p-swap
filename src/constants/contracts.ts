@@ -26,15 +26,15 @@ const contracts = {
     {} as { [ticker in Erc20CurrencyTicker]: { abi: typeof ERC20Abi; address: HexString } }
   ),
   [ContractType.ERC20_MARKETPLACE]: {
-    address: '0xbA4415009b3a2218f6e377Aa03e5eA1D373d27f3',
+    address: '0x8FC9293bC9E4431D32079726478D5B93aC153c3c',
     abi: Erc20MarketplaceAbi
   },
   [ContractType.BTC_MARKETPLACE]: {
-    address: '0x58CB036Ac410fbB5016684d5B5EEe36782b9EC32',
+    address: '0x1F229978BC874f099f8C224c69863cCa24d9EE54',
     abi: BtcMarketplaceAbi
   },
   [ContractType.ORD_MARKETPLACE]: {
-    address: '0xf71136c937357eBcC874c15414FB76B111620932',
+    address: '0x06Bd6358F90F0c83523A4ab9135a61F41cF77850',
     abi: OrdMarketplaceAbi
   },
   // [ContractType.FAUCET]: {
